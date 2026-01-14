@@ -1,1 +1,37 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>UWI Unternehmenssimulation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>UWI Projekt</h1>
+
+<div id="login">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Benutzername">
+    <button onclick="login()">Login</button>
+</div>
+
+<div id="app" style="display:none;">
+    <h2>Firma erstellen</h2>
+    <input type="text" id="firmenname" placeholder="Firmenname">
+    
+    <select id="rechtsform">
+        <option>Einzelunternehmen</option>
+        <option>GmbH</option>
+        <option>AG</option>
+    </select>
+
+    <button onclick="firmaSpeichern()">Firma speichern</button>
+
+    <h3>Meine Firmen</h3>
+    <ul id="firmenListe"></ul>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
 
