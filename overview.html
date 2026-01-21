@@ -1,37 +1,68 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>UWI Unternehmenssimulation — Firmenübersicht</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UWI Unternehmenssimulation — Übersicht</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
   <header class="topbar">
     <div class="brand">UWI Unternehmenssimulation</div>
-    <nav class="nav-inline">
-      <span id="userDisplay" class="muted"></span>
-      <button id="logoutBtn" class="btn">Abmelden</button>
-    </nav>
   </header>
 
   <main class="container">
     <section class="card">
-      <div class="row space-between">
-        <h1 class="h2">Firmenübersicht</h1>
-        <div>
-          <button id="createBtn" class="btn primary">+ Neue Firma erstellen</button>
-        </div>
+      <h1 class="h1">Übersicht der Firmen</h1>
+
+      <div id="companyList">
+        <!-- Firmen werden hier dynamisch angezeigt -->
       </div>
 
-      <div id="companiesList" class="list mt"></div>
+      <button id="logoutButton" class="btn">Logout</button>
     </section>
   </main>
 
   <footer class="footer">
-    <div class="muted">Daten werden lokal im Browser gespeichert (LocalStorage).</div>
+    <div>© UWI Unternehmenssimulation — Schulprojekt</div>
   </footer>
 
-  <script src="js/overview.js"></script>
+  <script>
+    // Beim Laden der Seite die Firmen des eingeloggten Benutzers anzeigen
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = localStorage.getItem('uwi_user');
+      if (!user) {
+        // Falls keiner eingeloggt ist, zurück zum Login
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Firmen des aktuellen Benutzers abrufen
+      const companiesKey = `uwi_companies_${user}`;
+      const companies = JSON.parse(localStorage.getItem(companiesKey)) || [];
+
+      // Liste der Firmen anzeigen
+      const companyListEl = document.getElementById('companyList');
+      if (companies.length === 0) {
+        companyListEl.innerHTML = '<p>Keine Firmen vorhanden.</p>';
+      } else {
+        const ul = document.createElement('ul');
+        companies.forEach(company => {
+          const li = document.createElement('li');
+          li.textContent = company;
+          ul.appendChild(li);
+        });
+        companyListEl.appendChild(ul);
+      }
+
+      // Logout-Funktion
+      document.getElementById('logoutButton').addEventListener('click', () => {
+        localStorage.removeItem('uwi_user');
+        window.location.href = 'index.html';
+      });
+    });
+  </script>
+
 </body>
 </html>
