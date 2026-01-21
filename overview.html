@@ -1,1 +1,37 @@
-.
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UWI Unternehmenssimulation — Firmenübersicht</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">UWI Unternehmenssimulation</div>
+    <nav class="nav-inline">
+      <span id="userDisplay" class="muted"></span>
+      <button id="logoutBtn" class="btn">Abmelden</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="row space-between">
+        <h1 class="h2">Firmenübersicht</h1>
+        <div>
+          <button id="createBtn" class="btn primary">+ Neue Firma erstellen</button>
+        </div>
+      </div>
+
+      <div id="companiesList" class="list mt"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="muted">Daten werden lokal im Browser gespeichert (LocalStorage).</div>
+  </footer>
+
+  <script src="js/overview.js"></script>
+</body>
+</html>
