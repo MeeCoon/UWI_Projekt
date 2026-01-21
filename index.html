@@ -1,25 +1,40 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<title>Login – UWI Projekt</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UWI Unternehmenssimulation — Login</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
- 
-<h1>UWI Unternehmenssimulation</h1>
- 
-<div class="form">
-<label>Name:</label>
-<input type="text" id="username">
-<br></br>
- 
-  <label>Passwort:</label>
-<input type="password" id="password">
- 
-  <button onclick="login()">Login</button>
-</div>
- 
-<script src="js/login.js"></script>
+  <header class="topbar">
+    <div class="brand">UWI Unternehmenssimulation</div>
+  </header>
+
+  <main class="container center-page">
+    <section class="card card-small">
+      <h1 class="h1">Anmelden</h1>
+
+      <form id="loginForm" class="form-grid">
+        <label for="username">Name:</label>
+        <input id="username" name="username" type="text" required placeholder="Ihr Name">
+
+        <label for="password">Passwort:</label>
+        <input id="password" name="password" type="password" required placeholder="Passwort">
+
+        <div class="form-actions" style="grid-column:1 / -1; justify-content:center;">
+          <button type="submit" class="btn primary">Login</button>
+        </div>
+      </form>
+
+      <p class="muted small">Hinweis: Es gibt kein Backend. Der Benutzername wird lokal (LocalStorage) gespeichert.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div>© UWI Unternehmenssimulation — Schulprojekt</div>
+  </footer>
+
+  <script src="js/login.js"></script>
 </body>
 </html>
