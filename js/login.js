@@ -28,6 +28,7 @@ function getStoredUser() {
 // Formularverarbeitung
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('loginForm');
+  const errorEl = document.getElementById('loginError'); // Optional: Fehlermeldung im UI
 
   form.addEventListener('submit', (ev) => {
     ev.preventDefault();
@@ -35,22 +36,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
 
-    // Login-Prüfung
+    // Fehler: Wenn Benutzername oder Passwort falsch sind
     if (username !== VALID_USERNAME || password !== VALID_PASSWORD) {
-      alert('Benutzername oder Passwort falsch!');
+      errorEl.textContent = 'Benutzername oder Passwort sind falsch!';
+      errorEl.style.display = 'block';
       return;
+    } else {
+      errorEl.style.display = 'none'; // Fehleranzeige ausblenden, wenn korrekt
+
+      // Speichern des Benutzernamens im LocalStorage
+      localStorage.setItem(USER_KEY, username);
+
+      // Option: initiale Arrays für Firmen anlegen
+      const companiesKey = `uwi_companies_${username}`;
+      if (!localStorage.getItem(companiesKey)) {
+        localStorage.setItem(companiesKey, JSON.stringify([]));
+      }
+
+      // Weiterleitung zur Übersicht
+      window.location.href = 'overview.html';
     }
-
-    // Speichern des Benutzernamens im LocalStorage
-    localStorage.setItem(USER_KEY, username);
-
-    // Option: initiale Arrays für Firmen anlegen
-    const companiesKey = `uwi_companies_${username}`;
-    if (!localStorage.getItem(companiesKey)) {
-      localStorage.setItem(companiesKey, JSON.stringify([]));
-    }
-
-    // Weiterleitung
-    window.location.href = 'overview.html';
   });
 });
