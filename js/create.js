@@ -1,57 +1,52 @@
 // js/create.js
 // Neue Firma erstellen (create.html)
-// - Formular einlesen
-// - Firma als Objekt in LocalStorage für den aktuellen Benutzer speichern
-// - Danach Weiterleitung zurück zur Übersicht (overview.html)
+// - Speichert Firma unter 'uwi_companies_<username>'
+// - Jede Firma bleibt nach Logout erhalten (da nur LocalStorage genutzt wird)
+// - Nach Erstellung Weiterleitung zu overview.html
 
-// LocalStorage keys
 const USER_KEY = 'uwi_user';
-const COMPANY_KEY_PREFIX = 'uwi_companies_';
+const COMPANIES_PREFIX = 'uwi_companies_';
 
-function getCurrentUser(){
-  return localStorage.getItem(USER_KEY);
-}
-function requireLogin(){
-  const user = getCurrentUser();
-  if(!user){
+// Helfer
+function getCurrentUserOrRedirect() {
+  const user = localStorage.getItem(USER_KEY);
+  if (!user) {
     window.location.href = 'index.html';
     return null;
   }
   return user;
 }
-function companiesKey(user){ return COMPANY_KEY_PREFIX + user; }
-function loadCompanies(user){
+function companiesKey(user) { return COMPANIES_PREFIX + user; }
+function loadCompaniesForUser(user) {
   const raw = localStorage.getItem(companiesKey(user));
-  try{
-    return raw ? JSON.parse(raw) : [];
-  }catch(e){
-    console.error('Fehler beim Laden der Firmen:', e);
-    return [];
-  }
+  try { return raw ? JSON.parse(raw) : []; } catch(err) { console.error(err); return []; }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const user = requireLogin();
-  if(!user) return;
+  const user = getCurrentUserOrRedirect();
+  if (!user) return;
 
-  // Anzeige Benutzername
+  // Benutzeranzeige und Buttons
   const userDisplay = document.getElementById('userDisplay');
-  if(userDisplay) userDisplay.textContent = `Angemeldet: ${user}`;
+  if (userDisplay) userDisplay.textContent = `Angemeldet: ${user}`;
 
-  // Logout & Cancel
   document.getElementById('logoutBtn').addEventListener('click', () => {
     localStorage.removeItem(USER_KEY);
+    // optional: Auswahl löschen
+    localStorage.removeItem('uwi_currentCompany_' + user);
     window.location.href = 'index.html';
   });
+
   document.getElementById('cancelBtn').addEventListener('click', () => {
     window.location.href = 'overview.html';
   });
 
+  // Formularverarbeitung
   const form = document.getElementById('createForm');
-  form.addEventListener('submit', (ev) => {
+  form.addEventListener('submit', ev => {
     ev.preventDefault();
 
-    // Eingabewerte sammeln
+    // Werte lesen
     const name = document.getElementById('name').value.trim();
     const legal = document.getElementById('legal').value;
     const capital = parseFloat(document.getElementById('capital').value) || 0;
@@ -59,13 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const purpose = document.getElementById('purpose').value.trim();
     const size = parseInt(document.getElementById('size').value) || 0;
 
-    // Einfache Validierung
-    if(!name){
+    if (!name) {
       alert('Bitte einen Firmennamen eingeben.');
       return;
     }
 
-    // Firma-Objekt erzeugen
+    // Firma-Objekt
     const company = {
       id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
       name,
@@ -77,12 +71,12 @@ document.addEventListener('DOMContentLoaded', () => {
       createdAt: new Date().toISOString()
     };
 
-    // Speichern im LocalStorage unter dem Benutzer
-    const companies = loadCompanies(user);
+    // Speichern unter user-spezifischem Schlüssel
+    const companies = loadCompaniesForUser(user);
     companies.push(company);
     localStorage.setItem(companiesKey(user), JSON.stringify(companies));
 
-    // Zurück zur Übersicht
+    // Zur Ansicht: zurück zur Übersicht
     window.location.href = 'overview.html';
   });
 });
