@@ -1,77 +1,60 @@
-(function () {
-  // LocalStorage Schlüssel
-  const USER_KEY = 'uwi_user';
-  const COMPANIES_PREFIX = 'uwi_companies_';
+// js/login.js
+// Login-Seite (index.html)
+// - Prüft Benutzername & Passwort
+// - Speichert beim Login den Benutzernamen im LocalStorage
+// - Leitet weiter zur overview.html
+// - Wenn bereits angemeldet, wird automatisch weitergeleitet
 
-  // Vordefinierte Konten (werden nur im Hintergrund in diesem JS verwaltet).
-  const CREDENTIALS = {
-    'erblin.tolaj': 'wms_uwi_erblin',
-    'melvin.haueter': 'wms_uwi_melvin',
-    'michel.glaubauf': 'wms_uwi_glaubauf'
-  };
+// Login-Daten
+const VALID_USERNAME = "erblin.tolaj";
+const VALID_PASSWORD = "wms_uwi_erblin";
 
-  // Hilfsfunktion: Fehlermeldung im Formular anzeigen
-  function showError(msg) {
-    const el = document.getElementById('loginError');
-    el.textContent = msg || '';
-  }
+// LocalStorage-Schlüssel
+const USER_KEY = 'uwi_user';
 
-  // Falls bereits angemeldet: direkt weiterleiten zur Übersicht
-  const existing = localStorage.getItem(USER_KEY);
-  if (existing) {
+// Hilfsfunktion: get stored user
+function getStoredUser() {
+  return localStorage.getItem(USER_KEY);
+}
+
+// Wenn bereits eingeloggt: weiterleiten
+(function autoRedirectIfLoggedIn() {
+  const user = getStoredUser();
+  if (user) {
     window.location.href = 'overview.html';
-    return;
   }
+})();
 
-  // Formular-Handler
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('loginForm');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
+// Formularverarbeitung
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('loginForm');
+  const errorEl = document.getElementById('loginError'); // Optional: Fehlermeldung im UI
 
-    form.addEventListener('submit', (ev) => {
-      ev.preventDefault();
-      showError('');
+  form.addEventListener('submit', (ev) => {
+    ev.preventDefault();
 
-      const username = (usernameInput.value || '').trim();
-      const password = passwordInput.value || '';
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
 
-      // Validierung: Felder ausgefüllt?
-      if (!username) {
-        showError('Bitte Benutzernamen eingeben.');
-        usernameInput.focus();
-        return;
-      }
-      if (!password) {
-        showError('Bitte Passwort eingeben.');
-        passwordInput.focus();
-        return;
-      }
+    // Fehler: Wenn Benutzername oder Passwort falsch sind
+    if (username !== VALID_USERNAME || password !== VALID_PASSWORD) {
+      errorEl.textContent = 'Benutzername oder Passwort sind falsch!';
+      errorEl.style.display = 'block';
+      return;
+    } else {
+      errorEl.style.display = 'none'; // Fehleranzeige ausblenden, wenn korrekt
 
-      // Prüfung: Benutzername exakt in CREDENTIALS vorhanden?
-      if (!Object.prototype.hasOwnProperty.call(CREDENTIALS, username)) {
-        showError('Ungültiger Benutzername. Dieses Konto ist nicht erlaubt.');
-        return;
-      }
-
-      // Passwortprüfung
-      const expected = CREDENTIALS[username];
-      if (password !== expected) {
-        showError('Ungültiges Passwort.');
-        return;
-      }
-
-      // Anmeldung erfolgreich:
+      // Speichern des Benutzernamens im LocalStorage
       localStorage.setItem(USER_KEY, username);
 
-      // Sicherstellen, dass die Firmenliste für diesen Benutzer existiert.
-      const key = COMPANIES_PREFIX + username;
-      if (!localStorage.getItem(key)) {
-        localStorage.setItem(key, JSON.stringify([]));
+      // Option: initiale Arrays für Firmen anlegen
+      const companiesKey = `uwi_companies_${username}`;
+      if (!localStorage.getItem(companiesKey)) {
+        localStorage.setItem(companiesKey, JSON.stringify([]));
       }
 
       // Weiterleitung zur Übersicht
       window.location.href = 'overview.html';
-    });
+    }
   });
-})();
+});
