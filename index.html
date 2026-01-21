@@ -1,222 +1,24 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>UWI Unternehmenssimulation</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<title>Login – UWI Projekt</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">UWI Unternehmenssimulation</div>
-    <nav class="nav" id="mainNav">
-      <!-- Navigation wird dynamisch verwaltet -->
-    </nav>
-    <div id="userArea" class="user-area"></div>
-  </header>
-
-  <main class="container">
-    <!-- Login / Register -->
-    <section id="loginSection" class="card center">
-      <h2>Anmelden</h2>
-      <form id="loginForm">
-        <label for="username">Benutzername</label>
-        <input id="username" name="username" required placeholder="z.B. max.mustermann" />
-        <div class="actions">
-          <button type="submit" class="btn primary">Anmelden</button>
-        </div>
-      </form>
-      <p class="muted">Der Login ist einfach: nur ein Benutzername. Alle Daten werden lokal im Browser gespeichert (LocalStorage).</p>
-    </section>
-
-    <!-- Dashboard: Firmenverwaltung -->
-    <section id="dashboard" class="hidden">
-      <div class="grid">
-        <div class="col">
-          <div class="card">
-            <h3>Firmenverwaltung</h3>
-            <form id="companyForm" class="inline-form">
-              <label for="companyName">Firmenname</label>
-              <input id="companyName" required placeholder="Firma GmbH" />
-              <label for="companyFormSelect">Rechtsform</label>
-              <select id="companyFormSelect">
-                <option>Einzelunternehmen</option>
-                <option>GbR</option>
-                <option>GmbH</option>
-                <option>AG</option>
-                <option>UG (haftungsbeschränkt)</option>
-              </select>
-              <div class="actions">
-                <button class="btn" id="saveCompanyBtn">Speichern</button>
-              </div>
-            </form>
-
-            <div id="companyList" class="list"></div>
-          </div>
-
-          <div class="card">
-            <h3>Recht (Kurz)</h3>
-            <p>Info-Seite zu Rechtsformen findest du oben in der Navigation unter „Recht“.</p>
-          </div>
-        </div>
-
-        <div class="col">
-          <div class="card">
-            <h3>Schnellaktionen</h3>
-            <div class="actions-col">
-              <button class="btn" data-nav="bookings">Buchungen</button>
-              <button class="btn" data-nav="balance">Bilanz</button>
-              <button class="btn" data-nav="ki">KI‑Prüfung</button>
-              <button class="btn" data-nav="documentation">Dokumentation</button>
-              <button class="btn" data-nav="recht">Recht</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3>Kontenübersicht (Schnell)</h3>
-            <div id="miniAccounts">Keine Buchungen</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Bookings -->
-    <section id="bookings" class="hidden">
-      <div class="card">
-        <h2>Buchungssystem</h2>
-        <form id="bookingForm" class="inline-form">
-          <label for="bookingCompany">Firma</label>
-          <select id="bookingCompany"></select>
-
-          <label for="debitAccount">Soll-Konto</label>
-          <input id="debitAccount" placeholder="z.B. Kasse" required />
-
-          <label for="creditAccount">Haben-Konto</label>
-          <input id="creditAccount" placeholder="z.B. Bank" required />
-
-          <label for="amount">Betrag</label>
-          <input id="amount" type="number" min="0.01" step="0.01" placeholder="1000" required />
-
-          <label for="bookingText">Buchungstext (optional)</label>
-          <input id="bookingText" placeholder="z.B. Zahlung Kunde XY" />
-
-          <div class="actions">
-            <button class="btn primary" id="saveBookingBtn">Buchen</button>
-            <button type="button" class="btn" id="clearBookingsBtn">Alle Buchungen löschen</button>
-          </div>
-        </form>
-
-        <h3>Buchungsliste</h3>
-        <div id="bookingList" class="list"></div>
-      </div>
-    </section>
-
-    <!-- Bilanz -->
-    <section id="balance" class="hidden">
-      <div class="card">
-        <h2>Bilanz</h2>
-        <div class="row">
-          <div class="col-6">
-            <h3>Aktiven</h3>
-            <table class="table" id="assetsTable">
-              <thead><tr><th>Konto</th><th>Wert</th></tr></thead>
-              <tbody></tbody>
-            </table>
-            <div class="total">Summe Aktiven: <span id="assetsTotal">0.00</span> €</div>
-          </div>
-          <div class="col-6">
-            <h3>Passiven</h3>
-            <table class="table" id="liabilitiesTable">
-              <thead><tr><th>Konto</th><th>Wert</th></tr></thead>
-              <tbody></tbody>
-            </table>
-            <div class="total">Summe Passiven: <span id="liabilitiesTotal">0.00</span> €</div>
-          </div>
-        </div>
-        <div class="balance-note" id="balanceNote"></div>
-      </div>
-    </section>
-
-    <!-- KI Prüfung -->
-    <section id="ki" class="hidden">
-      <div class="card">
-        <h2>KI‑Prüfung (Simulation)</h2>
-        <p>Gib einen Geschäftsvorfall ein, und trage deinen Buchungssatz ein. Das System prüft anhand einer Vergleichsliste und Schlüsselwörter.</p>
-        <form id="kiForm" class="inline-form">
-          <label for="kiText">Geschäftsvorfall</label>
-          <textarea id="kiText" placeholder="z.B. Kunde bezahlt bar für Waren" rows="3"></textarea>
-
-          <label for="kiDebit">Dein Soll‑Konto</label>
-          <input id="kiDebit" placeholder="z.B. Kasse" />
-
-          <label for="kiCredit">Dein Haben‑Konto</label>
-          <input id="kiCredit" placeholder="z.B. Warenbestand" />
-
-          <label for="kiAmount">Betrag</label>
-          <input id="kiAmount" type="number" step="0.01" />
-
-          <div class="actions">
-            <button class="btn primary" id="kiCheckBtn">Prüfen</button>
-            <button type="button" class="btn" id="kiHintBtn">Hint anzeigen</button>
-          </div>
-        </form>
-
-        <div id="kiResult" class="result"></div>
-      </div>
-    </section>
-
-    <!-- Recht -->
-    <section id="recht" class="hidden">
-      <div class="card">
-        <h2>Recht — Rechtsformen (kurz)</h2>
-        <label for="rechtSelect">Wähle Rechtsform</label>
-        <select id="rechtSelect">
-          <option>Einzelunternehmen</option>
-          <option>GbR</option>
-          <option>GmbH</option>
-          <option>UG (haftungsbeschränkt)</option>
-          <option>AG</option>
-        </select>
-
-        <div id="rechtInfo" class="card small"></div>
-      </div>
-    </section>
-
-    <!-- Documentation -->
-    <section id="documentation" class="hidden">
-      <div class="card">
-        <h2>Projektdokumentation — UWI Unternehmenssimulation</h2>
-        <h3>Ziel</h3>
-        <p>Die Webseite soll Schülern eine einfache Unternehmenssimulation bieten: Firmen verwalten, Buchungen durchführen, Bilanz erstellen und rechtliche Grundbegriffe erklären.</p>
-
-        <h3>Funktionen</h3>
-        <ul>
-          <li>Login mit Benutzername (Daten lokal gespeichert)</li>
-          <li>Firmenverwaltung je Benutzer (Name + Rechtsform)</li>
-          <li>Buchungssystem: Soll/Haben/Betrag, Buchungsliste</li>
-          <li>Bilanz: Aktiven und Passiven berechnen und prüfen</li>
-          <li>KI‑Prüfung (Simulation): Prüfen von Buchungssätzen anhand einfacher Regeln</li>
-          <li>Rechtsseite: Schulische Infos zu Rechtsformen</li>
-        </ul>
-
-        <h3>Technik</h3>
-        <p>HTML, CSS, JavaScript. Alle Daten werden im LocalStorage des Browsers pro Benutzer gespeichert. Keine Server-Komponente nötig.</p>
-
-        <h3>Arbeitsprozess</h3>
-        <p>Entwurf als Single-Page-App (SPA) mit Bereichen/Sections. Logik in script.js, Styling in style.css. Fokus auf Klarheit, einfache Bedienung und Schulnähe.</p>
-
-        <h3>Fazit</h3>
-        <p>Die Anwendung ist eine einfache und sichere Umgebung zum Üben von Buchungen und Bilanzdenken. Für weiterführende Nutzung wären Mehrbenutzer-Backend, Persistenz auf Server und erweiterte Prüfalgorithmen sinnvoll.</p>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <div>© UWI Unternehmenssimulation — Schulprojekt</div>
-      <div class="muted">Daten lokal gespeichert im Browser.</div>
-    </footer>
-  </main>
-
-  <script src="script.js"></script>
+ 
+<h1>UWI Unternehmenssimulation</h1>
+ 
+<div class="form">
+<label>Name:</label>
+<input type="text" id="username">
+ 
+  <label>Passwort:</label>
+<input type="password" id="password">
+ 
+  <button onclick="login()">Login</button>
+</div>
+ 
+<script src="js/login.js"></script>
 </body>
 </html>
