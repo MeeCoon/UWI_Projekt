@@ -1,13 +1,16 @@
 // js/login.js
 // Login-Seite (index.html)
-// - Prüft Benutzername & Passwort
+// - Prüft Benutzername & Passwort für 3 Benutzer
 // - Speichert beim Login den Benutzernamen im LocalStorage
 // - Leitet weiter zur overview.html
 // - Wenn bereits angemeldet, wird automatisch weitergeleitet
 
-// Login-Daten (Demo!)
-const VALID_USERNAME = "erblin.tolaj";
-const VALID_PASSWORD = "wms_uwi_erblin";
+// Login-Daten (für 3 Benutzer)
+const VALID_USERS = {
+  "erblin.tolaj": "wms_uwi_erblin",
+  "melvin.haueter": "wms_uwi_melvin",
+  "michel.glaubauf": "wms_uwi_glaubauf"
+};
 
 // LocalStorage-Schlüssel
 const USER_KEY = 'uwi_user';
@@ -37,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const password = document.getElementById('password').value;
 
     // Fehler: Wenn Benutzername oder Passwort falsch sind
-    if (username !== VALID_USERNAME || password !== VALID_PASSWORD) {
+    if (!VALID_USERS[username] || VALID_USERS[username] !== password) {
       errorEl.textContent = 'Benutzername oder Passwort sind falsch!';
       errorEl.style.display = 'block';
       return;
@@ -47,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Speichern des Benutzernamens im LocalStorage
       localStorage.setItem(USER_KEY, username);
 
-      // Option: initiale Arrays für Firmen anlegen
+      // Option: initiale Arrays für Firmen anlegen, falls noch nicht vorhanden
       const companiesKey = `uwi_companies_${username}`;
       if (!localStorage.getItem(companiesKey)) {
         localStorage.setItem(companiesKey, JSON.stringify([]));
