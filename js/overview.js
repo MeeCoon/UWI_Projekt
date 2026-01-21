@@ -1,68 +1,81 @@
 // js/overview.js
 // Firmenübersicht (overview.html)
-// - Liest angemeldeten Benutzer aus LocalStorage
-// - Lädt die Firmenliste des Benutzers und zeigt sie an
-// - Klick auf Firma: Firma-ID in LocalStorage speichern und zu company.html weiterleiten
-// - Button "Neue Firma erstellen" → create.html
-// - Logout-Funktion
+// - Verwaltet Firmen pro angemeldetem Benutzer.
+// - Setzt die ausgewählte Firma pro Benutzer (uwi_currentCompany_<username>).
+// - Logout entfernt nur die Anmeldung und die Auswahl, nicht die Firmen-Daten.
 
+// LocalStorage keys / Prefixes
 const USER_KEY = 'uwi_user';
-const COMPANY_KEY_PREFIX = 'uwi_companies_';
-const SELECTED_COMPANY_KEY = 'uwi_currentCompany';
+const COMPANIES_PREFIX = 'uwi_companies_';
+const SELECTED_COMPANY_PREFIX = 'uwi_currentCompany_';
 
-// Hilfsfunktionen
-function getCurrentUser(){
-  return localStorage.getItem(USER_KEY);
-}
-function requireLogin(){
-  const user = getCurrentUser();
-  if(!user){
-    // nicht angemeldet → zur Login-Seite
+// Helper: get current username or redirect to login
+function getCurrentUserOrRedirect() {
+  const user = localStorage.getItem(USER_KEY);
+  if (!user) {
+    // nicht angemeldet → Login
     window.location.href = 'index.html';
     return null;
   }
   return user;
 }
-function companiesKey(user){ return COMPANY_KEY_PREFIX + user; }
-function loadCompanies(user){
+
+// Helper: key builders
+function companiesKey(user) { return COMPANIES_PREFIX + user; }
+function selectedCompanyKey(user) { return SELECTED_COMPANY_PREFIX + user; }
+
+// Lade Firmenliste für user
+function loadCompaniesForUser(user) {
   const raw = localStorage.getItem(companiesKey(user));
-  try{
+  try {
     return raw ? JSON.parse(raw) : [];
-  }catch(e){
-    console.error('Fehler beim Parsen der Firmenliste:', e);
+  } catch (err) {
+    console.error('Fehler beim Parsen der Firmenliste aus LocalStorage:', err);
     return [];
   }
 }
 
-// Rendering
+// Escape HTML (einfacher Schutz vor XSS)
+function escapeHtml(str) {
+  if (str === undefined || str === null) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  const user = requireLogin();
-  if(!user) return;
+  const user = getCurrentUserOrRedirect();
+  if (!user) return;
 
-  // Anzeige Benutzername
+  // UI-Elemente
   const userDisplay = document.getElementById('userDisplay');
-  userDisplay.textContent = `Angemeldet: ${user}`;
+  const createBtn = document.getElementById('createBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const listEl = document.getElementById('companiesList');
 
-  // Buttons
-  document.getElementById('createBtn').addEventListener('click', () => {
+  // Anzeigen wer eingeloggt ist
+  if (userDisplay) userDisplay.textContent = `Angemeldet: ${user}`;
+
+  // Neuer Firma-Button
+  createBtn.addEventListener('click', () => {
     window.location.href = 'create.html';
   });
-  document.getElementById('logoutBtn').addEventListener('click', () => {
+
+  // Logout: Entfernt nur Anmeldung und Auswahl, nicht Firmen
+  logoutBtn.addEventListener('click', () => {
     localStorage.removeItem(USER_KEY);
-    // optional: auch Auswahl löschen
-    localStorage.removeItem(SELECTED_COMPANY_KEY);
+    localStorage.removeItem(selectedCompanyKey(user)); // Auswahl des Benutzers löschen
     window.location.href = 'index.html';
   });
 
-  // List anzeigen
-  const listEl = document.getElementById('companiesList');
-  function renderList(){
-    const companies = loadCompanies(user);
+  // Render-Funktion
+  function renderList() {
+    const companies = loadCompaniesForUser(user);
     listEl.innerHTML = '';
-    if(companies.length === 0){
-      listEl.innerHTML = '<div class="small muted">Keine Firmen vorhanden. Erstelle eine neue Firma.</div>';
+
+    if (!companies || companies.length === 0) {
+      listEl.innerHTML = '<div class="small muted">Keine Firmen vorhanden. Erstellen Sie eine neue Firma.</div>';
       return;
     }
+
     companies.forEach(c => {
       const item = document.createElement('div');
       item.className = 'company-item';
@@ -71,24 +84,19 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="font-weight:600">${escapeHtml(c.name)}</div>
           <div class="small muted">${escapeHtml(c.legal)} · ${escapeHtml(c.industry || '')}</div>
         </div>
-        <div class="small muted">Mitarb.: ${escapeHtml(String(c.size || '‑'))}</div>
+        <div class="small muted">Mitarb.: ${escapeHtml(String(c.size || '–'))}</div>
       `;
-      // Wenn Item geklickt: speichern und weiterleiten
+
+      // Klick auf Firma: speichere Auswahl pro-user und weiterleiten
       item.addEventListener('click', () => {
-        localStorage.setItem(SELECTED_COMPANY_KEY, c.id);
+        localStorage.setItem(selectedCompanyKey(user), c.id);
         window.location.href = 'company.html';
       });
+
       listEl.appendChild(item);
     });
   }
 
-  // helper: escapeHtml to avoid XSS
-  function escapeHtml(str){
-    if(str === undefined || str === null) return '';
-    return String(str).replace(/[&<>"']/g, function(m){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
-    });
-  }
-
+  // initial render
   renderList();
 });
