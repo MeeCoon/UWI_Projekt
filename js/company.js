@@ -1,20 +1,7 @@
 // js/company.js
 // Erweiterte Firmenansicht mit tab-gesteuerter Anzeige (Bilanz / Erfolgsrechnung / Buchungssätze / Wirtschaft / Recht)
 // Verhalten gemäß Anforderung:
-// - Beim Laden steht unten (im Inhaltsbereich) nichts, solange kein Reiter angeklickt wurde.
-// - Default-Reiter ist "Bilanz" (als erste Option vorhanden), aber es wird erst Inhalt angezeigt,
-//   wenn der Benutzer aktiv auf den Reiter klickt.
-// - Wenn der Benutzer auf den Reiter "Bilanz" klickt, erscheint zunächst ein klickbarer Header
-//   "Bilanz 2024". Erst wenn dieser Header angeklickt wird, wird die Bilanz inklusive Zahlen angezeigt.
-// - Beim Wechsel auf einen anderen Reiter (z.B. "Erfolgsrechnung") zeigt die Seite analog
-//   zunächst "Erfolgsrechnung 2024" als klickbare Überschrift; ein Klick darauf erzeugt die Inhalte.
-// - Alle Inhalte werden pro Benutzer und pro Firma aus dem LocalStorage verwaltet.
-// - Buchungen werden erwartet unter dem Key: uwi_bookings_<username>, jedes Booking-Objekt enthält:
-//   { id, companyId, debit, credit, amount, text, date }
-// - Firmen sind gespeichert unter: uwi_companies_<username>
-// - Ausgewählte Firma pro Benutzer: uwi_currentCompany_<username>
 
-// Helper-Funktionen und Variablen
 const USER_KEY = 'uwi_user';
 const COMPANIES_PREFIX = 'uwi_companies_';
 const SELECTED_COMPANY_PREFIX = 'uwi_currentCompany_';
