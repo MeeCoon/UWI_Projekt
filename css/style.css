@@ -134,3 +134,162 @@ body{
   .center-page{min-height:unset;padding:30px 0}
   .tabs{flex-wrap:wrap}
 }
+
+/* Zusätzliche / ersetzende Styles für die bilanz.html
+   Hinweise:
+   - Entfernt Floristik AG
+   - Header zeigt nur "Bilanz" + kleine Zeile "in Tausend CHF"
+   - Weißer Bilanz-Kasten zentriert mit leichtem Rahmen & Radius
+   - Zwei Spalten: links Aktiva / rechts Passiva
+   - Dicke durchgehende vertikale Trennlinie genau in der Mitte
+   - Jeder Block hat eine dünne graue Trennlinie am Ende
+   - Totals-Zeile fetter Text, Beträge rechtsbündig
+   - Statische Zahlen im HTML; kein JavaScript erzeugt Werte
+*/
+ 
+/* Basis / Variablen */
+:root{
+  --page-bg: #f6f8fb;
+  --sheet-bg: #ffffff;
+  --blue: #1e62d0;
+  --muted: #5b6570;
+  --line: #e6eefb;
+  --thin-border: #e9eef6;
+  --text: #0b1220;
+  --radius: 8px;
+  --max-width: 980px;
+  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+}
+ 
+/* Page background */
+html,body{height:100%;margin:0;background:var(--page-bg);color:var(--text)}
+a{color:inherit}
+ 
+/* Header bar */
+.header-bar{
+  width:100%;
+  background: linear-gradient(90deg,var(--blue), #2170d6);
+  color:white;
+  padding:18px 0;
+  box-sizing:border-box;
+}
+.header-inner{
+  max-width:var(--max-width);
+  margin:0 auto;
+  padding:0 18px;
+}
+.title{margin:0;font-size:20px;font-weight:700;letter-spacing:0.6px}
+.subtitle{margin-top:6px;font-size:12px;opacity:0.95}
+ 
+/* Page container */
+.page{
+  max-width:var(--max-width);
+  margin:18px auto;
+  padding:0 18px;
+  box-sizing:border-box;
+}
+ 
+/* Bilanz-Kasten (weißes Blatt) */
+.bilanz-container{
+  background:var(--sheet-bg);
+  border:1px solid var(--thin-border);
+  border-radius:var(--radius);
+  padding:18px;
+  box-sizing:border-box;
+}
+ 
+/* Grid: left column / divider / right column */
+.bilanz-grid{
+  display:grid;
+  grid-template-columns: 1fr 16px 1fr; /* middle column reserved for divider */
+  gap:0;
+  position:relative;
+  align-items:start;
+}
+ 
+/* Divider (center column) - full height, solid (thick) */
+.divider{
+  width:100%;
+  display:block;
+}
+.divider::before{
+  content:"";
+  display:block;
+  margin:0 auto;
+  width:6px;                    /* dicke Trennlinie */
+  height:100%;
+  background: linear-gradient(#1f56b8,#1e62d0);
+  border-radius:3px;
+}
+ 
+/* Columns */
+.column{
+  padding:8px 12px;
+  box-sizing:border-box;
+}
+ 
+/* Column title */
+.column-title{
+  margin:0 0 12px 0;
+  color:var(--blue);
+  font-size:18px;
+  font-weight:700;
+}
+ 
+/* Block (group) */
+.block{
+  padding-bottom:10px;
+  margin-bottom:12px;
+  border-bottom:1px solid var(--thin-border); /* feine graue Trennlinie */
+}
+ 
+/* Block title */
+.block-title{
+  font-size:13px;
+  font-weight:700;
+  color:var(--muted);
+  margin:0 0 8px 0;
+}
+ 
+/* Row: label left, amount right */
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:6px 0;
+}
+.label{
+  font-size:14px;
+  color:var(--text);
+  padding-right:12px;
+  line-height:1.2;
+}
+.amount{
+  min-width:72px;
+  text-align:right;
+  font-weight:600;
+  font-variant-numeric:tabular-nums;
+}
+ 
+/* Totals */
+.total-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding-top:10px;
+  margin-top:6px;
+  border-top:2px solid var(--thin-border);
+}
+.total-label, .total-value{
+  font-weight:800;
+  font-size:16px;
+}
+.total-value{min-width:72px;text-align:right}
+ 
+/* Responsive: on small screens stack columns and hide center divider */
+@media (max-width:760px){
+  .bilanz-grid{grid-template-columns: 1fr; }
+  .divider{ display:none; }
+  .column{ padding:10px 6px; }
+  .header-inner{text-align:center}
+}
