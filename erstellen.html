@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UWI Unternehmenssimulation — Neue Firma</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">UWI Unternehmenssimulation</div>
+    <nav class="nav-inline">
+      <span id="userDisplay" class="muted"></span>
+      <button id="logoutBtn" class="btn">Abmelden</button>
+    </nav>
+  </header>
+
+  <main class="container center-page">
+    <section class="card card-small">
+      <h1 class="h2">Neue Firma erstellen</h1>
+
+      <form id="createForm" class="form-grid">
+        <label for="name">Firmenname</label>
+        <input id="name" required placeholder="z. B. Müller GmbH">
+
+        <label for="legal">Rechtsform</label>
+        <select id="legal">
+          <option>Einzelunternehmen</option>
+          <option>GmbH</option>
+          <option>AG</option>
+        </select>
+
+        <label for="capital">Startkapital (€)</label>
+        <input id="capital" type="number" min="0" step="0.01" placeholder="10000">
+
+        <label for="industry">Branche</label>
+        <input id="industry" placeholder="z. B. Handel">
+
+        <label for="purpose">Zweck</label>
+        <input id="purpose" placeholder="Kurzbeschreibung des Zwecks">
+
+        <label for="size">Grösse (Anzahl Mitarbeitende)</label>
+        <input id="size" type="number" min="1" step="1" placeholder="5">
+
+        <div class="form-actions" style="grid-column:1 / -1; justify-content:center;">
+          <button type="submit" class="btn primary">Firma erstellen</button>
+          <button type="button" id="cancelBtn" class="btn">Abbrechen</button>
+        </div>
+      </form>
+
+      <p class="muted small">Alle Daten werden im LocalStorage des angemeldeten Benutzers gespeichert.</p>
+    </section>
+  </main>
+
+  <script src="js/create.js"></script>
+</body>
+</html>
