@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UWI Unternehmenssimulation — Firmenansicht</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">UWI Unternehmenssimulation</div>
+    <nav class="nav-inline">
+      <span id="userDisplay" class="muted"></span>
+      <button id="backBtn" class="btn">Zur Übersicht</button>
+      <button id="logoutBtn" class="btn">Abmelden</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="row space-between">
+        <div>
+          <h1 id="companyTitle" class="h2">Firma</h1>
+          <div id="companyMeta" class="small muted"></div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="balance">Bilanz</button>
+        <button class="tab-btn" data-tab="income">Erfolgsrechnung</button>
+        <button class="tab-btn" data-tab="bookings">Buchungssätze</button>
+        <button class="tab-btn" data-tab="economy">Wirtschaft</button>
+        <button class="tab-btn" data-tab="law">Recht</button>
+      </div>
+
+      <div class="tab-content" id="balance">Hier kommt die Bilanz (Platzhalter).</div>
+      <div class="tab-content hidden" id="income">Hier kommt die Erfolgsrechnung (Platzhalter).</div>
+      <div class="tab-content hidden" id="bookings">Hier kommen Buchungssätze (Platzhalter).</div>
+      <div class="tab-content hidden" id="economy">Wirtschaftliche Informationen (Platzhalter).</div>
+      <div class="tab-content hidden" id="law">Rechtliche Hinweise (Platzhalter).</div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
+  </footer>
+
+  <script src="js/company.js"></script>
+</body>
+</html>
