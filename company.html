@@ -1,104 +1,50 @@
-// js/company.js
-// Firmenansicht (company.html)
-// - Liest die ausgewählte Firma, die pro Benutzer gespeichert ist unter:
-//     uwi_currentCompany_<username>
-// - Zeigt Platzhalterinhalte für Tabs (Bilanz, Erfolgsrechnung, Buchungen, Wirtschaft, Recht)
-// - Logout entfernt nur Anmeldung und die Auswahl des aktuellen Benutzers
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UWI Unternehmenssimulation — Firmenansicht</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">UWI Unternehmenssimulation</div>
+    <nav class="nav-inline">
+      <span id="userDisplay" class="muted"></span>
+      <button id="backBtn" class="btn">Zur Übersicht</button>
+      <button id="logoutBtn" class="btn">Abmelden</button>
+    </nav>
+  </header>
 
-const USER_KEY = 'uwi_user';
-const COMPANIES_PREFIX = 'uwi_companies_';
-const SELECTED_COMPANY_PREFIX = 'uwi_currentCompany_';
+  <main class="container">
+    <section class="card">
+      <div class="row space-between">
+        <div>
+          <h1 id="companyTitle" class="h2">Firma</h1>
+          <div id="companyMeta" class="small muted"></div>
+        </div>
+      </div>
 
-function getCurrentUserOrRedirect() {
-  const user = localStorage.getItem(USER_KEY);
-  if (!user) {
-    window.location.href = 'index.html';
-    return null;
-  }
-  return user;
-}
-function companiesKey(user) { return COMPANIES_PREFIX + user; }
-function selectedCompanyKey(user) { return SELECTED_COMPANY_PREFIX + user; }
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="balance">Bilanz</button>
+        <button class="tab-btn" data-tab="income">Erfolgsrechnung</button>
+        <button class="tab-btn" data-tab="bookings">Buchungssätze</button>
+        <button class="tab-btn" data-tab="economy">Wirtschaft</button>
+        <button class="tab-btn" data-tab="law">Recht</button>
+      </div>
 
-function loadCompaniesForUser(user) {
-  const raw = localStorage.getItem(companiesKey(user));
-  try { return raw ? JSON.parse(raw) : []; } catch(err) { console.error(err); return []; }
-}
+      <div class="tab-content" id="balance">Hier kommt die Bilanz (Platzhalter).</div>
+      <div class="tab-content hidden" id="income">Hier kommt die Erfolgsrechnung (Platzhalter).</div>
+      <div class="tab-content hidden" id="bookings">Hier kommen Buchungssätze (Platzhalter).</div>
+      <div class="tab-content hidden" id="economy">Wirtschaftliche Informationen (Platzhalter).</div>
+      <div class="tab-content hidden" id="law">Rechtliche Hinweise (Platzhalter).</div>
+    </section>
+  </main>
 
-function escapeHtml(str) {
-  if (str === undefined || str === null) return '';
-  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
-}
+  <footer class="footer">
+    <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
+  </footer>
 
-document.addEventListener('DOMContentLoaded', () => {
-  const user = getCurrentUserOrRedirect();
-  if (!user) return;
-
-  // Buttons
-  const logoutBtn = document.getElementById('logoutBtn');
-  const backBtn = document.getElementById('backBtn');
-
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(selectedCompanyKey(user));
-    window.location.href = 'index.html';
-  });
-  backBtn.addEventListener('click', () => {
-    window.location.href = 'overview.html';
-  });
-
-  // Anzeige User
-  const userDisplay = document.getElementById('userDisplay');
-  if (userDisplay) userDisplay.textContent = `Angemeldet: ${user}`;
-
-  // geladene Firma ermitteln (per-user)
-  const selId = localStorage.getItem(selectedCompanyKey(user));
-  if (!selId) {
-    alert('Keine Firma ausgewählt. Zur Übersicht weitergeleitet.');
-    window.location.href = 'overview.html';
-    return;
-  }
-
-  const companies = loadCompaniesForUser(user);
-  const company = companies.find(c => c.id === selId);
-  if (!company) {
-    alert('Ausgewählte Firma nicht gefunden. Zur Übersicht weitergeleitet.');
-    window.location.href = 'overview.html';
-    return;
-  }
-
-  // Anzeige Titel & Metadaten
-  const titleEl = document.getElementById('companyTitle');
-  const metaEl = document.getElementById('companyMeta');
-  if (titleEl) titleEl.textContent = company.name;
-  if (metaEl) metaEl.textContent = `${company.legal} · ${company.industry || '–'} · Startkapital: ${company.capital} € · Mitarbeitende: ${company.size}`;
-
-  // Tabs: einfache Umschaltung
-  const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
-  const tabContents = Array.from(document.querySelectorAll('.tab-content'));
-
-  tabButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const tab = btn.dataset.tab;
-      tabContents.forEach(c => {
-        if (c.id === tab) c.classList.remove('hidden'); else c.classList.add('hidden');
-      });
-    });
-  });
-
-  // Platzhalterinhalte (können erweitert werden)
-  const created = new Date(company.createdAt).toLocaleString();
-  const balanceEl = document.getElementById('balance');
-  const incomeEl = document.getElementById('income');
-  const bookingsEl = document.getElementById('bookings');
-  const economyEl = document.getElementById('economy');
-  const lawEl = document.getElementById('law');
-
-  if (balanceEl) balanceEl.textContent = `Hier kommt die Bilanz für ${escapeHtml(company.name)}. (Erstellt: ${created})`;
-  if (incomeEl) incomeEl.textContent = 'Hier kommt die Erfolgsrechnung (Platzhalter).';
-  if (bookingsEl) bookingsEl.innerHTML = '<p>Hier können Buchungssätze gelistet werden. (Platzhalter)</p><p class="small muted">Noch keine Buchungen vorhanden.</p>';
-  if (economyEl) economyEl.textContent = `Wirtschaftliche Informationen zur Firma (Platzhalter). Branche: ${escapeHtml(company.industry || '–')}`;
-  if (lawEl) lawEl.innerHTML = '<h3>Rechtliche Hinweise (Kurz)</h3><p class="small">Diese Inhalte sind schulische Platzhalter.</p>';
-});
+  <script src="js/company.js"></script>
+</body>
+</html>
