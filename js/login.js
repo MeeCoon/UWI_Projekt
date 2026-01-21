@@ -6,8 +6,8 @@
 // - Wenn bereits angemeldet, wird automatisch weitergeleitet
 
 // Login-Daten (Demo!)
-const VALID_USERNAME = "test";
-const VALID_PASSWORD = "test123";
+const VALID_USERNAME = "erblin.tolaj";
+const VALID_PASSWORD = "wms_uwi_erblin";
 
 // LocalStorage-Schlüssel
 const USER_KEY = 'uwi_user';
