@@ -1,57 +1,88 @@
-<!doctype html>
-<html lang="de">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>UWI Unternehmenssimulation — Neue Firma</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <header class="topbar">
-    <div class="brand">UWI Unternehmenssimulation</div>
-    <nav class="nav-inline">
-      <span id="userDisplay" class="muted"></span>
-      <button id="logoutBtn" class="btn">Abmelden</button>
-    </nav>
-  </header>
+// js/create.js
+// Neue Firma erstellen (create.html)
+// - Formular einlesen
+// - Firma als Objekt in LocalStorage für den aktuellen Benutzer speichern
+// - Danach Weiterleitung zurück zur Übersicht (overview.html)
 
-  <main class="container center-page">
-    <section class="card card-small">
-      <h1 class="h2">Neue Firma erstellen</h1>
+// LocalStorage keys
+const USER_KEY = 'uwi_user';
+const COMPANY_KEY_PREFIX = 'uwi_companies_';
 
-      <form id="createForm" class="form-grid">
-        <label for="name">Firmenname</label>
-        <input id="name" required placeholder="z. B. Müller GmbH">
+function getCurrentUser(){
+  return localStorage.getItem(USER_KEY);
+}
+function requireLogin(){
+  const user = getCurrentUser();
+  if(!user){
+    window.location.href = 'index.html';
+    return null;
+  }
+  return user;
+}
+function companiesKey(user){ return COMPANY_KEY_PREFIX + user; }
+function loadCompanies(user){
+  const raw = localStorage.getItem(companiesKey(user));
+  try{
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){
+    console.error('Fehler beim Laden der Firmen:', e);
+    return [];
+  }
+}
 
-        <label for="legal">Rechtsform</label>
-        <select id="legal">
-          <option>Einzelunternehmen</option>
-          <option>GmbH</option>
-          <option>AG</option>
-        </select>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = requireLogin();
+  if(!user) return;
 
-        <label for="capital">Startkapital (€)</label>
-        <input id="capital" type="number" min="0" step="0.01" placeholder="10000">
+  // Anzeige Benutzername
+  const userDisplay = document.getElementById('userDisplay');
+  if(userDisplay) userDisplay.textContent = `Angemeldet: ${user}`;
 
-        <label for="industry">Branche</label>
-        <input id="industry" placeholder="z. B. Handel">
+  // Logout & Cancel
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem(USER_KEY);
+    window.location.href = 'index.html';
+  });
+  document.getElementById('cancelBtn').addEventListener('click', () => {
+    window.location.href = 'overview.html';
+  });
 
-        <label for="purpose">Zweck</label>
-        <input id="purpose" placeholder="Kurzbeschreibung des Zwecks">
+  const form = document.getElementById('createForm');
+  form.addEventListener('submit', (ev) => {
+    ev.preventDefault();
 
-        <label for="size">Grösse (Anzahl Mitarbeitende)</label>
-        <input id="size" type="number" min="1" step="1" placeholder="5">
+    // Eingabewerte sammeln
+    const name = document.getElementById('name').value.trim();
+    const legal = document.getElementById('legal').value;
+    const capital = parseFloat(document.getElementById('capital').value) || 0;
+    const industry = document.getElementById('industry').value.trim();
+    const purpose = document.getElementById('purpose').value.trim();
+    const size = parseInt(document.getElementById('size').value) || 0;
 
-        <div class="form-actions" style="grid-column:1 / -1; justify-content:center;">
-          <button type="submit" class="btn primary">Firma erstellen</button>
-          <button type="button" id="cancelBtn" class="btn">Abbrechen</button>
-        </div>
-      </form>
+    // Einfache Validierung
+    if(!name){
+      alert('Bitte einen Firmennamen eingeben.');
+      return;
+    }
 
-      <p class="muted small">Alle Daten werden im LocalStorage des angemeldeten Benutzers gespeichert.</p>
-    </section>
-  </main>
+    // Firma-Objekt erzeugen
+    const company = {
+      id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+      name,
+      legal,
+      capital,
+      industry,
+      purpose,
+      size,
+      createdAt: new Date().toISOString()
+    };
 
-  <script src="js/create.js"></script>
-</body>
-</html>
+    // Speichern im LocalStorage unter dem Benutzer
+    const companies = loadCompanies(user);
+    companies.push(company);
+    localStorage.setItem(companiesKey(user), JSON.stringify(companies));
+
+    // Zurück zur Übersicht
+    window.location.href = 'overview.html';
+  });
+});
