@@ -15,19 +15,28 @@
     <section class="card card-small">
       <h1 class="h1">Anmelden</h1>
 
-      <form id="loginForm" class="form-grid">
+      <!--
+        Login-Formular
+        - Benutzername muss einer der vordefinierten Benutzer sein (siehe js/login.js)
+        - Passwort muss ausgefüllt sein; seine Prüfung erfolgt im Hintergrund (ohne Anzeige im HTML)
+      -->
+      <form id="loginForm" class="form-grid" novalidate>
         <label for="username">Name:</label>
-        <input id="username" name="username" type="text" required placeholder="Ihr Name">
+        <input id="username" name="username" type="text" required placeholder="z.B. erblin.tolaj">
 
         <label for="password">Passwort:</label>
         <input id="password" name="password" type="password" required placeholder="Passwort">
 
         <div class="form-actions" style="grid-column:1 / -1; justify-content:center;">
-          <button type="submit" class="btn primary">Login</button>
+          <button type="submit" class="btn primary" id="loginBtn">Login</button>
         </div>
+
+        <!-- Platz für Fehlermeldungen -->
+        <div id="loginError" style="grid-column:1 / -1;color:#b91c1c;text-align:center;margin-top:6px;font-size:0.95rem;"></div>
       </form>
 
-      <p class="muted small">Hinweis: Es gibt kein Backend. Der Benutzername wird lokal (LocalStorage) gespeichert.</p>
+      <p class="muted small">Hinweis: Dies ist eine Demo für schulische Zwecke. Die Benutzerdaten werden nur lokal geprüft — kein Backend.</p>
+      <p class="small muted">Sicherheits-Hinweis: Benutzernamen/Passwörter werden nur im Hintergrund verwaltet. Dies ist keine sichere Authentifizierung für produktive Systeme.</p>
     </section>
   </main>
 
