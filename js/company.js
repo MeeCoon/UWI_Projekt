@@ -35,7 +35,7 @@ function renderYearTabs(container) {
   container.innerHTML = '';
 
   // Default years (can be changed later by stored logic)
-  const defaultYears = [2024, 2025, 2026];
+  const defaultYears = [2025];
 
   // create year buttons
   defaultYears.forEach((year, idx) => {
