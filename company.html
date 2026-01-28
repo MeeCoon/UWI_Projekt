@@ -3,79 +3,41 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Firma — UWI Unternehmenssimulation</title>
+  <title>UWI Unternehmenssimulation — Firmenansicht</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Blauer Full‑width Header -->
-  <header class="headerBar">
-    <div class="headerInner">
-      <div class="brand">UWI Unternehmenssimulation</div>
-    </div>
+  <header class="topbar">
+    <div class="brand">UWI Unternehmenssimulation</div>
+    <nav class="nav-inline">
+      <span id="userDisplay" class="muted"></span>
+      <button id="backBtn" class="btn">Zur Übersicht</button>
+      <button id="logoutBtn" class="btn">Abmelden</button>
+    </nav>
   </header>
 
-  <!-- Weißer, zentrierter Container -->
-  <main class="wrap">
+  <main class="container">
     <section class="card">
-      <!-- Firmenkopf -->
-      <div class="companyHeader">
+      <div class="row space-between">
         <div>
-          <h1 id="companyTitle" class="companyName">Firma Muster</h1>
-          <div id="companyMeta" class="companyMeta">GmbH · Handel · Startkapital: 10 · Mitarbeitende: 5</div>
-        </div>
-        <div class="companyActions">
-          <button id="backBtn" class="btn">Zur Übersicht</button>
-          <button id="logoutBtn" class="btn">Abmelden</button>
+          <h1 id="companyTitle" class="h2">Firma</h1>
+          <div id="companyMeta" class="small muted"></div>
         </div>
       </div>
 
-      <!-- Haupt-Tabs (Ebene 1) -->
-      <div class="tabs" role="tablist" aria-label="Haupttabs">
-        <button class="mainTab tabBtn active" data-tab="bilanz" id="tabBtn-bilanz">Bilanz</button>
-        <button class="mainTab tabBtn" data-tab="erfolg" id="tabBtn-erfolg">Erfolgsrechnung</button>
-        <button class="mainTab tabBtn" data-tab="buchungen" id="tabBtn-buchungen">Buchungssätze</button>
-        <button class="mainTab tabBtn" data-tab="wirtschaft" id="tabBtn-wirtschaft">Wirtschaft</button>
-        <button class="mainTab tabBtn" data-tab="recht" id="tabBtn-recht">Recht</button>
+ <div class="tabs">
+        <button class="tab-btn active" data-tab="balance">Bilanz</button>
+        <button class="tab-btn" data-tab="income">Erfolgsrechnung</button>
+        <button class="tab-btn" data-tab="bookings">Buchungssätze</button>
+        <button class="tab-btn" data-tab="economy">Wirtschaft</button>
+        <button class="tab-btn" data-tab="law">Recht</button>
       </div>
-
-      <!-- Sektionen (je eine section pro Haupt-Tab) -->
-      <!-- Jeder Abschnitt enthält: 
-           - div.yearTabs[data-section="..."]    <-- wird per JS gerendert (Buttons + +Jahr)
-           - div.yearContents[data-section="..."] <-- Jahr-Contents werden per JS angelegt / verwaltet
-      -->
-
-      <!-- BILANZ -->
-      <section id="tab-bilanz" class="tabSection">
-        <div class="yearTabs" data-section="bilanz" aria-label="Bilanz Jahre"></div>
-        <div class="yearContents" data-section="bilanz"></div>
-      </section>
-
-      <!-- ERFOLGSRECHNUNG -->
-      <section id="tab-erfolg" class="tabSection hidden">
-        <div class="yearTabs" data-section="erfolg" aria-label="Erfolg Jahre"></div>
-        <div class="yearContents" data-section="erfolg"></div>
-      </section>
-
-      <!-- BUCHUNGEN -->
-      <section id="tab-buchungen" class="tabSection hidden">
-        <div class="yearTabs" data-section="buchungen" aria-label="Buchungen Jahre"></div>
-        <div class="yearContents" data-section="buchungen"></div>
-      </section>
-
-      <!-- WIRTSCHAFT -->
-      <section id="tab-wirtschaft" class="tabSection hidden">
-        <div class="yearTabs" data-section="wirtschaft" aria-label="Wirtschaft Jahre"></div>
-        <div class="yearContents" data-section="wirtschaft"></div>
-      </section>
-
-      <!-- RECHT -->
-      <section id="tab-recht" class="tabSection hidden">
-        <div class="yearTabs" data-section="recht" aria-label="Recht Jahre"></div>
-        <div class="yearContents" data-section="recht"></div>
-      </section>
-
     </section>
   </main>
+
+  <footer class="footer">
+    <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
+  </footer>
 
   <script src="js/company.js"></script>
 </body>
