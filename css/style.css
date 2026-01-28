@@ -1,30 +1,34 @@
-/* css/style.css
-   Vollständige Styles für die UWI Unternehmenssimulation
-   - Einheitliches Layout für company.html, bilanz/erfolgsrechnung etc.
-   - Enthält Header, Wrap, Card, Tabs (Haupt- und Jahres-Tabs), Content-Cards,
-     Bilanz-spezifische Styles, Tabellen-Grundstile und Responsive-Regeln.
-   - Klassen, die im Projekt verwendet werden:
-     .headerBar, .headerInner, .wrap, .card, .companyHeader, .companyName, .companyMeta,
-     .tabs, .tabBtn, .mainTab, .yearTabs, .yearBtn, .addYearBtn,
-     .contentCard, .hidden, .active
-*/
+/* =========================================================
+   UWI Unternehmenssimulation – Master Stylesheet
+   Kombiniert: Basislayout, Tabs, Jahres-Tabs, Bilanz-Layout
+   ========================================================= */
 
 /* ==========================
-   Farben & Grundwerte
+   Farben & Variablen
    ========================== */
 :root{
   --page-bg: #f6f8fb;
   --sheet-bg: #ffffff;
+  --bg: #f5f7fb;
+
   --blue: #1e62d0;
   --blue-dark: #1b4fb0;
   --blue-light: #eef6ff;
-  --muted: #55606a;
+  --accent: #2b6ef6;
+  --accent-2: #0ea5a4;
+
+  --text: #0b1220;
+  --muted: #5b6570;
+
   --thin-line: #e9eef6;
   --card-border: #e6eefb;
-  --text: #0b1220;
+
   --radius: 10px;
-  --max-wrap: 1100px;
   --shadow: 0 8px 24px rgba(11,18,32,0.06);
+
+  --max-wrap: 1100px;
+  --max-width: 1000px;
+
   font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
@@ -33,158 +37,156 @@
 /* ==========================
    Basis
    ========================== */
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--page-bg);color:var(--text)}
-a{color:inherit}
-.hidden { display:none !important; }
+*{ box-sizing:border-box }
+html,body{
+  height:100%;
+  margin:0;
+  background: linear-gradient(180deg,var(--bg),#fff);
+  color:var(--text);
+}
+a{ color:inherit }
+.hidden{ display:none !important }
 
-/* Kleine Utility-Klassen */
-.center{text-align:center}
-.small{font-size:0.9rem;color:var(--muted)}
-.muted{color:var(--muted)}
+/* Utilities */
+.small{ font-size:0.9rem; color:var(--muted) }
+.muted{ color:var(--muted) }
+.center{ text-align:center }
+.row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.mt{ margin-top:12px }
 
 /* ==========================
-   Header (vollbreit)
+   Header / Topbar
    ========================== */
-.headerBar{
+.headerBar, .topbar{
   width:100%;
-  background: linear-gradient(90deg,var(--blue), var(--blue-dark));
+  background: linear-gradient(90deg,var(--blue),var(--blue-dark));
   color:#fff;
-  padding:18px 0;
-  box-sizing:border-box;
+  padding:16px 0;
+  position:sticky;
+  top:0;
+  z-index:40;
 }
-.headerInner{
+.headerInner, .topbar{
   max-width:var(--max-wrap);
   margin:0 auto;
   padding:0 18px;
   display:flex;
   align-items:center;
-  justify-content:flex-start;
+  justify-content:space-between;
 }
 .brand{
   font-weight:700;
   font-size:18px;
-  letter-spacing:0.4px;
+  letter-spacing:.4px;
 }
 
 /* ==========================
-   Haupt-Wrapper & Card
+   Layout / Container / Cards
    ========================== */
-.wrap{
+.wrap, .container{
   max-width:var(--max-wrap);
   margin:20px auto;
-  padding:0 18px;
-  box-sizing:border-box;
+  padding:0 18px 40px;
 }
 .card{
   background:var(--sheet-bg);
   border:1px solid var(--card-border);
   border-radius:var(--radius);
   padding:18px;
-  box-shadow: var(--shadow);
+  box-shadow:var(--shadow);
   margin-bottom:18px;
 }
+.card-small{ max-width:540px }
 
-/* ==========================
-   Firmen-Kopf
-   ========================== */
-.companyHeader{
+.center-page{
   display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:12px;
-  margin-bottom:12px;
+  align-items:center;
+  justify-content:center;
+  min-height:calc(100vh - 120px);
 }
-.companyName{margin:0;font-size:20px;font-weight:700}
-.companyMeta{margin-top:6px;color:var(--muted);font-size:0.95rem}
-.companyActions{display:flex;gap:8px;align-items:center}
 
 /* ==========================
-   Buttons / Pills (Tabs)
+   Buttons
    ========================== */
 .btn{
-  padding:8px 12px;border-radius:8px;border:1px solid rgba(11,18,32,0.06);background:#fff;cursor:pointer;
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid rgba(11,18,32,0.06);
+  background:#fff;
+  cursor:pointer;
+  transition:transform .08s ease, box-shadow .12s ease;
 }
-.btn:hover{transform:translateY(-1px)}
-/* General pill-style used for main tabs and others */
+.btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 18px rgba(11,18,32,0.06);
+}
+.btn.primary{
+  background:var(--accent);
+  color:#fff;
+  border:0;
+}
+.btn.ghost{
+  background:transparent;
+}
+
+/* ==========================
+   Tabs (Haupt + Jahre)
+   ========================== */
+.tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
 .tabBtn{
   padding:8px 12px;
   border-radius:999px;
   border:1px solid transparent;
   background:transparent;
   cursor:pointer;
-  transition: background .12s ease, transform .06s ease;
+  transition:background .12s, transform .06s;
 }
-.tabBtn:hover{ transform: translateY(-1px); }
-
-/* Active state for main tabs */
+.tabBtn:hover{ transform:translateY(-1px) }
 .tabBtn.active{
   background:var(--blue-light);
   border-color:var(--blue);
-  color:var(--text);
-  box-shadow: inset 0 0 0 1px rgba(43,110,246,0.06);
+  box-shadow:inset 0 0 0 1px rgba(43,110,246,.06);
 }
 
-/* main tab container */
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-
-/* ==========================
-   Year Tabs (Untertabs)
-   ========================== */
+/* Year Tabs */
 .yearTabs{
   display:flex;
   gap:8px;
   flex-wrap:wrap;
-  margin-bottom:12px;
   align-items:center;
+  margin-bottom:12px;
 }
 .yearBtn{
   padding:6px 10px;
   border-radius:8px;
-  border:1px solid rgba(11,18,32,0.06);
+  border:1px solid rgba(11,18,32,.06);
   background:transparent;
-  font-size:0.95rem;
   cursor:pointer;
 }
-.yearBtn:hover{ background: #f3f7ff; }
 .yearBtn.active{
   background:var(--blue-light);
   border-color:var(--blue);
 }
-
-/* + Jahr hinzufügen Button */
 .addYearBtn{
   padding:6px 10px;
   border-radius:8px;
-  border:1px dashed rgba(11,18,32,0.08);
+  border:1px dashed rgba(11,18,32,.08);
   background:transparent;
   color:var(--muted);
-  cursor:pointer;
 }
-.addYearBtn:hover{ background: rgba(43,110,246,0.05); }
 
 /* ==========================
-   Content-Card (innerhalb Tabs)
-   ========================== */
-.contentCard{
-  padding:14px;
-  background:transparent;
-  border:1px solid rgba(11,18,32,0.03);
-  border-radius:8px;
-  margin-bottom:12px;
-}
-.contentCard h2{margin:0 0 8px 0}
-
-/* ==========================
-   Tabellen / Listen (allgemein)
-   ========================== */
-.table{width:100%;border-collapse:collapse;margin-top:8px}
-.table th, .table td{padding:10px 8px;text-align:left;border-bottom:1px solid rgba(11,18,32,0.04)}
-.table th{background:#f8fafc;font-weight:600}
-
-/* ==========================
-   Bilanz-spezifische Styles
-   (auch passend für Erfolgsrechnung Look)
+   Bilanz / Erfolgsrechnung
    ========================== */
 .bilanz-container{
   background:var(--sheet-bg);
@@ -194,52 +196,59 @@ a{color:inherit}
 }
 .bilanz-grid{
   display:grid;
-  grid-template-columns: 1fr 18px 1fr; /* center for divider */
-  gap:0;
+  grid-template-columns:1fr 18px 1fr;
   position:relative;
-  align-items:start;
 }
-.divider{ width:100%; height:100%; display:block; position:relative; }
 .divider::before{
   content:"";
   position:absolute;
-  top:0; bottom:0; left:50%;
+  top:0; bottom:0;
+  left:50%;
   transform:translateX(-50%);
-  width:6px; /* dicke Trennlinie */
-  background: linear-gradient(#1f56b8,#1e62d0);
+  width:6px;
+  background:linear-gradient(#1f56b8,#1e62d0);
   border-radius:3px;
 }
-
-/* Column basics */
-.column{ padding:8px 12px; box-sizing:border-box; }
-.column-title{ margin:0 0 12px 0; color:var(--blue); font-size:18px; font-weight:700; }
-
-/* Block (group) */
-.block{ padding-bottom:10px; margin-bottom:12px; border-bottom:1px solid var(--thin-line); }
-.block-title{ font-size:13px; font-weight:700; color:var(--muted); margin:0 0 8px 0; }
-
-/* Row: label + amount */
-.row{ display:flex; justify-content:space-between; align-items:center; padding:6px 0; }
-.label{ font-size:14px; color:var(--text); padding-right:12px; line-height:1.2; }
-.amount{ min-width:72px; text-align:right; font-weight:600; font-variant-numeric:tabular-nums; }
-
-/* Totals */
-.total-row{ display:flex; justify-content:space-between; align-items:center; padding-top:10px; margin-top:6px; border-top:2px solid var(--thin-line); }
-.total-label, .total-value{ font-weight:800; font-size:16px; }
-.total-value{ min-width:72px; text-align:right; }
-
-/* Jahres-Ergebnis row (Erfolgsrechnung) */
-.result-row{ display:flex; justify-content:space-between; align-items:center; margin-top:14px; padding-top:12px; border-top:2px solid var(--thin-line); font-weight:800; font-size:16px; }
+.column{ padding:8px 12px }
+.column-title{
+  font-size:18px;
+  font-weight:700;
+  color:var(--blue);
+  margin:0 0 12px;
+}
+.block{
+  padding-bottom:10px;
+  margin-bottom:12px;
+  border-bottom:1px solid var(--thin-line);
+}
+.block-title{
+  font-size:13px;
+  font-weight:700;
+  color:var(--muted);
+  margin:0 0 8px;
+}
+.label{ font-size:14px }
+.amount{
+  min-width:72px;
+  text-align:right;
+  font-weight:600;
+  font-variant-numeric:tabular-nums;
+}
+.total-row{
+  margin-top:6px;
+  padding-top:10px;
+  border-top:2px solid var(--thin-line);
+  font-weight:800;
+}
 
 /* ==========================
    Responsive
    ========================== */
 @media (max-width:900px){
-  .wrap{ padding:0 14px; }
-  .companyHeader{flex-direction:column;align-items:flex-start}
-  .companyActions{width:100%;justify-content:flex-start}
-  .tabs{gap:6px}
-  .tabBtn{padding:6px 10px}
-  .bilanz-grid{ grid-template-columns: 1fr; }
-  .divider{ display:none; }
+  .bilanz-grid{ grid-template-columns:1fr }
+  .divider{ display:none }
+}
+@media (max-width:720px){
+  .center-page{ min-height:unset }
+  .tabs, .yearTabs{ gap:6px }
 }
