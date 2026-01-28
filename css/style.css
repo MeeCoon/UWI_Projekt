@@ -293,3 +293,58 @@ a{color:inherit}
   .column{ padding:10px 6px; }
   .header-inner{text-align:center}
 }
+
+/* Sichtbarkeit */
+.hidden { display: none; }
+
+/* Haupt-Tabs (Ebene 1) */
+.main-tabs {
+  display:flex;
+  gap:8px;
+  margin:12px 0 18px 0;
+  flex-wrap:wrap;
+}
+.main-tabs .mainTab {
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid rgba(11,18,32,0.06);
+  background:transparent;
+  cursor:pointer;
+}
+.main-tabs .mainTab.active {
+  background:var(--blue);
+  color:white;
+  border-color:var(--blue);
+}
+
+/* Jahres-Tabs (Ebene 2) */
+.yearTabs {
+  display:flex;
+  gap:8px;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+}
+.yearBtn {
+  padding:6px 10px;
+  border-radius:6px;
+  border:1px solid rgba(11,18,32,0.06);
+  background:transparent;
+  font-size:0.95rem;
+  cursor:pointer;
+}
+.yearBtn.active {
+  background:#eef6ff;
+  border-color:var(--blue);
+  color:var(--text);
+}
+
+/* Ensure year content blocks have spacing */
+.yearContent {
+  margin-bottom:14px;
+}
+
+/* Small responsive tweaks */
+@media (max-width:720px){
+  .main-tabs, .yearTabs { gap:6px; }
+  .main-tabs .mainTab, .yearBtn { padding:6px 8px; }
+}
