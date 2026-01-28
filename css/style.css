@@ -131,3 +131,64 @@ body{
 .addYearBtn{
   padding:6px 10px;border-radius:8px;border:1px dashed rgba(11,18,32,.08);background:transparent;color:var(--muted);cursor:pointer
 }
+.balanceHeaderBlue{
+  background:#1f6feb;
+  color:#fff;
+  border-radius:12px;
+  padding:14px 16px;
+  margin: 10px 0 14px;
+}
+.balanceTitle{ font-size:22px; font-weight:800; }
+.balanceSub{ opacity:.9; font-size:13px; margin-top:4px; }
+ 
+.balanceSheet{
+  position: relative;
+  display:grid;
+  grid-template-columns: 1fr 14px 1fr;
+  gap: 14px;
+  background:#fff;
+  border:1px solid rgba(11,18,32,0.10);
+  border-radius:14px;
+  padding:14px;
+}
+ 
+.balanceDivider{
+  background:rgba(11,18,32,0.12);
+  border-radius:99px;
+}
+ 
+.balanceColTitle{ font-size:18px; font-weight:800; margin-bottom:8px; }
+.balanceBlockTitle{ margin-top:12px; font-weight:800; opacity:.9; }
+ 
+.balanceRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:6px 0;
+  border-bottom:1px solid rgba(11,18,32,0.06);
+}
+ 
+.balanceInput{
+  width:160px;
+  padding:8px 10px;
+  border:1px solid rgba(11,18,32,0.12);
+  border-radius:10px;
+  text-align:right;
+}
+ 
+.balanceTotal{
+  display:flex;
+  justify-content:space-between;
+  padding-top:10px;
+  margin-top:10px;
+  border-top:2px solid rgba(11,18,32,0.12);
+  font-weight:800;
+}
+ 
+.balanceActions{
+  margin-top:12px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
