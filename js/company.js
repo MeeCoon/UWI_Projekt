@@ -38,6 +38,47 @@ function escapeHtml(str) {
 
 function fmt(n){ return Number(n || 0).toFixed(2) + ' €'; }
 
+function renderYearTabs(container) {
+  container.innerHTML = '';
+
+  const years = [2025];
+
+  years.forEach(year => {
+    const btn = document.createElement('button');
+    btn.className = 'yearBtn active';
+    btn.textContent = year;
+    container.appendChild(btn);
+  });
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'addYearBtn';
+  addBtn.textContent = '+ Jahr hinzufügen';
+
+  addBtn.addEventListener('click', () => {
+    const input = prompt('Jahr eingeben (2026–2100):');
+    const year = Number(input);
+
+    if (!year || year < 2026 || year > 2100) {
+      alert('Bitte ein gültiges Jahr zwischen 2026 und 2100 eingeben.');
+      return;
+    }
+
+    // Prüfen ob Jahr schon existiert
+    const exists = [...container.querySelectorAll('.yearBtn')]
+      .some(b => Number(b.textContent) === year);
+    if (exists) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'yearBtn';
+    btn.textContent = year;
+
+    container.insertBefore(btn, addBtn);
+  });
+
+  container.appendChild(addBtn);
+}
+
+
 // ------------------------- Bilanzdarstellung -------------------------
 
 // Diese Funktion zeigt die Bilanz direkt im bestehenden Tab an
