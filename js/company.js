@@ -1,33 +1,41 @@
 // js/company.js
-// Firmenansicht mit Tabs, Firmenauswahl und Jahres-Buttons
+// Firmenansicht – kompatibel mit overview.js (user-spezifische Speicherung)
 
 const USER_KEY = 'uwi_user';
-const COMPANIES_KEY = 'uwi_companies';
-const CURRENT_COMPANY_KEY = 'uwi_currentCompany';
+const COMPANIES_PREFIX = 'uwi_companies_';
+const SELECTED_COMPANY_PREFIX = 'uwi_currentCompany_';
 
 /* ------------------ Helper ------------------ */
-function getCurrentUser() {
-  return localStorage.getItem(USER_KEY);
+function getCurrentUserOrRedirect() {
+  const user = localStorage.getItem(USER_KEY);
+  if (!user) {
+    window.location.href = 'index.html';
+    return null;
+  }
+  return user;
 }
 
-function loadCompanies() {
+function companiesKey(user) {
+  return COMPANIES_PREFIX + user;
+}
+
+function selectedCompanyKey(user) {
+  return SELECTED_COMPANY_PREFIX + user;
+}
+
+function loadCompaniesForUser(user) {
   try {
-    return JSON.parse(localStorage.getItem(COMPANIES_KEY)) || [];
+    return JSON.parse(localStorage.getItem(companiesKey(user))) || [];
   } catch {
     return [];
   }
-}
-
-function getCurrentCompany() {
-  const id = localStorage.getItem(CURRENT_COMPANY_KEY);
-  if (!id) return null;
-  return loadCompanies().find(c => c.id === id) || null;
 }
 
 /* ------------------ Year Tabs ------------------ */
 function renderYearTabs(container) {
   container.innerHTML = '';
 
+  // Startjahr
   const years = [2025];
 
   years.forEach(year => {
@@ -57,6 +65,7 @@ function renderYearTabs(container) {
     const btn = document.createElement('button');
     btn.className = 'yearBtn';
     btn.textContent = year;
+
     container.insertBefore(btn, addBtn);
   });
 
@@ -66,23 +75,35 @@ function renderYearTabs(container) {
 /* ------------------ DOM Ready ------------------ */
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* ---- Firma laden ---- */
-  const company = getCurrentCompany();
-  if (!company) {
+  /* ---- User & Firma laden ---- */
+  const user = getCurrentUserOrRedirect();
+  if (!user) return;
+
+  const companyId = localStorage.getItem(selectedCompanyKey(user));
+  if (!companyId) {
     alert('Keine Firma ausgewählt. Zurück zur Übersicht.');
     window.location.href = 'overview.html';
     return;
   }
 
+  const companies = loadCompaniesForUser(user);
+  const company = companies.find(c => c.id === companyId);
+
+  if (!company) {
+    alert('Firma nicht gefunden. Zurück zur Übersicht.');
+    window.location.href = 'overview.html';
+    return;
+  }
+
+  /* ---- Firmenkopf ---- */
   const titleEl = document.getElementById('companyTitle');
   const metaEl = document.getElementById('companyMeta');
 
   if (titleEl) titleEl.textContent = company.name;
   if (metaEl) {
     metaEl.textContent =
-      `${company.legal || ''} · ${company.industry || '–'} · ` +
-      `Startkapital: ${company.capital || '-'} € · ` +
-      `Mitarbeitende: ${company.size || '-'}`;
+      `${company.legal} · ${company.industry || '–'} · ` +
+      `Startkapital: ${company.capital} € · Mitarbeitende: ${company.size}`;
   }
 
   /* ---- Header Buttons ---- */
@@ -90,8 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const logoutBtn = document.getElementById('logoutBtn');
   const userDisplay = document.getElementById('userDisplay');
 
-  const user = getCurrentUser();
-  if (user && userDisplay) {
+  if (userDisplay) {
     userDisplay.textContent = `Angemeldet: ${user}`;
   }
 
@@ -104,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
       localStorage.removeItem(USER_KEY);
-      localStorage.removeItem(CURRENT_COMPANY_KEY);
+      localStorage.removeItem(selectedCompanyKey(user));
       window.location.href = 'index.html';
     });
   }
@@ -116,9 +136,11 @@ document.addEventListener('DOMContentLoaded', () => {
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
 
+      // Active-State
       tabButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
+      // Inhalte wechseln
       tabContents.forEach(c => c.classList.add('hidden'));
 
       const tab = btn.dataset.tab;
@@ -127,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       content.classList.remove('hidden');
 
-      // Jahres-Tabs nur bei Bilanz / Erfolgsrechnung / Buchungssätze
+      // Jahre nur bei bestimmten Reitern
       const yearTabs = content.querySelector('.yearTabs');
       if (yearTabs) {
         renderYearTabs(yearTabs);
@@ -135,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Standard: Bilanz initial laden
+  // Standard: Bilanz anzeigen
   const initialTab = document.querySelector('.tab-btn.active');
   if (initialTab) initialTab.click();
 });
