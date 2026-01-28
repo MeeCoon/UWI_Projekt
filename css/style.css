@@ -1,310 +1,144 @@
 /* css/style.css
-   Einfaches, sauberes Schul-Design für die UWI Unternehmenssimulation.
-   Einheitliches Layout, zentrierte Formulare, Buttons mit Hover-Effekt.
+   Vollständige Styles für die UWI Unternehmenssimulation
+   - Einheitliches Layout für company.html, bilanz/erfolgsrechnung etc.
+   - Enthält Header, Wrap, Card, Tabs (Haupt- und Jahres-Tabs), Content-Cards,
+     Bilanz-spezifische Styles, Tabellen-Grundstile und Responsive-Regeln.
+   - Klassen, die im Projekt verwendet werden:
+     .headerBar, .headerInner, .wrap, .card, .companyHeader, .companyName, .companyMeta,
+     .tabs, .tabBtn, .mainTab, .yearTabs, .yearBtn, .addYearBtn,
+     .contentCard, .hidden, .active
 */
 
-/* Farben & Variablen */
-:root{
-  --bg: #f5f7fb;
-  --card: #ffffff;
-  --text: #0b1220;
-  --muted: #6b7280;
-  --accent: #2b6ef6;
-  --accent-2: #0ea5a4;
-  --radius: 10px;
-  --shadow: 0 8px 24px rgba(11,18,32,0.06);
-  --max-width: 1000px;
-  --gap: 16px;
-  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* Basis */
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  background: linear-gradient(180deg, var(--bg), #ffffff);
-  color:var(--text);
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
-
-/* Topbar */
-.topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 20px;
-  background: rgba(255,255,255,0.8);
-  border-bottom: 1px solid rgba(11,18,32,0.04);
-  position:sticky;
-  top:0;
-  z-index:40;
-}
-.brand{font-weight:700;color:var(--accent)}
-.nav-inline{display:flex;gap:10px;align-items:center}
-.muted{color:var(--muted)}
-.h1{font-size:1.6rem;margin:0 0 8px}
-.h2{font-size:1.2rem;margin:0}
-
-/* Container */
-.container{
-  max-width:var(--max-width);
-  margin:28px auto;
-  padding:0 18px 50px;
-}
-
-/* Cards */
-.card{
-  background:var(--card);
-  padding:18px;
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  border:1px solid rgba(11,18,32,0.03);
-}
-.card-small{max-width:540px}
-
-/* Center page helper */
-.center-page{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-height:calc(100vh - 120px);
-}
-
-/* Forms */
-.form-grid{
-  display:grid;
-  grid-template-columns: 140px 1fr;
-  gap:12px 16px;
-  align-items:center;
-}
-.form-grid label{justify-self:end;padding-right:6px;color:var(--muted)}
-.form-grid input, .form-grid select, .form-grid textarea{
-  padding:10px 12px;border-radius:8px;border:1px solid rgba(11,18,32,0.06);font-size:0.95rem;
-  background:transparent; width:100%;
-}
-.form-actions{display:flex;gap:10px}
-
-/* List */
-.list{margin-top:14px;display:flex;flex-direction:column;gap:10px}
-.company-item{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px;border-radius:8px;
-  background: linear-gradient(180deg,#ffffff,#fbfdff);
-  border:1px solid rgba(11,18,32,0.04);
-  cursor:pointer;
-}
-.company-item:hover{box-shadow:0 6px 18px rgba(11,18,32,0.04)}
-
-/* Buttons */
-.btn{
-  padding:8px 12px;border-radius:8px;border:1px solid rgba(11,18,32,0.06);background:#fff;cursor:pointer;
-  transition: transform .08s ease, box-shadow .12s ease;
-}
-.btn:hover{transform:translateY(-2px); box-shadow:0 8px 18px rgba(11,18,32,0.06)}
-.btn.primary{background:var(--accent);color:white;border:0}
-.btn.ghost{background:transparent;border:1px solid rgba(11,18,32,0.06)}
-
-/* Tabs */
-.tabs{display:flex;gap:8px;margin-top:14px;margin-bottom:12px}
-.tab-btn{
-  padding:8px 12px;border-radius:8px;border:1px solid rgba(11,18,32,0.04);background:#f8fafc;cursor:pointer;
-}
-.tab-btn.active{background:var(--accent);color:white;border:0}
-
-/* Tab content */
-.tab-content{padding:12px;border-radius:8px;background:#ffffff;border:1px solid rgba(11,18,32,0.03);margin-top:8px}
-
-/* Small utilities */
-.space-between{display:flex;align-items:center;justify-content:space-between}
-.row{display:flex;align-items:center;gap:12px}
-.mt{margin-top:12px}
-.small{font-size:0.9rem;color:var(--muted)}
-
-/* Footer */
-.footer{max-width:var(--max-width);margin:18px auto;color:var(--muted);padding:8px 18px;display:flex;justify-content:space-between}
-
-/* Responsive */
-@media (max-width:720px){
-  .form-grid{grid-template-columns:1fr; align-items:stretch}
-  .form-grid label{justify-self:start;padding-right:0}
-  .center-page{min-height:unset;padding:30px 0}
-  .tabs{flex-wrap:wrap}
-}
-
-/* Zusätzliche / ersetzende Styles für die bilanz.html
-   Hinweise:
-   - Entfernt Floristik AG
-   - Header zeigt nur "Bilanz" + kleine Zeile "in Tausend CHF"
-   - Weißer Bilanz-Kasten zentriert mit leichtem Rahmen & Radius
-   - Zwei Spalten: links Aktiva / rechts Passiva
-   - Dicke durchgehende vertikale Trennlinie genau in der Mitte
-   - Jeder Block hat eine dünne graue Trennlinie am Ende
-   - Totals-Zeile fetter Text, Beträge rechtsbündig
-   - Statische Zahlen im HTML; kein JavaScript erzeugt Werte
-*/
- 
-/* Basis / Variablen */
+/* ==========================
+   Farben & Grundwerte
+   ========================== */
 :root{
   --page-bg: #f6f8fb;
   --sheet-bg: #ffffff;
   --blue: #1e62d0;
-  --muted: #5b6570;
-  --line: #e6eefb;
-  --thin-border: #e9eef6;
+  --blue-dark: #1b4fb0;
+  --blue-light: #eef6ff;
+  --muted: #55606a;
+  --thin-line: #e9eef6;
+  --card-border: #e6eefb;
   --text: #0b1220;
-  --radius: 8px;
-  --max-width: 980px;
+  --radius: 10px;
+  --max-wrap: 1100px;
+  --shadow: 0 8px 24px rgba(11,18,32,0.06);
   font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
- 
-/* Page background */
+
+/* ==========================
+   Basis
+   ========================== */
+*{box-sizing:border-box}
 html,body{height:100%;margin:0;background:var(--page-bg);color:var(--text)}
 a{color:inherit}
- 
-/* Header bar */
-.header-bar{
+.hidden { display:none !important; }
+
+/* Kleine Utility-Klassen */
+.center{text-align:center}
+.small{font-size:0.9rem;color:var(--muted)}
+.muted{color:var(--muted)}
+
+/* ==========================
+   Header (vollbreit)
+   ========================== */
+.headerBar{
   width:100%;
-  background: linear-gradient(90deg,var(--blue), #2170d6);
-  color:white;
+  background: linear-gradient(90deg,var(--blue), var(--blue-dark));
+  color:#fff;
   padding:18px 0;
   box-sizing:border-box;
 }
-.header-inner{
-  max-width:var(--max-width);
+.headerInner{
+  max-width:var(--max-wrap);
   margin:0 auto;
   padding:0 18px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
 }
-.title{margin:0;font-size:20px;font-weight:700;letter-spacing:0.6px}
-.subtitle{margin-top:6px;font-size:12px;opacity:0.95}
- 
-/* Page container */
-.page{
-  max-width:var(--max-width);
-  margin:18px auto;
-  padding:0 18px;
-  box-sizing:border-box;
-}
- 
-/* Bilanz-Kasten (weißes Blatt) */
-.bilanz-container{
-  background:var(--sheet-bg);
-  border:1px solid var(--thin-border);
-  border-radius:var(--radius);
-  padding:18px;
-  box-sizing:border-box;
-}
- 
-/* Grid: left column / divider / right column */
-.bilanz-grid{
-  display:grid;
-  grid-template-columns: 1fr 16px 1fr; /* middle column reserved for divider */
-  gap:0;
-  position:relative;
-  align-items:start;
-}
- 
-/* Divider (center column) - full height, solid (thick) */
-.divider{
-  width:100%;
-  display:block;
-}
-.divider::before{
-  content:"";
-  display:block;
-  margin:0 auto;
-  width:6px;                    /* dicke Trennlinie */
-  height:100%;
-  background: linear-gradient(#1f56b8,#1e62d0);
-  border-radius:3px;
-}
- 
-/* Columns */
-.column{
-  padding:8px 12px;
-  box-sizing:border-box;
-}
- 
-/* Column title */
-.column-title{
-  margin:0 0 12px 0;
-  color:var(--blue);
+.brand{
+  font-weight:700;
   font-size:18px;
-  font-weight:700;
-}
- 
-/* Block (group) */
-.block{
-  padding-bottom:10px;
-  margin-bottom:12px;
-  border-bottom:1px solid var(--thin-border); /* feine graue Trennlinie */
-}
- 
-/* Block title */
-.block-title{
-  font-size:13px;
-  font-weight:700;
-  color:var(--muted);
-  margin:0 0 8px 0;
-}
- 
-/* Row: label left, amount right */
-.row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:6px 0;
-}
-.label{
-  font-size:14px;
-  color:var(--text);
-  padding-right:12px;
-  line-height:1.2;
-}
-.amount{
-  min-width:72px;
-  text-align:right;
-  font-weight:600;
-  font-variant-numeric:tabular-nums;
-}
- 
-/* Totals */
-.total-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding-top:10px;
-  margin-top:6px;
-  border-top:2px solid var(--thin-border);
-}
-.total-label, .total-value{
-  font-weight:800;
-  font-size:16px;
-}
-.total-value{min-width:72px;text-align:right}
- 
-/* Responsive: on small screens stack columns and hide center divider */
-@media (max-width:760px){
-  .bilanz-grid{grid-template-columns: 1fr; }
-  .divider{ display:none; }
-  .column{ padding:10px 6px; }
-  .header-inner{text-align:center}
+  letter-spacing:0.4px;
 }
 
-/* --- Year Tabs / Add Year Button Styles --- */
-.yearTabs {
+/* ==========================
+   Haupt-Wrapper & Card
+   ========================== */
+.wrap{
+  max-width:var(--max-wrap);
+  margin:20px auto;
+  padding:0 18px;
+  box-sizing:border-box;
+}
+.card{
+  background:var(--sheet-bg);
+  border:1px solid var(--card-border);
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow: var(--shadow);
+  margin-bottom:18px;
+}
+
+/* ==========================
+   Firmen-Kopf
+   ========================== */
+.companyHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:12px;
+}
+.companyName{margin:0;font-size:20px;font-weight:700}
+.companyMeta{margin-top:6px;color:var(--muted);font-size:0.95rem}
+.companyActions{display:flex;gap:8px;align-items:center}
+
+/* ==========================
+   Buttons / Pills (Tabs)
+   ========================== */
+.btn{
+  padding:8px 12px;border-radius:8px;border:1px solid rgba(11,18,32,0.06);background:#fff;cursor:pointer;
+}
+.btn:hover{transform:translateY(-1px)}
+/* General pill-style used for main tabs and others */
+.tabBtn{
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid transparent;
+  background:transparent;
+  cursor:pointer;
+  transition: background .12s ease, transform .06s ease;
+}
+.tabBtn:hover{ transform: translateY(-1px); }
+
+/* Active state for main tabs */
+.tabBtn.active{
+  background:var(--blue-light);
+  border-color:var(--blue);
+  color:var(--text);
+  box-shadow: inset 0 0 0 1px rgba(43,110,246,0.06);
+}
+
+/* main tab container */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+
+/* ==========================
+   Year Tabs (Untertabs)
+   ========================== */
+.yearTabs{
   display:flex;
   gap:8px;
   flex-wrap:wrap;
   margin-bottom:12px;
   align-items:center;
 }
-
-/* Reuse styling classes (.tabBtn) if present; otherwise define styling */
-.yearBtn {
+.yearBtn{
   padding:6px 10px;
   border-radius:8px;
   border:1px solid rgba(11,18,32,0.06);
@@ -312,14 +146,14 @@ a{color:inherit}
   font-size:0.95rem;
   cursor:pointer;
 }
-.yearBtn.active {
-  background: var(--blue-light, #eef6ff);
-  border-color: var(--blue, #1e62d0);
-  color: var(--text, #0b1220);
+.yearBtn:hover{ background: #f3f7ff; }
+.yearBtn.active{
+  background:var(--blue-light);
+  border-color:var(--blue);
 }
 
-/* "+ Jahr hinzufügen" Button */
-.addYearBtn {
+/* + Jahr hinzufügen Button */
+.addYearBtn{
   padding:6px 10px;
   border-radius:8px;
   border:1px dashed rgba(11,18,32,0.08);
@@ -327,35 +161,85 @@ a{color:inherit}
   color:var(--muted);
   cursor:pointer;
 }
-.addYearBtn:hover {
-  background: rgba(43,110,246,0.05);
-}
+.addYearBtn:hover{ background: rgba(43,110,246,0.05); }
 
-/* Reuse .tabBtn general style if present, otherwise a minimal fallback */
-.tabBtn {
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid transparent;
+/* ==========================
+   Content-Card (innerhalb Tabs)
+   ========================== */
+.contentCard{
+  padding:14px;
   background:transparent;
-  cursor:pointer;
-  transition: background .12s, transform .06s;
-}
-.tabBtn.active {
-  background:var(--blue-light, #eef6ff);
-  border-color:var(--blue, #1e62d0);
-  box-shadow: inset 0 0 0 1px rgba(43,110,246,0.06);
-}
-
-/* Small adjustments to content containers */
-.yearContents .yearContent {
+  border:1px solid rgba(11,18,32,0.03);
+  border-radius:8px;
   margin-bottom:12px;
 }
+.contentCard h2{margin:0 0 8px 0}
 
-/* Ensure .hidden class is present */
-.hidden { display:none !important; }
+/* ==========================
+   Tabellen / Listen (allgemein)
+   ========================== */
+.table{width:100%;border-collapse:collapse;margin-top:8px}
+.table th, .table td{padding:10px 8px;text-align:left;border-bottom:1px solid rgba(11,18,32,0.04)}
+.table th{background:#f8fafc;font-weight:600}
 
-/* Responsive: wrap year tabs on small screens */
-@media (max-width:720px){
-  .yearTabs { gap:6px; }
-  .yearBtn, .addYearBtn { padding:6px 8px; font-size:0.9rem; }
+/* ==========================
+   Bilanz-spezifische Styles
+   (auch passend für Erfolgsrechnung Look)
+   ========================== */
+.bilanz-container{
+  background:var(--sheet-bg);
+  border:1px solid var(--card-border);
+  border-radius:8px;
+  padding:18px;
+}
+.bilanz-grid{
+  display:grid;
+  grid-template-columns: 1fr 18px 1fr; /* center for divider */
+  gap:0;
+  position:relative;
+  align-items:start;
+}
+.divider{ width:100%; height:100%; display:block; position:relative; }
+.divider::before{
+  content:"";
+  position:absolute;
+  top:0; bottom:0; left:50%;
+  transform:translateX(-50%);
+  width:6px; /* dicke Trennlinie */
+  background: linear-gradient(#1f56b8,#1e62d0);
+  border-radius:3px;
+}
+
+/* Column basics */
+.column{ padding:8px 12px; box-sizing:border-box; }
+.column-title{ margin:0 0 12px 0; color:var(--blue); font-size:18px; font-weight:700; }
+
+/* Block (group) */
+.block{ padding-bottom:10px; margin-bottom:12px; border-bottom:1px solid var(--thin-line); }
+.block-title{ font-size:13px; font-weight:700; color:var(--muted); margin:0 0 8px 0; }
+
+/* Row: label + amount */
+.row{ display:flex; justify-content:space-between; align-items:center; padding:6px 0; }
+.label{ font-size:14px; color:var(--text); padding-right:12px; line-height:1.2; }
+.amount{ min-width:72px; text-align:right; font-weight:600; font-variant-numeric:tabular-nums; }
+
+/* Totals */
+.total-row{ display:flex; justify-content:space-between; align-items:center; padding-top:10px; margin-top:6px; border-top:2px solid var(--thin-line); }
+.total-label, .total-value{ font-weight:800; font-size:16px; }
+.total-value{ min-width:72px; text-align:right; }
+
+/* Jahres-Ergebnis row (Erfolgsrechnung) */
+.result-row{ display:flex; justify-content:space-between; align-items:center; margin-top:14px; padding-top:12px; border-top:2px solid var(--thin-line); font-weight:800; font-size:16px; }
+
+/* ==========================
+   Responsive
+   ========================== */
+@media (max-width:900px){
+  .wrap{ padding:0 14px; }
+  .companyHeader{flex-direction:column;align-items:flex-start}
+  .companyActions{width:100%;justify-content:flex-start}
+  .tabs{gap:6px}
+  .tabBtn{padding:6px 10px}
+  .bilanz-grid{ grid-template-columns: 1fr; }
+  .divider{ display:none; }
 }
