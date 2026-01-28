@@ -1,6 +1,42 @@
 // js/company.js
 // Tab- & Jahres-Logik (ohne Blockade durch fehlenden User)
 
+const USER_KEY = 'uwi_user';
+const COMPANIES_PREFIX = 'uwi_companies_';
+const SELECTED_COMPANY_PREFIX = 'uwi_currentCompany_';
+const BOOKINGS_PREFIX = 'uwi_bookings_';
+
+function getCurrentUserOrRedirect() {
+  const user = localStorage.getItem(USER_KEY);
+  if (!user) {
+    window.location.href = 'index.html';
+    return null;
+  }
+  return user;
+}
+
+function companiesKey(user) { return COMPANIES_PREFIX + user; }
+function selectedCompanyKey(user) { return SELECTED_COMPANY_PREFIX + user; }
+function bookingsKey(user) { return BOOKINGS_PREFIX + user; }
+
+function loadCompaniesForUser(user) {
+  const raw = localStorage.getItem(companiesKey(user));
+  try { return raw ? JSON.parse(raw) : []; } catch(e){ console.error(e); return []; }
+}
+
+function loadBookingsForUser(user) {
+  const raw = localStorage.getItem(bookingsKey(user));
+  try { return raw ? JSON.parse(raw) : []; } catch(e){ console.error(e); return []; }
+}
+
+// Escape helper for safe HTML output
+function escapeHtml(str) {
+  if (str === undefined || str === null) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+}
+
+function fmt(n){ return Number(n || 0).toFixed(2) + ' €'; }
+
 /* --------- Year Tabs Logic --------- */
 function renderYearTabs(container) {
   container.innerHTML = '';
