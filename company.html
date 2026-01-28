@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>UWI Unternehmenssimulation — Firmenansicht</title>
+  <title>Firma — UWI Unternehmenssimulation</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -20,24 +20,136 @@
     <section class="card">
       <div class="row space-between">
         <div>
-          <h1 id="companyTitle" class="h2">Firma</h1>
-          <div id="companyMeta" class="small muted"></div>
+          <h1 id="companyTitle" class="h2">Firma Muster</h1>
+          <div id="companyMeta" class="small muted">GmbH · Handel</div>
         </div>
       </div>
 
- <div class="tabs">
-        <button class="tab-btn active" data-tab="balance">Bilanz</button>
-        <button class="tab-btn" data-tab="income">Erfolgsrechnung</button>
-        <button class="tab-btn" data-tab="bookings">Buchungssätze</button>
-        <button class="tab-btn" data-tab="economy">Wirtschaft</button>
-        <button class="tab-btn" data-tab="law">Recht</button>
+      <!-- Ebene 1: Haupt-Tabs -->
+      <div class="main-tabs" role="tablist" aria-label="Haupttabs">
+        <button class="mainTab btn active" data-tab="bilanz" id="tabBtn-bilanz">Bilanz</button>
+        <button class="mainTab btn" data-tab="erfolg" id="tabBtn-erfolg">Erfolgsrechnung</button>
+        <button class="mainTab btn" data-tab="buchungen" id="tabBtn-buchungen">Buchungssätze</button>
+        <button class="mainTab btn" data-tab="wirtschaft" id="tabBtn-wirtschaft">Wirtschaft</button>
+        <button class="mainTab btn" data-tab="recht" id="tabBtn-recht">Recht</button>
       </div>
+
+      <!-- Hier folgen die Sektionen (eine pro Haupt-Tab). Die IDs und Struktur entsprechen der Vorgabe. -->
+      <!-- Jeder Abschnitt enthält: div.yearTabs[data-section="..."] mit Buttons .yearBtn[data-year="..."] -->
+      <!-- und div.yearContent[data-section="..."][data-year="..."] für die Inhalte -->
+
+      <!-- BILANZ -->
+      <section id="tab-bilanz" class="tabSection" role="region" aria-label="Bilanz">
+        <div class="yearTabs" data-section="bilanz" role="tablist" aria-label="Bilanz Jahre">
+          <button class="yearBtn btn active" data-year="2024" data-section="bilanz">2024</button>
+          <button class="yearBtn btn" data-year="2025" data-section="bilanz">2025</button>
+          <button class="yearBtn btn" data-year="2026" data-section="bilanz">2026</button>
+        </div>
+
+        <div class="yearContent" data-section="bilanz" data-year="2024">
+          <h3>Bilanz 2024 (Inhalt)</h3>
+          <p>Hier kommt die Bilanz für 2024 — Aktiva / Passiva (Platzhalter).</p>
+        </div>
+        <div class="yearContent hidden" data-section="bilanz" data-year="2025">
+          <h3>Bilanz 2025 (Inhalt)</h3>
+          <p>Hier kommt die Bilanz für 2025 — (Platzhalter).</p>
+        </div>
+        <div class="yearContent hidden" data-section="bilanz" data-year="2026">
+          <h3>Bilanz 2026 (Inhalt)</h3>
+          <p>Hier kommt die Bilanz für 2026 — (Platzhalter).</p>
+        </div>
+      </section>
+
+      <!-- ERFOLGSRECHNUNG -->
+      <section id="tab-erfolg" class="tabSection hidden" role="region" aria-label="Erfolgsrechnung">
+        <div class="yearTabs" data-section="erfolg" role="tablist" aria-label="Erfolg Jahre">
+          <button class="yearBtn btn active" data-year="2024" data-section="erfolg">2024</button>
+          <button class="yearBtn btn" data-year="2025" data-section="erfolg">2025</button>
+          <button class="yearBtn btn" data-year="2026" data-section="erfolg">2026</button>
+        </div>
+
+        <div class="yearContent" data-section="erfolg" data-year="2024">
+          <h3>Erfolgsrechnung 2024</h3>
+          <p>Inhalt Erfolgsrechnung 2024 (Platzhalter).</p>
+        </div>
+        <div class="yearContent hidden" data-section="erfolg" data-year="2025">
+          <h3>Erfolgsrechnung 2025</h3>
+          <p>Inhalt Erfolgsrechnung 2025 (Platzhalter).</p>
+        </div>
+        <div class="yearContent hidden" data-section="erfolg" data-year="2026">
+          <h3>Erfolgsrechnung 2026</h3>
+          <p>Inhalt Erfolgsrechnung 2026 (Platzhalter).</p>
+        </div>
+      </section>
+
+      <!-- BUCHUNGEN -->
+      <section id="tab-buchungen" class="tabSection hidden" role="region" aria-label="Buchungssätze">
+        <div class="yearTabs" data-section="buchungen" role="tablist" aria-label="Buchungen Jahre">
+          <button class="yearBtn btn active" data-year="2024" data-section="buchungen">2024</button>
+          <button class="yearBtn btn" data-year="2025" data-section="buchungen">2025</button>
+          <button class="yearBtn btn" data-year="2026" data-section="buchungen">2026</button>
+        </div>
+
+        <div class="yearContent" data-section="buchungen" data-year="2024">
+          <h3>Buchungssätze 2024</h3>
+          <p>Liste der Buchungssätze für 2024 (Platzhalter).</p>
+        </div>
+        <div class="yearContent hidden" data-section="buchungen" data-year="2025">
+          <h3>Buchungssätze 2025</h3>
+          <p>Liste der Buchungssätze für 2025 (Platzhalter).</p>
+        </div>
+        <div class="yearContent hidden" data-section="buchungen" data-year="2026">
+          <h3>Buchungssätze 2026</h3>
+          <p>Liste der Buchungssätze für 2026 (Platzhalter).</p>
+        </div>
+      </section>
+
+      <!-- WIRTSCHAFT -->
+      <section id="tab-wirtschaft" class="tabSection hidden" role="region" aria-label="Wirtschaft">
+        <div class="yearTabs" data-section="wirtschaft" role="tablist" aria-label="Wirtschaft Jahre">
+          <button class="yearBtn btn active" data-year="2024" data-section="wirtschaft">2024</button>
+          <button class="yearBtn btn" data-year="2025" data-section="wirtschaft">2025</button>
+          <button class="yearBtn btn" data-year="2026" data-section="wirtschaft">2026</button>
+        </div>
+
+        <div class="yearContent" data-section="wirtschaft" data-year="2024">
+          <h3>Wirtschaft 2024</h3>
+          <p>Inhalt Wirtschaft 2024 (Platzhalter).</p>
+        </div>
+        <div class="yearContent hidden" data-section="wirtschaft" data-year="2025">
+          <h3>Wirtschaft 2025</h3>
+          <p>Inhalt Wirtschaft 2025 (Platzhalter).</p>
+        </div>
+        <div class="yearContent hidden" data-section="wirtschaft" data-year="2026">
+          <h3>Wirtschaft 2026</h3>
+          <p>Inhalt Wirtschaft 2026 (Platzhalter).</p>
+        </div>
+      </section>
+
+      <!-- RECHT -->
+      <section id="tab-recht" class="tabSection hidden" role="region" aria-label="Recht">
+        <div class="yearTabs" data-section="recht" role="tablist" aria-label="Recht Jahre">
+          <button class="yearBtn btn active" data-year="2024" data-section="recht">2024</button>
+          <button class="yearBtn btn" data-year="2025" data-section="recht">2025</button>
+          <button class="yearBtn btn" data-year="2026" data-section="recht">2026</button>
+        </div>
+
+        <div class="yearContent" data-section="recht" data-year="2024">
+          <h3>Recht 2024</h3>
+          <p>Inhalt Recht 2024 (Platzhalter).</p>
+        </div>
+        <div class="yearContent hidden" data-section="recht" data-year="2025">
+          <h3>Recht 2025</h3>
+          <p>Inhalt Recht 2025 (Platzhalter).</p>
+        </div>
+        <div class="yearContent hidden" data-section="recht" data-year="2026">
+          <h3>Recht 2026</h3>
+          <p>Inhalt Recht 2026 (Platzhalter).</p>
+        </div>
+      </section>
+
     </section>
   </main>
-
-  <footer class="footer">
-    <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
-  </footer>
 
   <script src="js/company.js"></script>
 </body>
