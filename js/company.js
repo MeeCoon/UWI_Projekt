@@ -1,24 +1,17 @@
-const USER_KEY = 'uwi_user';
-
-function getCurrentUserOrRedirect() {
-  const user = localStorage.getItem(USER_KEY);
-  if (!user) {
-    window.location.href = 'index.html';
-    return null;
-  }
-  return user;
-}
+// js/company.js
+// Tab- & Jahres-Logik (ohne Blockade durch fehlenden User)
 
 /* --------- Year Tabs Logic --------- */
 function renderYearTabs(container) {
   container.innerHTML = '';
 
+  // Startjahr
   const years = [2025];
 
-  years.forEach(y => {
+  years.forEach(year => {
     const btn = document.createElement('button');
     btn.className = 'yearBtn active';
-    btn.textContent = y;
+    btn.textContent = year;
     container.appendChild(btn);
   });
 
@@ -26,11 +19,12 @@ function renderYearTabs(container) {
   addBtn.className = 'addYearBtn';
   addBtn.textContent = '+ Jahr hinzufügen';
 
-  addBtn.onclick = () => {
+  addBtn.addEventListener('click', () => {
     const input = prompt('Jahr eingeben (2026–2100)');
     const year = Number(input);
+
     if (!year || year < 2026 || year > 2100) {
-      alert('Ungültiges Jahr');
+      alert('Bitte ein gültiges Jahr zwischen 2026 und 2100 eingeben.');
       return;
     }
 
@@ -41,32 +35,38 @@ function renderYearTabs(container) {
     const btn = document.createElement('button');
     btn.className = 'yearBtn';
     btn.textContent = year;
+
     container.insertBefore(btn, addBtn);
-  };
+  });
 
   container.appendChild(addBtn);
 }
 
 /* --------- Tabs --------- */
 document.addEventListener('DOMContentLoaded', () => {
-  const user = getCurrentUserOrRedirect();
-  if (!user) return;
-
   const tabButtons = document.querySelectorAll('.tab-btn');
   const tabContents = document.querySelectorAll('.tab-content');
 
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      tabButtons.forEach(b => b.classList.remove('active'));
-      tabContents.forEach(c => c.classList.add('hidden'));
 
+      // Active-Status
+      tabButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+
+      // Inhalte umschalten
+      tabContents.forEach(c => c.classList.add('hidden'));
       const tab = btn.dataset.tab;
       const content = document.getElementById(tab);
+      if (!content) return;
+
       content.classList.remove('hidden');
 
+      // Jahres-Tabs nur für bestimmte Reiter
       const yearTabs = content.querySelector('.yearTabs');
-      if (yearTabs) renderYearTabs(yearTabs);
+      if (yearTabs) {
+        renderYearTabs(yearTabs);
+      }
     });
   });
 });
