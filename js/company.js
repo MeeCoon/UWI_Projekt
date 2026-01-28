@@ -1,12 +1,27 @@
 // js/company.js
-// Firmenansicht mit Tabs + Jahreslogik
-// Tabs funktionieren IMMER, Login-Funktionen nur wenn vorhanden
+// Firmenansicht mit Tabs, Firmenauswahl und Jahres-Buttons
 
 const USER_KEY = 'uwi_user';
+const COMPANIES_KEY = 'uwi_companies';
+const CURRENT_COMPANY_KEY = 'uwi_currentCompany';
 
-/* ------------------ Helpers ------------------ */
+/* ------------------ Helper ------------------ */
 function getCurrentUser() {
   return localStorage.getItem(USER_KEY);
+}
+
+function loadCompanies() {
+  try {
+    return JSON.parse(localStorage.getItem(COMPANIES_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function getCurrentCompany() {
+  const id = localStorage.getItem(CURRENT_COMPANY_KEY);
+  if (!id) return null;
+  return loadCompanies().find(c => c.id === id) || null;
 }
 
 /* ------------------ Year Tabs ------------------ */
@@ -42,7 +57,6 @@ function renderYearTabs(container) {
     const btn = document.createElement('button');
     btn.className = 'yearBtn';
     btn.textContent = year;
-
     container.insertBefore(btn, addBtn);
   });
 
@@ -51,6 +65,25 @@ function renderYearTabs(container) {
 
 /* ------------------ DOM Ready ------------------ */
 document.addEventListener('DOMContentLoaded', () => {
+
+  /* ---- Firma laden ---- */
+  const company = getCurrentCompany();
+  if (!company) {
+    alert('Keine Firma ausgewählt. Zurück zur Übersicht.');
+    window.location.href = 'overview.html';
+    return;
+  }
+
+  const titleEl = document.getElementById('companyTitle');
+  const metaEl = document.getElementById('companyMeta');
+
+  if (titleEl) titleEl.textContent = company.name;
+  if (metaEl) {
+    metaEl.textContent =
+      `${company.legal || ''} · ${company.industry || '–'} · ` +
+      `Startkapital: ${company.capital || '-'} € · ` +
+      `Mitarbeitende: ${company.size || '-'}`;
+  }
 
   /* ---- Header Buttons ---- */
   const backBtn = document.getElementById('backBtn');
@@ -71,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
       localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(CURRENT_COMPANY_KEY);
       window.location.href = 'index.html';
     });
   }
@@ -82,23 +116,26 @@ document.addEventListener('DOMContentLoaded', () => {
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
 
-      // Active State
       tabButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      // Inhalte wechseln
       tabContents.forEach(c => c.classList.add('hidden'));
+
       const tab = btn.dataset.tab;
       const content = document.getElementById(tab);
       if (!content) return;
 
       content.classList.remove('hidden');
 
-      // Jahres-Tabs nur bei Bilanz / ER / Buchungen
+      // Jahres-Tabs nur bei Bilanz / Erfolgsrechnung / Buchungssätze
       const yearTabs = content.querySelector('.yearTabs');
       if (yearTabs) {
         renderYearTabs(yearTabs);
       }
     });
   });
+
+  // Standard: Bilanz initial laden
+  const initialTab = document.querySelector('.tab-btn.active');
+  if (initialTab) initialTab.click();
 });
