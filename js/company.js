@@ -1,13 +1,19 @@
 // js/company.js
-// Firmenansicht – kompatibel mit overview.js (user-spezifische Speicherung)
-// + dynamische, klickbare Year-Tabs: neue Jahre können hinzugefügt werden und zeigen Inhalte an.
+// Firmenansicht – korrigierte und erweiterte Version
+// - Lädt ausgewählte Firma aus localStorage ("uwi_selected_company" als JSON-Objekt)
+// - Dynamische Year-Tabs pro Sektion (persistiert pro Firma+Sektion)
+// - "+ Jahr hinzufügen" mit Validierung (2000-2100)
+// - Erzeugt Year-Content bei Bedarf; spezielle Inhalte für "Bilanz" und "Erfolgsrechnung"
+// - Speicherung von Erfolgsrechnungsdaten pro Firma+Jahr
+// - Main-Tab-Handling, Logout-Handler
 
-// Konfiguration Keys
+/* ------------------ Konfiguration Keys ------------------ */
 const USER_KEY = 'uwi_user';
-const COMPANIES_PREFIX = 'uwi_companies_';
-const SELECTED_COMPANY_PREFIX = 'uwi_currentCompany_';
+const SELECTED_COMPANY_KEY = 'uwi_selected_company'; // JSON-objekt
+const YEARS_KEY_PREFIX = 'uwi_years_';               // uwi_years_<companyId>_<sectionId>
+const INCOME_KEY_PREFIX = 'uwi_income_';             // uwi_income_<companyId>_<year>
 
-/* ------------------ Helper ------------------ */
+/* ------------------ Hilfsfunktionen ------------------ */
 function getCurrentUserOrRedirect() {
   const user = localStorage.getItem(USER_KEY);
   if (!user) {
@@ -16,126 +22,165 @@ function getCurrentUserOrRedirect() {
   }
   return user;
 }
-function companiesKey(user) { return COMPANIES_PREFIX + user; }
-function selectedCompanyKey(user) { return SELECTED_COMPANY_PREFIX + user; }
-function loadCompaniesForUser(user) {
+
+// return selected company object or redirect to overview
+function getSelectedCompanyOrRedirect() {
+  const raw = localStorage.getItem(SELECTED_COMPANY_KEY);
+  if (!raw) {
+    window.location.href = 'overview.html';
+    return null;
+  }
   try {
-    return JSON.parse(localStorage.getItem(companiesKey(user))) || [];
-  } catch {
-    return [];
+    const obj = JSON.parse(raw);
+    // In case older code saved only an id string, try to handle
+    if (typeof obj === 'string') {
+      // we only have id; try to find company object from user's companies
+      const user = localStorage.getItem(USER_KEY);
+      if (!user) { window.location.href = 'index.html'; return null; }
+      const companiesRaw = localStorage.getItem(`uwi_companies_${user}`);
+      if (!companiesRaw) { window.location.href = 'overview.html'; return null; }
+      const arr = JSON.parse(companiesRaw);
+      const found = arr.find(c => String(c.id) === obj);
+      if (!found) { window.location.href = 'overview.html'; return null; }
+      return found;
+    }
+    return obj;
+  } catch (e) {
+    console.error('Fehler beim Parsen von uwi_selected_company:', e);
+    window.location.href = 'overview.html';
+    return null;
   }
 }
 
+// Helper: format number as CHF (de-CH thousands with apostrophe, no decimals)
+function fmtCHF(n) {
+  const num = Number(n) || 0;
+  return new Intl.NumberFormat('de-CH', { maximumFractionDigits: 0 }).format(num) + ' CHF';
+}
+
+// Year storage key for a company and section
+function yearsStorageKey(companyId, sectionId) {
+  return `${YEARS_KEY_PREFIX}${companyId}_${sectionId}`;
+}
+
+// Income storage key for company+year
+function incomeStorageKey(companyId, year) {
+  return `${INCOME_KEY_PREFIX}${companyId}_${year}`;
+}
+
 /* ------------------ Year Tabs & Content ------------------ */
-// Render year buttons inside a container (.yearTabs element).
-// Creates click handlers so the button activates and its year content is shown.
-function renderYearTabs(container) {
+
+// Load years persisted for company+section or return defaults
+function loadYearsFor(companyId, sectionId) {
+  const key = yearsStorageKey(companyId, sectionId);
+  const raw = localStorage.getItem(key);
+  if (!raw) return ['2024','2025','2026'];
+  try {
+    const arr = JSON.parse(raw);
+    if (Array.isArray(arr) && arr.length) return arr.map(String);
+    return ['2024','2025','2026'];
+  } catch { return ['2024','2025','2026']; }
+}
+
+function saveYearsFor(companyId, sectionId, yearsArray) {
+  const key = yearsStorageKey(companyId, sectionId);
+  localStorage.setItem(key, JSON.stringify(yearsArray.map(String)));
+}
+
+// Renders year buttons for the given .yearTabs container. SectionId must be string (e.g. "tab-bilanz")
+function renderYearTabs(container, companyId, sectionId) {
   if (!container) return;
-  // clear existing
   container.innerHTML = '';
 
-  // Default years (can be changed later by stored logic)
-  const defaultYears = [2025];
+  const years = loadYearsFor(companyId, sectionId);
 
-  // create year buttons
-  defaultYears.forEach((year, idx) => {
+  years.forEach(y => {
     const btn = document.createElement('button');
-    btn.className = 'yearBtn';
     btn.type = 'button';
-    btn.textContent = String(year);
-    btn.dataset.year = String(year);
-
-    // click handler
+    btn.className = 'yearBtn';
+    btn.dataset.year = String(y);
+    btn.textContent = String(y);
     btn.addEventListener('click', () => {
-      onYearButtonClick(container, String(year));
+      activateYear(container, companyId, sectionId, String(y));
     });
-
     container.appendChild(btn);
   });
 
-  // "+ Jahr hinzufügen" button
+  // add button
   const addBtn = document.createElement('button');
-  addBtn.className = 'addYearBtn';
   addBtn.type = 'button';
+  addBtn.className = 'addYearBtn';
   addBtn.textContent = '+ Jahr hinzufügen';
-
   addBtn.addEventListener('click', () => {
     const input = prompt('Jahr eingeben (z.B. 2027):');
-    if (input === null) return; // user canceled
-    const year = Number(String(input).trim());
-    if (!/^\d{4}$/.test(String(input).trim()) || isNaN(year) || year < 2000 || year > 2100) {
-      alert('Bitte eine gültige 4-stellige Jahreszahl (2000–2100) eingeben.');
-      return;
-    }
+    if (input === null) return;
+    const yearStr = String(input).trim();
+    if (!/^\d{4}$/.test(yearStr)) { alert('Bitte eine gültige 4-stellige Jahreszahl eingeben.'); return; }
+    const yearNum = Number(yearStr);
+    if (yearNum < 2000 || yearNum > 2100) { alert('Bitte Jahr zwischen 2000 und 2100.'); return; }
 
-    // check if already exists
-    const exists = Array.from(container.querySelectorAll('.yearBtn')).some(b => b.textContent === String(year));
-    if (exists) {
-      alert('Dieses Jahr ist bereits vorhanden.');
-      return;
-    }
+    const existing = Array.from(container.querySelectorAll('.yearBtn')).some(b => b.dataset.year === yearStr);
+    if (existing) { alert('Dieses Jahr existiert bereits.'); return; }
 
-    // create new button and insert before addBtn
+    // persist
+    years.push(yearStr);
+    years.sort((a,b)=>Number(a)-Number(b));
+    saveYearsFor(companyId, sectionId, years);
+
+    // create new button and click it
     const newBtn = document.createElement('button');
-    newBtn.className = 'yearBtn';
     newBtn.type = 'button';
-    newBtn.textContent = String(year);
-    newBtn.dataset.year = String(year);
-    newBtn.addEventListener('click', () => { onYearButtonClick(container, String(year)); });
+    newBtn.className = 'yearBtn';
+    newBtn.dataset.year = yearStr;
+    newBtn.textContent = yearStr;
+    newBtn.addEventListener('click', () => activateYear(container, companyId, sectionId, yearStr));
 
-    // Insert before addBtn
-    container.insertBefore(newBtn, addBtn);
+    // insert before addBtn (which is not yet appended)
+    container.appendChild(newBtn);
+    // re-add addBtn at end
+    container.appendChild(addBtn);
 
-    // Activate newly added year (simulate click)
+    // activate
     newBtn.click();
   });
 
   container.appendChild(addBtn);
 
-  // Activate the first year by default
-  const firstBtn = container.querySelector('.yearBtn');
-  if (firstBtn) firstBtn.click();
+  // activate first year by default
+  const first = container.querySelector('.yearBtn');
+  if (first) first.click();
 }
 
-// Handler when a year button is clicked
-function onYearButtonClick(container, year) {
+// Activates a year: sets active class, ensures yearContent exists and shows it
+function activateYear(container, companyId, sectionId, year) {
   if (!container) return;
+  // toggle active classes
+  container.querySelectorAll('.yearBtn').forEach(b => b.classList.toggle('active', b.dataset.year === String(year)));
 
-  // 1) Update active class on buttons within this container
-  container.querySelectorAll('.yearBtn').forEach(b => {
-    if (b.dataset.year === String(year)) b.classList.add('active');
-    else b.classList.remove('active');
-  });
+  // find containing section element (closest ancestor with class tabSection or id starting with 'tab-')
+  const sectionEl = container.closest('.tabSection') || container.closest('section') || container.closest('.card');
+  if (!sectionEl) return;
 
-  // 2) Find the tab/section that owns this yearTabs container
-  // Assumes structure: container is inside a section with class .tabSection
-  const section = container.closest('.tabSection');
-  if (!section) {
-    // fallback: try parentElement
-    console.warn('yearTabs container not inside .tabSection');
-    return;
-  }
-
-  // 3) Ensure there is a .yearContents root inside this section to hold year-specific content
-  let contentsRoot = section.querySelector('.yearContents');
+  // find or create yearContents root
+  let contentsRoot = sectionEl.querySelector('.yearContents');
   if (!contentsRoot) {
     contentsRoot = document.createElement('div');
     contentsRoot.className = 'yearContents';
-    section.appendChild(contentsRoot);
+    sectionEl.appendChild(contentsRoot);
   }
 
-  // 4) Hide all other yearContent in this section
+  // hide other contents
   contentsRoot.querySelectorAll('.yearContent').forEach(c => c.classList.add('hidden'));
 
-  // 5) Find or create the content element for this year
+  // find or create content for this year
   let content = contentsRoot.querySelector(`.yearContent[data-year="${year}"]`);
   if (!content) {
     content = document.createElement('div');
     content.className = 'yearContent contentBox';
     content.dataset.year = String(year);
 
-    // Determine base title depending on section id
-    const secId = section.id || '';
+    // Determine which section this is (use sectionEl.id if present)
+    const sid = sectionEl.id || sectionId || '';
     const titleMap = {
       'tab-bilanz': 'Bilanz',
       'tab-erfolg': 'Erfolgsrechnung',
@@ -143,281 +188,246 @@ function onYearButtonClick(container, year) {
       'tab-wirtschaft': 'Wirtschaft',
       'tab-recht': 'Recht'
     };
-    const baseTitle = titleMap[secId] || secId || 'Inhalt';
+    const base = titleMap[sid] || sid || sectionId || 'Inhalt';
 
     const h = document.createElement('h3');
-    h.textContent = `${baseTitle} ${year}`;
+    h.textContent = `${base} ${year}`;
     content.appendChild(h);
 
-    // If this is the Bilanz section, insert a specific placeholder structure
-    if (secId === 'tab-bilanz') {
+    // If Bilanz, add bilanz placeholder
+    if (sid === 'tab-bilanz' || sectionId === 'tab-bilanz') {
       const p = document.createElement('p');
-      p.textContent = `Hier kommt die Bilanz für ${year}. (Platzhalter-Inhalt)`;
+      p.textContent = `Hier kommt die Bilanz für ${year}. (Platzhalter)`;
       content.appendChild(p);
-      // Optionally more detailed bilanz placeholders could be added here
+    }
+    // If Erfolgsrechnung, build small income editor and load persisted data
+    else if (sid === 'tab-erfolg' || sectionId === 'tab-erfolg') {
+      buildIncomeEditor(content, companyId, year);
     } else {
       const p = document.createElement('p');
-      p.textContent = `Platzhalter-Inhalt für ${baseTitle} ${year}.`;
+      p.textContent = `Platzhalter-Inhalt für ${base} ${year}.`;
       content.appendChild(p);
     }
 
     contentsRoot.appendChild(content);
   }
 
-  // 6) Show this content
   content.classList.remove('hidden');
 }
 
-/* ------------------ DOM Ready ------------------ */
-document.addEventListener('DOMContentLoaded', () => {
-  /* ---- User & Firma laden ---- */
-  const user = getCurrentUserOrRedirect();
-  if (!user) return;
-
-  const companyId = localStorage.getItem(selectedCompanyKey(user));
-  if (!companyId) {
-    alert('Keine Firma ausgewählt. Zurück zur Übersicht.');
-    window.location.href = 'overview.html';
-    return;
-  }
-
-  const companies = loadCompaniesForUser(user);
-  const company = companies.find(c => c.id === companyId);
-
-  if (!company) {
-    alert('Firma nicht gefunden. Zurück zur Übersicht.');
-    window.location.href = 'overview.html';
-    return;
-  }
-
-  /* ---- Firmenkopf ---- */
-  const titleEl = document.getElementById('companyTitle');
-  const metaEl = document.getElementById('companyMeta');
-
-  if (titleEl) titleEl.textContent = company.name;
-  if (metaEl) {
-    // Try to use property names as in your stored company objects
-    const legal = company.legal || company.legalForm || '';
-    const industry = company.industry || '';
-    const capital = (company.capital != null ? company.capital : company.startCapital) || 0;
-    const size = company.size || company.employees || 0;
-
-    // format capital with apostrophe thousands
-    const formattedCapital = (function(n){
-      try {
-        return new Intl.NumberFormat('de-CH', { maximumFractionDigits: 0 }).format(Number(n));
-      } catch { return String(n); }
-    })(capital);
-
-    metaEl.textContent =
-      `${legal} · ${industry || '–'} · Startkapital: ${formattedCapital} CHF · Mitarbeitende: ${size}`;
-  }
-
-  /* ---- Header Buttons ---- */
-  const backBtn = document.getElementById('backBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const userDisplay = document.getElementById('userDisplay');
-
-  if (userDisplay) {
-    userDisplay.textContent = `Angemeldet: ${user}`;
-  }
-  if (backBtn) {
-    backBtn.addEventListener('click', () => {
-      window.location.href = 'overview.html';
-    });
-  }
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem(USER_KEY);
-      localStorage.removeItem(selectedCompanyKey(user));
-      window.location.href = 'index.html';
-    });
-  }
-
-  /* ---- Tabs ---- */
-  // note: your HTML might use different classes; adjust selectors if needed
-  const tabButtons = document.querySelectorAll('.tab-btn, .tabBtn, .mainTab'); // attempt to match common variants
-  const tabContents = document.querySelectorAll('.tab-content, .tabSection');
-
-  tabButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      // Active-State for main tabs
-      tabButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      // Hide all tab contents
-      tabContents.forEach(c => c.classList.add('hidden'));
-
-      // Determine target content: either data-tab or id
-      const tab = btn.dataset.tab || btn.getAttribute('data-tab') || btn.getAttribute('data-target') || btn.id;
-      // try id matching: if btn.dataset.tab === 'bilanz' we expect a section with id 'tab-bilanz' or 'bilanz'
-      let content = document.getElementById(`tab-${tab}`) || document.getElementById(tab);
-      if (!content) {
-        // fallback: find first .tabSection that has a matching data-section
-        content = document.querySelector(`.tabSection#tab-${tab}`) || document.querySelector(`.tabSection[data-section="${tab}"]`);
-      }
-      if (!content) {
-        // try to find element by dataset (common variants)
-        content = document.querySelector(`section[data-tab="${tab}"], section#${tab}`);
-      }
-      if (!content) {
-        console.warn('Ziel-Content für Tab nicht gefunden:', tab);
-        return;
-      }
-      content.classList.remove('hidden');
-
-      // If the newly shown content has a .yearTabs container, render its years
-      const yearTabs = content.querySelector('.yearTabs');
-      if (yearTabs) {
-        renderYearTabs(yearTabs);
-      }
-    });
-  });
-
-  // Trigger initial tab activation: find first main tab with active class or default to first tab button
-  let initialTabBtn = Array.from(tabButtons).find(b => b.classList.contains('active'));
-  if (!initialTabBtn && tabButtons.length) initialTabBtn = tabButtons[0];
-  if (initialTabBtn) initialTabBtn.click();
-});
-// Key: pro Firma + pro Jahr
+/* ------------------ Erfolgsrechnung: Speicher / UI ------------------ */
 function incomeKey(companyId, year) {
-  return `uwi_income_${companyId}_${year}`;
+  return `${INCOME_KEY_PREFIX}${companyId}_${year}`;
 }
-
 function defaultIncomeData() {
   return {
-    // Aufwand
-    warenaufwand: 0,
-    personalaufwand: 0,
-    raumaufwand: 0,
-    marketingaufwand: 0,
-    verwaltungsaufwand: 0,
-    abschreibungen: 0,
-    zinsaufwand: 0,
-
-    // Ertrag
-    warenertrag: 0,
-    dienstleistungsertrag: 0,
-    uebriger_ertrag: 0,
-    zinsertrag: 0
+    warenaufwand:0, personalaufwand:0, raumaufwand:0, marketingaufwand:0, verwaltungsaufwand:0,
+    abschreibungen:0, zinsaufwand:0,
+    warenertrag:0, dienstleistungsertrag:0, uebriger_ertrag:0, zinsertrag:0
   };
 }
-
 function loadIncome(companyId, year) {
   const raw = localStorage.getItem(incomeKey(companyId, year));
   if (!raw) return defaultIncomeData();
-  try {
-    const obj = JSON.parse(raw);
-    return { ...defaultIncomeData(), ...obj };
-  } catch {
-    return defaultIncomeData();
-  }
+  try { return { ...defaultIncomeData(), ...JSON.parse(raw) }; } catch { return defaultIncomeData(); }
 }
-
 function saveIncome(companyId, year, data) {
   localStorage.setItem(incomeKey(companyId, year), JSON.stringify(data));
 }
 
-function sumAufwand(d){
-  return (d.warenaufwand||0)+(d.personalaufwand||0)+(d.raumaufwand||0)+(d.marketingaufwand||0)+
-         (d.verwaltungsaufwand||0)+(d.abschreibungen||0)+(d.zinsaufwand||0);
-}
-function sumErtrag(d){
-  return (d.warenertrag||0)+(d.dienstleistungsertrag||0)+(d.uebriger_ertrag||0)+(d.zinsertrag||0);
-}
+function buildIncomeEditor(container, companyId, year) {
+  const data = loadIncome(companyId, year);
 
-function renderIncome(year) {
-  const company = getSelectedCompany();
-  if (!company) return;
+  const html = document.createElement('div');
+  html.className = 'incomeEditor';
 
-  const area = document.getElementById("incomeArea");
-  if (!area) return;
+  const rows = [
+    ['Warenaufwand', 'warenaufwand'],
+    ['Personalaufwand', 'personalaufwand'],
+    ['Raumaufwand (Miete)', 'raumaufwand'],
+    ['Marketingaufwand', 'marketingaufwand'],
+    ['Verwaltungsaufwand', 'verwaltungsaufwand'],
+    ['Abschreibungen', 'abschreibungen'],
+    ['Zinsaufwand', 'zinsaufwand']
+  ];
+  const rowsErtrag = [
+    ['Warenertrag (Umsatz)', 'warenertrag'],
+    ['Dienstleistungsertrag', 'dienstleistungsertrag'],
+    ['Übriger Betriebsertrag', 'uebriger_ertrag'],
+    ['Zinsertrag', 'zinsertrag']
+  ];
 
-  const d = loadIncome(company.id, year);
+  const leftCol = document.createElement('div');
+  leftCol.style.marginBottom = '10px';
+  leftCol.innerHTML = `<strong>Aufwand</strong>`;
+  rows.forEach(([label, key])=>{
+    const div = document.createElement('div');
+    div.className = 'incomeRow';
+    div.style.display='flex'; div.style.justifyContent='space-between'; div.style.marginTop='6px';
+    const lab = document.createElement('div'); lab.textContent = label;
+    const inp = document.createElement('input');
+    inp.type='number'; inp.min='0'; inp.step='1'; inp.value = Number(data[key]||0);
+    inp.dataset.key = key;
+    div.appendChild(lab); div.appendChild(inp);
+    leftCol.appendChild(div);
+  });
 
-  area.innerHTML = `
-    <div class="balanceHeaderBlue">
-      <div class="balanceTitle">Erfolgsrechnung ${year}</div>
-      <div class="balanceSub">alle Beträge in CHF (Start: 0)</div>
-    </div>
+  const rightCol = document.createElement('div');
+  rightCol.style.marginBottom='10px';
+  rightCol.innerHTML = `<strong>Ertrag</strong>`;
+  rowsErtrag.forEach(([label, key])=>{
+    const div = document.createElement('div');
+    div.className='incomeRow';
+    div.style.display='flex'; div.style.justifyContent='space-between'; div.style.marginTop='6px';
+    const lab = document.createElement('div'); lab.textContent = label;
+    const inp = document.createElement('input'); inp.type='number'; inp.min='0'; inp.step='1'; inp.value = Number(data[key]||0);
+    inp.dataset.key = key;
+    div.appendChild(lab); div.appendChild(inp);
+    rightCol.appendChild(div);
+  });
 
-    <div class="balanceSheet">
-      <div class="balanceCol">
-        <div class="balanceColTitle">Aufwand</div>
+  const totalsDiv = document.createElement('div');
+  totalsDiv.style.display='flex'; totalsDiv.style.justifyContent='space-between'; totalsDiv.style.marginTop='12px';
+  const totalAufwandSpan = document.createElement('div');
+  const totalErtragSpan = document.createElement('div');
+  totalAufwandSpan.textContent = 'Total Aufwand: ' + fmtCHF(calcTotalFromInputs(leftCol));
+  totalErtragSpan.textContent = 'Total Ertrag: ' + fmtCHF(calcTotalFromInputs(rightCol));
+  totalsDiv.appendChild(totalAufwandSpan); totalsDiv.appendChild(totalErtragSpan);
 
-        ${row("Warenaufwand", "warenaufwand", d.warenaufwand)}
-        ${row("Personalaufwand", "personalaufwand", d.personalaufwand)}
-        ${row("Raumaufwand (Miete)", "raumaufwand", d.raumaufwand)}
-        ${row("Marketingaufwand", "marketingaufwand", d.marketingaufwand)}
-        ${row("Verwaltungsaufwand", "verwaltungsaufwand", d.verwaltungsaufwand)}
-        ${row("Abschreibungen", "abschreibungen", d.abschreibungen)}
-        ${row("Zinsaufwand", "zinsaufwand", d.zinsaufwand)}
+  // Save button
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'btnPrimary';
+  saveBtn.textContent = 'Speichern';
+  saveBtn.style.marginTop = '10px';
 
-        <div class="balanceTotal">
-          <span>Total Aufwand</span>
-          <span id="totalAufwand">${fmtCHF(sumAufwand(d))}</span>
-        </div>
-      </div>
-
-      <div class="balanceDivider"></div>
-
-      <div class="balanceCol">
-        <div class="balanceColTitle">Ertrag</div>
-
-        ${row("Warenertrag (Umsatz)", "warenertrag", d.warenertrag)}
-        ${row("Dienstleistungsertrag", "dienstleistungsertrag", d.dienstleistungsertrag)}
-        ${row("Übriger Ertrag", "uebriger_ertrag", d.uebriger_ertrag)}
-        ${row("Zinsertrag", "zinsertrag", d.zinsertrag)}
-
-        <div class="balanceTotal">
-          <span>Total Ertrag</span>
-          <span id="totalErtrag">${fmtCHF(sumErtrag(d))}</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="balanceActions">
-      <button type="button" class="btn" id="saveIncomeBtn" data-year="${year}">Speichern</button>
-      <span class="muted small" id="saveIncomeInfo"></span>
-      <span class="muted small" style="margin-left:auto;font-weight:700;">
-        Ergebnis: <span id="resultIncome">${fmtCHF(sumErtrag(d) - sumAufwand(d))}</span>
-      </span>
-    </div>
-  `;
-
-  function row(label, key, val) {
-    return `
-      <div class="balanceRow">
-        <span>${label}</span>
-        <input class="incomeInput balanceInput" type="number" min="0" step="1" value="${Number(val||0)}" data-ikey="${key}" />
-      </div>
-    `;
-  }
-
-  // Live totals update
-  area.querySelectorAll(".incomeInput").forEach(inp => {
-    inp.addEventListener("input", () => {
-      const data = collectIncomeFromUI(area);
-      area.querySelector("#totalAufwand").textContent = fmtCHF(sumAufwand(data));
-      area.querySelector("#totalErtrag").textContent = fmtCHF(sumErtrag(data));
-      area.querySelector("#resultIncome").textContent = fmtCHF(sumErtrag(data) - sumAufwand(data));
+  // live update totals when inputs change
+  [leftCol, rightCol].forEach(col=>{
+    col.addEventListener('input', ()=> {
+      totalAufwandSpan.textContent = 'Total Aufwand: ' + fmtCHF(calcTotalFromInputs(leftCol));
+      totalErtragSpan.textContent = 'Total Ertrag: ' + fmtCHF(calcTotalFromInputs(rightCol));
     });
   });
 
-  // Save
-  area.querySelector("#saveIncomeBtn").addEventListener("click", () => {
-    const data = collectIncomeFromUI(area);
-    saveIncome(company.id, year, data);
-    const info = area.querySelector("#saveIncomeInfo");
-    if (info) info.textContent = `Gespeichert für ${year}.`;
+  saveBtn.addEventListener('click', ()=>{
+    const newData = {...defaultIncomeData()};
+    [...leftCol.querySelectorAll('input'), ...rightCol.querySelectorAll('input')].forEach(inp => {
+      const key = inp.dataset.key;
+      newData[key] = Number(inp.value || 0);
+    });
+    saveIncome(companyId, year, newData);
+    alert('Erfolgsrechnung gespeichert.');
   });
+
+  // append parts to container
+  html.appendChild(leftCol);
+  html.appendChild(rightCol);
+  html.appendChild(totalsDiv);
+  html.appendChild(saveBtn);
+  container.appendChild(html);
 }
 
-function collectIncomeFromUI(areaEl) {
-  const data = defaultIncomeData();
-  areaEl.querySelectorAll(".incomeInput").forEach(inp => {
-    const k = inp.dataset.ikey;
-    data[k] = Number(inp.value || 0);
+// helper to sum inputs inside a column element
+function calcTotalFromInputs(colElement) {
+  let sum = 0;
+  colElement.querySelectorAll('input').forEach(inp => {
+    sum += Number(inp.value || 0);
   });
-  return data;
+  return sum;
 }
+
+/* ------------------ Main Init & Tabs ------------------ */
+document.addEventListener('DOMContentLoaded', () => {
+  // Load selected company (object)
+  const company = getSelectedCompanyOrRedirect();
+  if (!company) return;
+
+  // Fill company header (IDs in your HTML: companyTitle, companyMeta)
+  const titleEl = document.getElementById('companyTitle') || document.getElementById('companyName') || document.querySelector('.companyHead h1');
+  const metaEl = document.getElementById('companyMeta') || document.getElementById('companyMeta') || document.querySelector('.companyHead .meta');
+
+  if (titleEl) titleEl.textContent = company.name || '';
+  if (metaEl) {
+    const legal = company.legal || company.legalForm || '';
+    const industry = company.industry || '';
+    const capital = company.startCapital || company.capital || 0;
+    const employees = company.employees || company.size || 0;
+    metaEl.textContent = `${legal} · ${industry || '–'} · Startkapital: ${new Intl.NumberFormat('de-CH', { maximumFractionDigits: 0 }).format(Number(capital))} CHF · Mitarbeitende: ${employees}`;
+  }
+
+  // Logout button
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', ()=> {
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(SELECTED_COMPANY_KEY);
+      window.location.href = 'index.html';
+    });
+  }
+
+  // Back to overview link/button (id backBtn or anchor)
+  const backBtn = document.getElementById('backBtn') || document.getElementById('backLink');
+  if (backBtn) {
+    backBtn.addEventListener('click', ()=> { window.location.href = 'overview.html'; });
+  }
+
+  // Main tabs: find .mainTab elements
+  const mainTabs = Array.from(document.querySelectorAll('.mainTab, .tabBtn, .tab-btn'));
+  const sections = Array.from(document.querySelectorAll('.tabSection, .tab-content, section[id^="tab-"]'));
+
+  function showMainTab(tabName) {
+    // hide all sections first
+    sections.forEach(sec => sec.classList.add('hidden'));
+    // remove active from tabs
+    mainTabs.forEach(t => t.classList.remove('active'));
+
+    // find requested section: id "tab-"+tabName or id === tabName
+    let section = document.getElementById(`tab-${tabName}`);
+    if (!section) section = document.getElementById(tabName);
+    if (!section) {
+      // try matching by data-section
+      section = document.querySelector(`.tabSection[data-section="${tabName}"]`);
+    }
+    if (!section) {
+      // fallback to first available
+      section = sections[0];
+    }
+
+    // activate tab button
+    const tabBtn = mainTabs.find(t => (t.dataset.tab || t.getAttribute('data-tab') || t.textContent.toLowerCase()).toString().includes(tabName));
+    if (tabBtn) tabBtn.classList.add('active');
+
+    section.classList.remove('hidden');
+
+    // render yearTabs for this section if any
+    const yearTabsContainer = section.querySelector('.yearTabs');
+    if (yearTabsContainer) {
+      // use section.id if available, else use 'tab-'+tabName
+      const sectionId = section.id || `tab-${tabName}`;
+      renderYearTabs(yearTabsContainer, company.id, sectionId);
+    }
+  }
+
+  // wire main tab buttons
+  mainTabs.forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      const t = btn.dataset.tab || btn.getAttribute('data-tab') || btn.textContent.trim().toLowerCase();
+      // prefer dataset tab exact value if present
+      const tabName = btn.dataset.tab || btn.getAttribute('data-tab') || t;
+      showMainTab(tabName);
+    });
+  });
+
+  // initial show: try to show Bilanz first
+  let initial = mainTabs.find(b => (b.dataset.tab === 'bilanz' || (b.textContent||'').toLowerCase().includes('bilanz')));
+  if (!initial && mainTabs.length) initial = mainTabs[0];
+  if (initial) {
+    initial.click();
+  } else {
+    // fallback: render yearTabs for any existing section
+    const anySection = sections[0];
+    if (anySection) {
+      const yearTabsContainer = anySection.querySelector('.yearTabs');
+      if (yearTabsContainer) renderYearTabs(yearTabsContainer, company.id, anySection.id || 'section');
+    }
+  }
+});
