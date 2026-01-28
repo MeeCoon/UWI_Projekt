@@ -1,47 +1,18 @@
 // js/company.js
-// Tab- & Jahres-Logik (ohne Blockade durch fehlenden User)
+// Firmenansicht mit Tabs + Jahreslogik
+// Tabs funktionieren IMMER, Login-Funktionen nur wenn vorhanden
 
 const USER_KEY = 'uwi_user';
-const COMPANIES_PREFIX = 'uwi_companies_';
-const SELECTED_COMPANY_PREFIX = 'uwi_currentCompany_';
-const BOOKINGS_PREFIX = 'uwi_bookings_';
 
-function getCurrentUserOrRedirect() {
-  const user = localStorage.getItem(USER_KEY);
-  if (!user) {
-    window.location.href = 'index.html';
-    return null;
-  }
-  return user;
+/* ------------------ Helpers ------------------ */
+function getCurrentUser() {
+  return localStorage.getItem(USER_KEY);
 }
 
-function companiesKey(user) { return COMPANIES_PREFIX + user; }
-function selectedCompanyKey(user) { return SELECTED_COMPANY_PREFIX + user; }
-function bookingsKey(user) { return BOOKINGS_PREFIX + user; }
-
-function loadCompaniesForUser(user) {
-  const raw = localStorage.getItem(companiesKey(user));
-  try { return raw ? JSON.parse(raw) : []; } catch(e){ console.error(e); return []; }
-}
-
-function loadBookingsForUser(user) {
-  const raw = localStorage.getItem(bookingsKey(user));
-  try { return raw ? JSON.parse(raw) : []; } catch(e){ console.error(e); return []; }
-}
-
-// Escape helper for safe HTML output
-function escapeHtml(str) {
-  if (str === undefined || str === null) return '';
-  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
-}
-
-function fmt(n){ return Number(n || 0).toFixed(2) + ' €'; }
-
-/* --------- Year Tabs Logic --------- */
+/* ------------------ Year Tabs ------------------ */
 function renderYearTabs(container) {
   container.innerHTML = '';
 
-  // Startjahr
   const years = [2025];
 
   years.forEach(year => {
@@ -78,19 +49,44 @@ function renderYearTabs(container) {
   container.appendChild(addBtn);
 }
 
-/* --------- Tabs --------- */
+/* ------------------ DOM Ready ------------------ */
 document.addEventListener('DOMContentLoaded', () => {
+
+  /* ---- Header Buttons ---- */
+  const backBtn = document.getElementById('backBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const userDisplay = document.getElementById('userDisplay');
+
+  const user = getCurrentUser();
+  if (user && userDisplay) {
+    userDisplay.textContent = `Angemeldet: ${user}`;
+  }
+
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      window.location.href = 'overview.html';
+    });
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem(USER_KEY);
+      window.location.href = 'index.html';
+    });
+  }
+
+  /* ---- Tabs ---- */
   const tabButtons = document.querySelectorAll('.tab-btn');
   const tabContents = document.querySelectorAll('.tab-content');
 
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
 
-      // Active-Status
+      // Active State
       tabButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      // Inhalte umschalten
+      // Inhalte wechseln
       tabContents.forEach(c => c.classList.add('hidden'));
       const tab = btn.dataset.tab;
       const content = document.getElementById(tab);
@@ -98,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       content.classList.remove('hidden');
 
-      // Jahres-Tabs nur für bestimmte Reiter
+      // Jahres-Tabs nur bei Bilanz / ER / Buchungen
       const yearTabs = content.querySelector('.yearTabs');
       if (yearTabs) {
         renderYearTabs(yearTabs);
