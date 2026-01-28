@@ -1,60 +1,174 @@
-<!doctype html>
-<html lang="de">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>UWI Unternehmenssimulation — Firmenansicht</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+// js/company.js
 
-<header class="topbar">
-  <div class="brand">UWI Unternehmenssimulation</div>
-  <nav class="nav-inline">
-    <span id="userDisplay" class="muted"></span>
-    <button id="backBtn" class="btn">Zur Übersicht</button>
-    <button id="logoutBtn" class="btn">Abmelden</button>
-  </nav>
-</header>
+const USER_KEY = "uwi_user";
+const SELECTED_COMPANY_KEY = "uwi_selected_company";
 
-<main class="container">
-  <section class="card">
-    <h1 class="h2">Firma</h1>
+// Jahre pro Firma + Tab speichern
+function yearsKey(companyId, section) {
+  return `uwi_years_${companyId}_${section}`;
+}
 
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="balance">Bilanz</button>
-      <button class="tab-btn" data-tab="income">Erfolgsrechnung</button>
-      <button class="tab-btn" data-tab="bookings">Buchungssätze</button>
-      <button class="tab-btn" data-tab="economy">Wirtschaft</button>
-      <button class="tab-btn" data-tab="law">Recht</button>
-    </div>
+function getUser() {
+  return localStorage.getItem(USER_KEY);
+}
 
-    <div id="balance" class="tab-content">
-      <div class="yearTabs"></div>
-    </div>
+function getSelectedCompany() {
+  const raw = localStorage.getItem(SELECTED_COMPANY_KEY);
+  return raw ? JSON.parse(raw) : null;
+}
 
-    <div id="income" class="tab-content hidden">
-      <div class="yearTabs"></div>
-    </div>
+function defaultYears() {
+  return ["2024", "2025", "2026"];
+}
 
-    <div id="bookings" class="tab-content hidden">
-      <div class="yearTabs"></div>
-    </div>
+function getYears(companyId, section) {
+  const raw = localStorage.getItem(yearsKey(companyId, section));
+  const arr = raw ? JSON.parse(raw) : null;
+  return Array.isArray(arr) && arr.length ? arr : defaultYears();
+}
 
-    <div id="economy" class="tab-content hidden">
-      <div class="small muted">Wirtschaftlicher Inhalt</div>
-    </div>
+function saveYears(companyId, section, years) {
+  localStorage.setItem(yearsKey(companyId, section), JSON.stringify(years));
+}
 
-    <div id="law" class="tab-content hidden">
-      <div class="small muted">Rechtlicher Inhalt</div>
-    </div>
-  </section>
-</main>
+function activeSection() {
+  const btn = document.querySelector(".tab-btn.active");
+  return btn ? btn.dataset.tab : "balance";
+}
 
-<footer class="footer">
-  <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
-</footer>
+// Rendert die Jahr-Tabs in der aktuell sichtbaren Section
+function renderYearTabs(section) {
+  const company = getSelectedCompany();
+  if (!company) return;
 
-<script src="js/company.js"></script>
-</body>
-</html>
+  // NUR den yearTabs-Container innerhalb der aktiven tab-content nehmen
+  const container = document.querySelector(`#${section} .yearTabs`);
+  if (!container) return;
+
+  const years = getYears(company.id, section);
+
+  // Falls noch kein aktives Jahr gesetzt ist: erstes
+  const current = container.dataset.currentYear || years[0];
+  container.dataset.currentYear = current;
+
+  container.innerHTML = `
+    ${years
+      .map(
+        (y) =>
+          `<button type="button" class="yearBtn ${y === current ? "active" : ""}" data-year="${y}">${y}</button>`
+      )
+      .join("")}
+    <button type="button" class="addYearBtn" data-action="add-year">+ Jahr hinzufügen</button>
+  `;
+
+  // Optional: einfacher Platzhalter-Text pro Jahr (damit man den Wechsel sieht)
+  // (ohne Layout zu ändern – nur Text)
+  let content = document.querySelector(`#${section} .yearContent`);
+  if (!content) {
+    content = document.createElement("div");
+    content.className = "yearContent";
+    document.getElementById(section).appendChild(content);
+  }
+  content.textContent = `${section.toUpperCase()} ${current} (Platzhalter)`;
+}
+
+function showMainTab(section) {
+  // Inhalte umschalten
+  document.querySelectorAll(".tab-content").forEach((el) => el.classList.add("hidden"));
+  document.getElementById(section)?.classList.remove("hidden");
+
+  // Button active setzen
+  document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+  document.querySelector(`.tab-btn[data-tab="${section}"]`)?.classList.add("active");
+
+  // YearTabs neu rendern (wichtig!)
+  renderYearTabs(section);
+}
+
+// ✅ EIN einziger globaler Click-Handler (Event Delegation)
+// Dadurch funktionieren auch neu erstellte Jahr-Buttons!
+document.addEventListener("click", (e) => {
+  // Haupt-Tabs
+  const tabBtn = e.target.closest(".tab-btn");
+  if (tabBtn) {
+    showMainTab(tabBtn.dataset.tab);
+    return;
+  }
+
+  // Jahre klicken
+  const yearBtn = e.target.closest(".yearBtn");
+  if (yearBtn) {
+    const section = activeSection();
+    const container = document.querySelector(`#${section} .yearTabs`);
+    if (!container) return;
+
+    container.dataset.currentYear = yearBtn.dataset.year;
+    renderYearTabs(section);
+    return;
+  }
+
+  // Jahr hinzufügen
+  const addBtn = e.target.closest(".addYearBtn");
+  if (addBtn) {
+    const section = activeSection();
+    const company = getSelectedCompany();
+    if (!company) return;
+
+    const input = prompt("Jahr eingeben (z.B. 2027):");
+    if (!input) return;
+
+    const year = input.trim();
+    const valid = /^\d{4}$/.test(year) && Number(year) >= 2000 && Number(year) <= 2100;
+    if (!valid) {
+      alert("Bitte ein gültiges Jahr eingeben (2000–2100).");
+      return;
+    }
+
+    const years = getYears(company.id, section);
+    if (years.includes(year)) {
+      alert("Dieses Jahr gibt es schon.");
+      return;
+    }
+
+    years.push(year);
+    years.sort(); // optional
+    saveYears(company.id, section, years);
+
+    // neues Jahr direkt aktivieren
+    const container = document.querySelector(`#${section} .yearTabs`);
+    if (container) container.dataset.currentYear = year;
+
+    renderYearTabs(section);
+    return;
+  }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Buttons oben fixen
+  const backBtn = document.getElementById("backBtn");
+  if (backBtn) backBtn.addEventListener("click", () => (window.location.href = "overview.html"));
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(SELECTED_COMPANY_KEY);
+      window.location.href = "index.html";
+    });
+  }
+
+  // User anzeigen
+  const u = getUser();
+  const userDisplay = document.getElementById("userDisplay");
+  if (userDisplay) userDisplay.textContent = u ? `Angemeldet: ${u}` : "";
+
+  // Falls keine Firma gewählt -> zurück
+  const company = getSelectedCompany();
+  if (!company) {
+    window.location.href = "overview.html";
+    return;
+  }
+
+  // Start: Bilanz + erste Jahre rendern
+  showMainTab("balance");
+});
