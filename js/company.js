@@ -279,3 +279,145 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!initialTabBtn && tabButtons.length) initialTabBtn = tabButtons[0];
   if (initialTabBtn) initialTabBtn.click();
 });
+// Key: pro Firma + pro Jahr
+function incomeKey(companyId, year) {
+  return `uwi_income_${companyId}_${year}`;
+}
+
+function defaultIncomeData() {
+  return {
+    // Aufwand
+    warenaufwand: 0,
+    personalaufwand: 0,
+    raumaufwand: 0,
+    marketingaufwand: 0,
+    verwaltungsaufwand: 0,
+    abschreibungen: 0,
+    zinsaufwand: 0,
+
+    // Ertrag
+    warenertrag: 0,
+    dienstleistungsertrag: 0,
+    uebriger_ertrag: 0,
+    zinsertrag: 0
+  };
+}
+
+function loadIncome(companyId, year) {
+  const raw = localStorage.getItem(incomeKey(companyId, year));
+  if (!raw) return defaultIncomeData();
+  try {
+    const obj = JSON.parse(raw);
+    return { ...defaultIncomeData(), ...obj };
+  } catch {
+    return defaultIncomeData();
+  }
+}
+
+function saveIncome(companyId, year, data) {
+  localStorage.setItem(incomeKey(companyId, year), JSON.stringify(data));
+}
+
+function sumAufwand(d){
+  return (d.warenaufwand||0)+(d.personalaufwand||0)+(d.raumaufwand||0)+(d.marketingaufwand||0)+
+         (d.verwaltungsaufwand||0)+(d.abschreibungen||0)+(d.zinsaufwand||0);
+}
+function sumErtrag(d){
+  return (d.warenertrag||0)+(d.dienstleistungsertrag||0)+(d.uebriger_ertrag||0)+(d.zinsertrag||0);
+}
+
+function renderIncome(year) {
+  const company = getSelectedCompany();
+  if (!company) return;
+
+  const area = document.getElementById("incomeArea");
+  if (!area) return;
+
+  const d = loadIncome(company.id, year);
+
+  area.innerHTML = `
+    <div class="balanceHeaderBlue">
+      <div class="balanceTitle">Erfolgsrechnung ${year}</div>
+      <div class="balanceSub">alle Beträge in CHF (Start: 0)</div>
+    </div>
+
+    <div class="balanceSheet">
+      <div class="balanceCol">
+        <div class="balanceColTitle">Aufwand</div>
+
+        ${row("Warenaufwand", "warenaufwand", d.warenaufwand)}
+        ${row("Personalaufwand", "personalaufwand", d.personalaufwand)}
+        ${row("Raumaufwand (Miete)", "raumaufwand", d.raumaufwand)}
+        ${row("Marketingaufwand", "marketingaufwand", d.marketingaufwand)}
+        ${row("Verwaltungsaufwand", "verwaltungsaufwand", d.verwaltungsaufwand)}
+        ${row("Abschreibungen", "abschreibungen", d.abschreibungen)}
+        ${row("Zinsaufwand", "zinsaufwand", d.zinsaufwand)}
+
+        <div class="balanceTotal">
+          <span>Total Aufwand</span>
+          <span id="totalAufwand">${fmtCHF(sumAufwand(d))}</span>
+        </div>
+      </div>
+
+      <div class="balanceDivider"></div>
+
+      <div class="balanceCol">
+        <div class="balanceColTitle">Ertrag</div>
+
+        ${row("Warenertrag (Umsatz)", "warenertrag", d.warenertrag)}
+        ${row("Dienstleistungsertrag", "dienstleistungsertrag", d.dienstleistungsertrag)}
+        ${row("Übriger Ertrag", "uebriger_ertrag", d.uebriger_ertrag)}
+        ${row("Zinsertrag", "zinsertrag", d.zinsertrag)}
+
+        <div class="balanceTotal">
+          <span>Total Ertrag</span>
+          <span id="totalErtrag">${fmtCHF(sumErtrag(d))}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="balanceActions">
+      <button type="button" class="btn" id="saveIncomeBtn" data-year="${year}">Speichern</button>
+      <span class="muted small" id="saveIncomeInfo"></span>
+      <span class="muted small" style="margin-left:auto;font-weight:700;">
+        Ergebnis: <span id="resultIncome">${fmtCHF(sumErtrag(d) - sumAufwand(d))}</span>
+      </span>
+    </div>
+  `;
+
+  function row(label, key, val) {
+    return `
+      <div class="balanceRow">
+        <span>${label}</span>
+        <input class="incomeInput balanceInput" type="number" min="0" step="1" value="${Number(val||0)}" data-ikey="${key}" />
+      </div>
+    `;
+  }
+
+  // Live totals update
+  area.querySelectorAll(".incomeInput").forEach(inp => {
+    inp.addEventListener("input", () => {
+      const data = collectIncomeFromUI(area);
+      area.querySelector("#totalAufwand").textContent = fmtCHF(sumAufwand(data));
+      area.querySelector("#totalErtrag").textContent = fmtCHF(sumErtrag(data));
+      area.querySelector("#resultIncome").textContent = fmtCHF(sumErtrag(data) - sumAufwand(data));
+    });
+  });
+
+  // Save
+  area.querySelector("#saveIncomeBtn").addEventListener("click", () => {
+    const data = collectIncomeFromUI(area);
+    saveIncome(company.id, year, data);
+    const info = area.querySelector("#saveIncomeInfo");
+    if (info) info.textContent = `Gespeichert für ${year}.`;
+  });
+}
+
+function collectIncomeFromUI(areaEl) {
+  const data = defaultIncomeData();
+  areaEl.querySelectorAll(".incomeInput").forEach(inp => {
+    const k = inp.dataset.ikey;
+    data[k] = Number(inp.value || 0);
+  });
+  return data;
+}
