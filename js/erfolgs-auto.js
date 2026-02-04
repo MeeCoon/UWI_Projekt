@@ -1,3 +1,4 @@
+console.log("✅ erfolgsrechnung-auto.js geladen");
 const USER_KEY = "uwi_user";
 const COMPANIES_PREFIX = "uwi_companies_";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
