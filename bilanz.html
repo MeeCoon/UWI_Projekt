@@ -10,6 +10,11 @@
 
 <header class="topbar">
   <div class="brand">UWI Unternehmenssimulation</div>
+  <nav class="nav-inline">
+    <span id="userDisplay" class="muted"></span>
+    <button id="backBtn" class="btn" type="button">Zur Firma</button>
+    <button id="logoutBtn" class="btn" type="button">Abmelden</button>
+  </nav>
 </header>
 
 <main class="container">
@@ -17,9 +22,12 @@
 
 <h1 class="h2">Bilanz nach Schweizer Kontenrahmen KMU (vereinfachte Version)</h1>
 
+<!-- ✅ Jahre -->
+<div class="yearTabs" id="yearTabs" style="margin-top:12px;"></div>
+
 <div class="balanceHeaderBlue">
-  <div class="balanceTitle">Bilanz</div>
-  <div class="balanceSub">Alle Beträge starten bei 0 CHF</div>
+  <div class="balanceTitle" id="balanceTitle">Bilanz</div>
+  <div class="balanceSub" id="balanceSub">Alle Beträge starten bei 0 CHF</div>
 </div>
 
 <div class="balanceSheet">
@@ -50,7 +58,7 @@
 
 <div class="balanceTotal">
   <span>Total Aktiven</span>
-  <span>0 CHF</span>
+  <span id="totalAktiven">0 CHF</span>
 </div>
 </div>
 
@@ -80,7 +88,7 @@
 
 <div class="balanceTotal">
   <span>Total Passiven</span>
-  <span>0 CHF</span>
+  <span id="totalPassiven">0 CHF</span>
 </div>
 </div>
 
@@ -93,5 +101,7 @@
   <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
 </footer>
 
+<!-- ✅ Jahre + Bilanz-Auto -->
+<script src="js/bilanz-auto.js"></script>
 </body>
 </html>
