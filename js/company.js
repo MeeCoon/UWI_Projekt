@@ -1,12 +1,3 @@
-// js/company.js
-// Firmenansicht – korrigierte und erweiterte Version
-// - Lädt ausgewählte Firma aus localStorage ("uwi_selected_company" als JSON-Objekt)
-// - Dynamische Year-Tabs pro Sektion (persistiert pro Firma+Sektion)
-// - "+ Jahr hinzufügen" mit Validierung (2000-2100)
-// - Erzeugt Year-Content bei Bedarf; spezielle Inhalte für "Bilanz" und "Erfolgsrechnung"
-// - Speicherung von Erfolgsrechnungsdaten pro Firma+Jahr
-// - Main-Tab-Handling, Logout-Handler
-
 /* ------------------ Konfiguration Keys ------------------ */
 const USER_KEY = 'uwi_user';
 const SELECTED_COMPANY_KEY = 'uwi_selected_company'; // JSON-objekt
