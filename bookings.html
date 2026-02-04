@@ -2,47 +2,91 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>UWI — Buchungssätze</title>
+  <title>Buchungssätze</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
 
+<body>
 <header class="topbar">
   <div class="brand">UWI Unternehmenssimulation</div>
   <nav class="nav-inline">
+    <span id="userDisplay" class="muted"></span>
     <button id="backBtn" class="btn">Zur Firma</button>
     <button id="logoutBtn" class="btn">Abmelden</button>
   </nav>
 </header>
 
 <main class="container">
+  <section class="card">
 
-<section class="card">
-<h1 class="h2">Buchungssätze</h1>
-<p class="muted">Jede Buchung aktualisiert automatisch die Bilanz.</p>
+    <h1 class="h2">Buchungssätze</h1>
 
-<table class="balanceSheet" style="width:100%; margin-top:12px;">
-  <thead>
-    <tr>
-      <th>Buchungstatsache</th>
-      <th>Soll (Konto)</th>
-      <th>Haben (Konto)</th>
-      <th>Betrag (CHF)</th>
-      <th>Aktion</th>
-    </tr>
-  </thead>
+    <div class="tabs">
+      <a class="tab-link" href="bilanz.html">Bilanz</a>
+      <a class="tab-link" href="erfolgsrechnung.html">Erfolgsrechnung</a>
+      <a class="tab-link active" href="bookings.html">Buchungssätze</a>
+      <a class="tab-link" href="wirtschaft.html">Wirtschaft</a>
+      <a class="tab-link" href="recht.html">Recht</a>
+    </div>
 
-  <tbody id="bookingTableBody">
-  </tbody>
-</table>
+    <div class="bookings-layout">
 
-<button class="btn primary" id="addRowBtn" style="margin-top:12px;">
-+ Neue Buchung hinzufügen
-</button>
+      <!-- TABELLE ÜBER GANZE BREITE -->
+      <table class="booking-table">
+        <thead>
+          <tr>
+            <th>Buchungstatsache</th>
+            <th>Soll</th>
+            <th>Haben</th>
+            <th>Betrag (CHF)</th>
+          </tr>
+        </thead>
+        <tbody id="bookingTableBody">
+        </tbody>
+      </table>
 
-</section>
+      <!-- FORMULAR DARUNTER -->
+      <div class="booking-form">
+        <div class="field full-row">
+          <label>Buchungstatsache</label>
+          <textarea id="fact" rows="2" placeholder="z.B. Kauf von Mobiliar gegen Rechnung"></textarea>
+        </div>
 
+        <div class="field">
+          <label>Soll</label>
+          <select id="soll">
+            <option value="">— Konto wählen —</option>
+            <option>Mobiliar</option>
+            <option>Bank</option>
+            <option>Kasse</option>
+            <option>Debitoren</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Haben</label>
+          <select id="haben">
+            <option value="">— Konto wählen —</option>
+            <option>Verbindlichkeiten</option>
+            <option>Eigenkapital</option>
+            <option>Bank</option>
+            <option>Umsatz</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Betrag (CHF)</label>
+          <input type="number" id="betrag" placeholder="z.B. 2500">
+        </div>
+
+        <div class="field">
+          <label>&nbsp;</label>
+          <button id="addBookingBtn" class="btn primary">Buchen</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
 </main>
 
 <footer class="footer">
