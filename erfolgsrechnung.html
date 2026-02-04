@@ -18,92 +18,88 @@
 </header>
 
 <main class="container">
-<section class="card">
-  <h1 class="h2">Erfolgsrechnung nach Schweizer Kontenrahmen KMU (vereinfachte Version)</h1>
+  <section class="card">
+    <h1 class="h2">Erfolgsrechnung nach Schweizer Kontenrahmen KMU (vereinfachte Version)</h1>
 
-  <!-- Jahre -->
-  <div class="yearTabs" id="yearTabs" style="margin-top:12px;"></div>
+    <!-- Jahre (wie Bilanz) -->
+    <div class="yearTabs" id="yearTabs" style="margin-top:12px;"></div>
 
-  <div class="balanceHeaderBlue">
-    <div class="balanceTitle" id="erTitle">Erfolgsrechnung</div>
-    <div class="balanceSub" id="erSub">Beträge werden aus Buchungen berechnet (Start = 0)</div>
-  </div>
+    <div class="balanceHeaderBlue">
+      <div class="balanceTitle" id="erTitle">Erfolgsrechnung</div>
+      <div class="balanceSub" id="erSub">Beträge werden aus Buchungen berechnet (Start = 0)</div>
+    </div>
 
-  <div class="balanceSheet">
+    <div class="balanceSheet">
+      <!-- AUFWAND -->
+      <div class="balanceCol" id="colAufwand">
+        <div class="balanceColTitle">Aufwand</div>
 
-    <!-- AUFWAND -->
-    <div class="balanceCol" id="colAufwand">
-      <div class="balanceColTitle">Aufwand</div>
+        <div class="balanceBlockTitle">4 – Material-, Handelswaren- & Dienstleistungsaufwand</div>
+        <div class="balanceRow"><span>4000 Materialaufwand Produktion</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>4200 Handelswarenaufwand (Warenaufwand)</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>4400 Aufwand für bezogene Dienstleistungen</span><input class="balanceInput" type="number" value="0"></div>
 
-      <div class="balanceBlockTitle">4 – Material-, Handelswaren- & Dienstleistungsaufwand</div>
-      <div class="balanceRow"><span>4000 Materialaufwand Produktion</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>4200 Handelswarenaufwand (Warenaufwand)</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>4400 Aufwand für bezogene Dienstleistungen</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceBlockTitle">5 – Personalaufwand</div>
+        <div class="balanceRow"><span>5000 Lohnaufwand</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>5700 Sozialversicherungsaufwand</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>5800 Übriger Personalaufwand</span><input class="balanceInput" type="number" value="0"></div>
 
-      <div class="balanceBlockTitle">5 – Personalaufwand</div>
-      <div class="balanceRow"><span>5000 Lohnaufwand</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>5700 Sozialversicherungsaufwand</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>5800 Übriger Personalaufwand</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceBlockTitle">6 – Übriger Aufwand / Abschreibungen / Finanzen</div>
+        <div class="balanceRow"><span>6000 Raumaufwand</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>6100 Unterhalt, Reparaturen, Ersatz (URE)</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>6200 Fahrzeugaufwand</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>6300 Versicherungsaufwand</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>6500 Verwaltungsaufwand</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>6800 Abschreibungen</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>6900 Finanzaufwand</span><input class="balanceInput" type="number" value="0"></div>
 
-      <div class="balanceBlockTitle">6 – Übriger Aufwand / Abschreibungen / Finanzen</div>
-      <div class="balanceRow"><span>6000 Raumaufwand</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>6100 Unterhalt, Reparaturen, Ersatz (URE)</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>6200 Fahrzeugaufwand</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>6300 Versicherungsaufwand</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>6500 Verwaltungsaufwand</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>6800 Abschreibungen</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>6900 Finanzaufwand</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceBlockTitle">8 – Betriebsfremd / ausserordentlich</div>
+        <div class="balanceRow"><span>8000 Betriebsfremder Aufwand</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>8500 Ausserordentlicher Aufwand</span><input class="balanceInput" type="number" value="0"></div>
 
-      <div class="balanceBlockTitle">8 – Betriebsfremd / ausserordentlich</div>
-      <div class="balanceRow"><span>8000 Betriebsfremder Aufwand</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>8500 Ausserordentlicher Aufwand</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceTotal">
+          <span>Total Aufwand</span>
+          <span id="totalAufwand">0 CHF</span>
+        </div>
+      </div>
 
-      <div class="balanceTotal">
-        <span>Total Aufwand</span>
-        <span id="totalAufwand">0 CHF</span>
+      <div class="balanceDivider"></div>
+
+      <!-- ERTRAG -->
+      <div class="balanceCol" id="colErtrag">
+        <div class="balanceColTitle">Ertrag</div>
+
+        <div class="balanceBlockTitle">3 – Betriebsertrag</div>
+        <div class="balanceRow"><span>3000 Produktionserlöse</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>3200 Handelserlöse (Warenertrag)</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>3400 Dienstleistungserlöse</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>3600 Übrige Erlöse</span><input class="balanceInput" type="number" value="0"></div>
+
+        <div class="balanceBlockTitle">7 – Nebenerfolg</div>
+        <div class="balanceRow"><span>7000 Ertrag Nebenbetrieb</span><input class="balanceInput" type="number" value="0"></div>
+
+        <div class="balanceBlockTitle">8 – Betriebsfremd / ausserordentlich</div>
+        <div class="balanceRow"><span>8100 Betriebsfremder Ertrag</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>8510 Ausserordentlicher Ertrag</span><input class="balanceInput" type="number" value="0"></div>
+
+        <div class="balanceTotal">
+          <span>Total Ertrag</span>
+          <span id="totalErtrag">0 CHF</span>
+        </div>
       </div>
     </div>
 
-    <div class="balanceDivider"></div>
-
-    <!-- ERTRAG -->
-    <div class="balanceCol" id="colErtrag">
-      <div class="balanceColTitle">Ertrag</div>
-
-      <div class="balanceBlockTitle">3 – Betriebsertrag</div>
-      <div class="balanceRow"><span>3000 Produktionserlöse</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>3200 Handelserlöse (Warenertrag)</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>3400 Dienstleistungserlöse</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>3600 Übrige Erlöse</span><input class="balanceInput" type="number" value="0"></div>
-
-      <div class="balanceBlockTitle">7 – Nebenerfolg</div>
-      <div class="balanceRow"><span>7000 Ertrag Nebenbetrieb</span><input class="balanceInput" type="number" value="0"></div>
-
-      <div class="balanceBlockTitle">8 – Betriebsfremd / ausserordentlich</div>
-      <div class="balanceRow"><span>8100 Betriebsfremder Ertrag</span><input class="balanceInput" type="number" value="0"></div>
-      <div class="balanceRow"><span>8510 Ausserordentlicher Ertrag</span><input class="balanceInput" type="number" value="0"></div>
-
-      <div class="balanceTotal">
-        <span>Total Ertrag</span>
-        <span id="totalErtrag">0 CHF</span>
-      </div>
+    <div class="balanceActions">
+      <span class="muted"><strong>Jahresergebnis:</strong> <span id="jahresErgebnis">0 CHF</span></span>
+      <span class="muted small" style="margin-left:auto;">Buchungen im Jahr: <b id="countBookings">0</b></span>
     </div>
-
-  </div>
-
-  <div class="balanceActions">
-    <span class="muted"><strong>Jahresergebnis:</strong> <span id="jahresErgebnis">0 CHF</span></span>
-    <span class="muted small" style="margin-left:auto;">Buchungen im Jahr: <b id="countBookings">0</b></span>
-  </div>
-
-</section>
+  </section>
 </main>
 
 <footer class="footer">
   <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
 </footer>
 
-<!-- WICHTIG: exakt dieser Dateiname -->
 <script src="js/erfolgsrechnung-auto.js"></script>
 </body>
 </html>
