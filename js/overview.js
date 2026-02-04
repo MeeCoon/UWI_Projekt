@@ -23,6 +23,15 @@ function loadCompanies(user) {
   }
 }
 
+function escapeHtml(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
 function renderCompanies(user) {
   const list = document.getElementById("companiesList");
   if (!list) return;
@@ -36,48 +45,42 @@ function renderCompanies(user) {
   }
 
   companies.forEach((c) => {
-    const row = document.createElement("div");
-    row.className = "listItem";
-
     const legal = c.legalForm || c.legal || "–";
     const industry = c.industry || "–";
     const employees = c.employees ?? c.size ?? "–";
 
+    const row = document.createElement("div");
+    row.className = "listItem";
     row.innerHTML = `
       <div class="listMain">
         <div class="listTitle">${escapeHtml(c.name || "Ohne Name")}</div>
         <div class="muted small">${escapeHtml(legal)} · ${escapeHtml(industry)} · Mitarbeitende: ${escapeHtml(String(employees))}</div>
       </div>
       <div class="listActions">
-        <button class="btn" type="button" data-open="${c.id}">Öffnen</button>
+        <button class="btn" type="button" data-open="${escapeHtml(c.id)}">Öffnen</button>
       </div>
     `;
-
-    row.querySelector(`[data-open="${c.id}"]`).addEventListener("click", () => {
-      localStorage.setItem(currentCompanyKey(user), c.id);
-      window.location.href = "company.html";
-    });
-
     list.appendChild(row);
   });
-}
 
-// mini safe html
-function escapeHtml(s){
-  return String(s)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+  // ✅ Event-Delegation: funktioniert auch, wenn später neu gerendert wird
+  list.onclick = (e) => {
+    const btn = e.target.closest("[data-open]");
+    if (!btn) return;
+
+    const id = btn.getAttribute("data-open");
+    localStorage.setItem(currentCompanyKey(user), id);
+
+    // ✅ harte Navigation
+    window.location.assign("company.html");
+  };
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const user = getUserOrRedirect();
   if (!user) return;
 
-  const userDisplay = document.getElementById("userDisplay");
-  if (userDisplay) userDisplay.textContent = `Angemeldet: ${user}`;
+  document.getElementById("userDisplay").textContent = `Angemeldet: ${user}`;
 
   document.getElementById("logoutBtn")?.addEventListener("click", () => {
     localStorage.removeItem(USER_KEY);
