@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>UWI Unternehmenssimulation — Firmenansicht</title>
+  <title>UWI Unternehmenssimulation — Firma</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
   <header class="topbar">
     <div class="brand">UWI Unternehmenssimulation</div>
@@ -21,37 +22,20 @@
       <h1 id="companyTitle" class="h2">Firma</h1>
       <div id="companyMeta" class="small muted"></div>
 
-      <div class="tabs">
-        <button class="tab-btn active" type="button" data-tab="balance">Bilanz</button>
-        <button class="tab-btn" type="button" data-tab="income">Erfolgsrechnung</button>
-        <button class="tab-btn" type="button" data-tab="bookings">Buchungssätze</button>
-        <button class="tab-btn" type="button" data-tab="economy">Wirtschaft</button>
-        <button class="tab-btn" type="button" data-tab="law">Recht</button>
+      <!-- Navigation als LINKS zu eigenen Seiten -->
+      <div class="tabs" style="margin-top:14px;">
+        <a class="tab-link active" href="bilanz.html">Bilanz</a>
+        <a class="tab-link" href="erfolgsrechnung.html">Erfolgsrechnung</a>
+        <a class="tab-link" href="buchungen.html">Buchungssätze</a>
+        <a class="tab-link" href="wirtschaft.html">Wirtschaft</a>
+        <a class="tab-link" href="recht.html">Recht</a>
       </div>
 
-      <div id="balance" class="tab-content">
-        <div class="yearTabs"></div>
-        <div id="balanceArea" class="contentBox"></div>
-      </div>
-
-      <div id="income" class="tab-content hidden">
-        <div class="yearTabs"></div>
-        <div id="incomeArea" class="contentBox"></div>
-      </div>
-
-      <div id="bookings" class="tab-content hidden">
-        <div class="yearTabs"></div>
-        <div class="contentBox muted">Buchungssätze (kommt danach)</div>
-      </div>
-
-      <div id="economy" class="tab-content hidden">
-        <div class="yearTabs"></div>
-        <div class="contentBox muted">Wirtschaft (kommt danach)</div>
-      </div>
-
-      <div id="law" class="tab-content hidden">
-        <div class="yearTabs"></div>
-        <div class="contentBox muted">Recht (kommt danach)</div>
+      <div class="tab-content" style="margin-top:12px;">
+        <div class="muted">
+          Wähle oben eine Seite aus (Bilanz / Erfolgsrechnung / …).<br>
+          Diese Seite dient nur als Firmen-Startseite.
+        </div>
       </div>
     </section>
   </main>
@@ -60,6 +44,78 @@
     <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
   </footer>
 
-  <script src="js/company.js"></script>
+  <script>
+    // Minimal: Back + Logout + Anzeige (passt zu euren Keys aus overview/company)
+    const USER_KEY = "uwi_user";
+    const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
+    const COMPANIES_PREFIX = "uwi_companies_";
+
+    const companiesKey = (user) => `${COMPANIES_PREFIX}${user}`;
+    const currentCompanyKey = (user) => `${CURRENT_COMPANY_PREFIX}${user}`;
+
+    function loadCompanies(user){
+      try { return JSON.parse(localStorage.getItem(companiesKey(user)) || "[]"); }
+      catch { return []; }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = localStorage.getItem(USER_KEY);
+      if (!user) { window.location.href = "index.html"; return; }
+
+      document.getElementById("userDisplay").textContent = `Angemeldet: ${user}`;
+
+      document.getElementById("backBtn").addEventListener("click", () => {
+        window.location.href = "overview.html";
+      });
+
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem(USER_KEY);
+        localStorage.removeItem(currentCompanyKey(user));
+        window.location.href = "index.html";
+      });
+
+      // Firma laden & anzeigen (optional, aber praktisch)
+      const companyId = localStorage.getItem(currentCompanyKey(user));
+      if (!companyId) { window.location.href = "overview.html"; return; }
+
+      const company = loadCompanies(user).find(c => c.id === companyId);
+      if (!company) { window.location.href = "overview.html"; return; }
+
+      document.getElementById("companyTitle").textContent = company.name || "Firma";
+
+      const legal = company.legalForm || company.legal || "–";
+      const industry = company.industry || "–";
+      const capital = Number(company.startCapital ?? company.capital ?? 0);
+      const emp = company.employees ?? company.size ?? 0;
+
+      // 100000 -> 100'000 CHF
+      const fmtCHF = (n) => {
+        const s = Math.round(Number(n || 0)).toString();
+        return s.replace(/\B(?=(\d{3})+(?!\d))/g, "'") + " CHF";
+      };
+
+      document.getElementById("companyMeta").textContent =
+        `${legal} · ${industry} · Startkapital: ${fmtCHF(capital)} · Mitarbeitende: ${emp}`;
+    });
+  </script>
+
+  <style>
+    /* kleine Ergänzung, falls ihr tab-link noch nicht habt */
+    .tab-link{
+      display:inline-block;
+      padding:8px 12px;
+      border-radius:8px;
+      border:1px solid rgba(11,18,32,0.04);
+      background:#f8fafc;
+      color:inherit;
+      text-decoration:none;
+      cursor:pointer;
+    }
+    .tab-link.active{
+      background: var(--accent);
+      color:#fff;
+      border:0;
+    }
+  </style>
 </body>
 </html>
