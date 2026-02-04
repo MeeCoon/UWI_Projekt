@@ -21,7 +21,7 @@
   <section class="card">
     <h1 class="h2">Erfolgsrechnung nach Schweizer Kontenrahmen KMU (vereinfachte Version)</h1>
 
-    <!-- Jahre (wie Bilanz) -->
+    <!-- Jahre wie bei Bilanz -->
     <div class="yearTabs" id="yearTabs" style="margin-top:12px;"></div>
 
     <div class="balanceHeaderBlue">
@@ -30,6 +30,7 @@
     </div>
 
     <div class="balanceSheet">
+
       <!-- AUFWAND -->
       <div class="balanceCol" id="colAufwand">
         <div class="balanceColTitle">Aufwand</div>
@@ -51,9 +52,9 @@
         <div class="balanceRow"><span>6300 Versicherungsaufwand</span><input class="balanceInput" type="number" value="0"></div>
         <div class="balanceRow"><span>6500 Verwaltungsaufwand</span><input class="balanceInput" type="number" value="0"></div>
         <div class="balanceRow"><span>6800 Abschreibungen</span><input class="balanceInput" type="number" value="0"></div>
-        <div class="balanceRow"><span>6900 Finanzaufwand</span><input class="balanceInput" type="number" value="0"></div>
+        <div class="balanceRow"><span>6900 Finanzaufwand</span><input class="balanceInput" type="number" value="0"></divser>
 
-        <div class="balanceBlockTitle">8 – Betriebsfremd / ausserordentlich</div>
+        <div class="balanceBlockTitle">8 – Betriebsfremd / ausserordentlich (Aufwand)</div>
         <div class="balanceRow"><span>8000 Betriebsfremder Aufwand</span><input class="balanceInput" type="number" value="0"></div>
         <div class="balanceRow"><span>8500 Ausserordentlicher Aufwand</span><input class="balanceInput" type="number" value="0"></div>
 
@@ -78,7 +79,7 @@
         <div class="balanceBlockTitle">7 – Nebenerfolg</div>
         <div class="balanceRow"><span>7000 Ertrag Nebenbetrieb</span><input class="balanceInput" type="number" value="0"></div>
 
-        <div class="balanceBlockTitle">8 – Betriebsfremd / ausserordentlich</div>
+        <div class="balanceBlockTitle">8 – Betriebsfremd / ausserordentlich (Ertrag)</div>
         <div class="balanceRow"><span>8100 Betriebsfremder Ertrag</span><input class="balanceInput" type="number" value="0"></div>
         <div class="balanceRow"><span>8510 Ausserordentlicher Ertrag</span><input class="balanceInput" type="number" value="0"></div>
 
@@ -87,6 +88,7 @@
           <span id="totalErtrag">0 CHF</span>
         </div>
       </div>
+
     </div>
 
     <div class="balanceActions">
@@ -100,6 +102,7 @@
   <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
 </footer>
 
+<!-- WICHTIG: exakt so -->
 <script src="js/erfolgsrechnung-auto.js"></script>
 </body>
 </html>
