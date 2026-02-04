@@ -1,19 +1,20 @@
-// js/erfolgs-auto.js
 const USER_KEY = "uwi_user";
 const COMPANIES_PREFIX = "uwi_companies_";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 
 const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
-
-// muss zu eurer Buchungsseite passen:
 const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
 
-// Jahre pro Firma für ER:
 const yearsKey = (companyId) => `uwi_years_${companyId}_income`;
-
 const DEFAULT_YEARS = ["2024", "2025", "2026"];
 let currentYear = "2024";
+
+function fmtCHF(n) {
+  const num = Math.round(Number(n || 0));
+  const s = String(num).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+  return `${s} CHF`;
+}
 
 function getUserOrRedirect() {
   const u = localStorage.getItem(USER_KEY);
@@ -29,6 +30,7 @@ function getSelectedCompany(u) {
   if (!id) return null;
   return loadCompanies(u).find(c => c.id === id) || null;
 }
+
 function getYears(companyId) {
   try {
     const arr = JSON.parse(localStorage.getItem(yearsKey(companyId)) || "null");
@@ -39,14 +41,10 @@ function getYears(companyId) {
 function saveYears(companyId, years) {
   localStorage.setItem(yearsKey(companyId), JSON.stringify(years));
 }
+
 function loadJournal(companyId, year) {
   try { return JSON.parse(localStorage.getItem(journalKey(companyId, year)) || "[]"); }
   catch { return []; }
-}
-function fmtCHF(n) {
-  const num = Math.round(Number(n || 0));
-  const s = String(num).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
-  return `${s} CHF`;
 }
 
 // Soll +, Haben -
@@ -64,21 +62,18 @@ function computeSaldo(rows) {
   return saldo;
 }
 
-// ER-Regel (vereinfacht, funktioniert fürs Schulprojekt gut):
-// Aufwand (4/5/6): Anzeige = max(+saldo, 0)
-// Ertrag (3/7/8): Anzeige = max(-saldo, 0)
 function isExpense(acct) { return ["4","5","6"].includes(String(acct)[0]); }
 function isRevenue(acct) { return ["3","7","8"].includes(String(acct)[0]); }
 
-function applyIncomeStatement(companyId, year) {
-  document.getElementById("incomeTitle").textContent = `Erfolgsrechnung ${year}`;
-  document.getElementById("incomeSub").textContent = `Beträge werden live aus Buchungen berechnet (Start = 0)`;
+function applyER(companyId, year) {
+  document.getElementById("erTitle").textContent = `Erfolgsrechnung ${year}`;
+  document.getElementById("erSub").textContent = `Beträge werden aus Buchungen berechnet (Start = 0)`;
 
   const rows = loadJournal(companyId, year);
   const saldo = computeSaldo(rows);
 
-  let totalAufwand = 0;
-  let totalErtrag = 0;
+  let totalA = 0;
+  let totalE = 0;
 
   document.querySelectorAll(".balanceRow").forEach(row => {
     const label = row.querySelector("span")?.textContent?.trim() || "";
@@ -88,27 +83,23 @@ function applyIncomeStatement(companyId, year) {
     const m = label.match(/^(\d+)/);
     if (!m) return;
     const acct = m[1];
+
     const s = Number(saldo[acct] || 0);
 
     let shown = 0;
-    if (isExpense(acct)) {
-      shown = Math.max(s, 0);
-      totalAufwand += shown;
-    } else if (isRevenue(acct)) {
-      shown = Math.max(-s, 0);
-      totalErtrag += shown;
-    } else {
-      shown = 0;
-    }
+    if (isExpense(acct)) { shown = Math.max(s, 0); totalA += shown; }
+    else if (isRevenue(acct)) { shown = Math.max(-s, 0); totalE += shown; }
+    else shown = 0;
 
     input.value = String(Math.round(shown));
-    input.readOnly = true;
-    input.style.background = "#f8fafc";
+    input.readOnly = true;              // <- wenn du tippen willst: diese Zeile löschen
+    input.style.background = "#f8fafc"; // <- und diese Zeile löschen
   });
 
-  document.getElementById("totalAufwand").textContent = fmtCHF(totalAufwand);
-  document.getElementById("totalErtrag").textContent = fmtCHF(totalErtrag);
-  document.getElementById("result").textContent = fmtCHF(totalErtrag - totalAufwand);
+  document.getElementById("totalAufwand").textContent = fmtCHF(totalA);
+  document.getElementById("totalErtrag").textContent = fmtCHF(totalE);
+  document.getElementById("jahresErgebnis").textContent = fmtCHF(totalE - totalA);
+  document.getElementById("countBookings").textContent = String(rows.length);
 }
 
 function renderYearTabs(companyId) {
@@ -125,7 +116,7 @@ function renderYearTabs(companyId) {
     if (!b) return;
     currentYear = b.dataset.year;
     renderYearTabs(companyId);
-    applyIncomeStatement(companyId, currentYear);
+    applyER(companyId, currentYear);
   };
 
   document.getElementById("addYearBtn").onclick = () => {
@@ -137,27 +128,28 @@ function renderYearTabs(companyId) {
     const next = getYears(companyId);
     if (next.includes(y)) return alert("Dieses Jahr gibt es schon.");
 
-    next.push(y);
-    next.sort();
+    next.push(y); next.sort();
     saveYears(companyId, next);
 
     currentYear = y;
     renderYearTabs(companyId);
-    applyIncomeStatement(companyId, currentYear);
+    applyER(companyId, currentYear);
   };
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("ER Script geladen ✅"); // <- wenn du das NICHT siehst: Dateiname/Pfad falsch
+
   const user = getUserOrRedirect();
   if (!user) return;
 
   document.getElementById("userDisplay").textContent = `Angemeldet: ${user}`;
 
-  document.getElementById("backBtn")?.addEventListener("click", () => {
+  document.getElementById("backBtn").addEventListener("click", () => {
     window.location.href = "company.html";
   });
 
-  document.getElementById("logoutBtn")?.addEventListener("click", () => {
+  document.getElementById("logoutBtn").addEventListener("click", () => {
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(currentCompanyKey(user));
     window.location.href = "index.html";
@@ -168,5 +160,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   currentYear = getYears(company.id)[0];
   renderYearTabs(company.id);
-  applyIncomeStatement(company.id, currentYear);
+  applyER(company.id, currentYear);
 });
