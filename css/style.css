@@ -1,16 +1,24 @@
-/* ===================== BASIS & LAYOUT ===================== */
+/* css/style.css
+   Einfaches, sauberes Schul-Design für die UWI Unternehmenssimulation.
+   Einheitliches Layout, zentrierte Formulare, Buttons mit Hover-Effekt.
+*/
+
+/* Farben & Variablen */
 :root{
   --bg: #f5f7fb;
   --card: #ffffff;
   --text: #0b1220;
   --muted: #6b7280;
   --accent: #2b6ef6;
+  --accent-2: #0ea5a4;
   --radius: 10px;
   --shadow: 0 8px 24px rgba(11,18,32,0.06);
   --max-width: 1000px;
+  --gap: 16px;
   font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
+/* Basis */
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
@@ -19,7 +27,7 @@ body{
   color:var(--text);
 }
 
-/* ===================== TOPBAR ===================== */
+/* Topbar */
 .topbar{
   display:flex;
   align-items:center;
@@ -37,13 +45,14 @@ body{
 .h1{font-size:1.6rem;margin:0 0 8px}
 .h2{font-size:1.2rem;margin:0}
 
-/* ===================== CONTAINER & CARD ===================== */
+/* Container */
 .container{
   max-width:var(--max-width);
   margin:28px auto;
   padding:0 18px 50px;
 }
 
+/* Cards */
 .card{
   background:var(--card);
   padding:18px;
@@ -52,7 +61,7 @@ body{
   border:1px solid rgba(11,18,32,0.03);
 }
 
-/* ===================== BUTTONS ===================== */
+/* Buttons */
 .btn{
   padding:8px 12px;
   border-radius:8px;
@@ -60,31 +69,100 @@ body{
   background:#fff;
   cursor:pointer;
 }
-.btn.primary{
+
+/* Tabs */
+.tabs{display:flex;gap:8px;margin-top:14px;margin-bottom:12px}
+.tab-btn{
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid rgba(11,18,32,0.04);
+  background:#f8fafc;
+  cursor:pointer;
+}
+.tab-btn.active{
   background:var(--accent);
   color:white;
   border:0;
 }
 
-/* ===================== TABS ===================== */
-.tabs{display:flex;gap:8px;margin-top:14px;margin-bottom:12px}
-.tab-link{
-  display:inline-block;
-  padding:8px 12px;
-  border-radius:8px;
-  border:1px solid rgba(11,18,32,0.04);
-  background:#f8fafc;
-  color:inherit;
-  text-decoration:none;
-  cursor:pointer;
-}
-.tab-link.active{
-  background: var(--accent);
-  color:#fff;
-  border:0;
+/* Footer */
+.footer{
+  max-width:var(--max-width);
+  margin:18px auto;
+  color:var(--muted);
+  padding:8px 18px;
 }
 
-/* ===================== BUCHUNG – NEUES DESIGN ===================== */
+/* ===================== BILANZ DESIGN ===================== */
+
+.balanceHeaderBlue{
+  background:#1f6feb;
+  color:#fff;
+  border-radius:12px;
+  padding:14px 16px;
+  margin: 10px 0 14px;
+}
+
+.balanceTitle{ font-size:22px; font-weight:800; }
+.balanceSub{ opacity:.9; font-size:13px; margin-top:4px; }
+
+.balanceSheet{
+  display:grid;
+  grid-template-columns: 1fr 14px 1fr;
+  gap: 14px;
+  background:#fff;
+  border:1px solid rgba(11,18,32,0.10);
+  border-radius:14px;
+  padding:14px;
+}
+
+.balanceDivider{
+  background:rgba(11,18,32,0.12);
+  border-radius:99px;
+}
+
+.balanceColTitle{
+  font-size:18px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+.balanceBlockTitle{
+  margin-top:12px;
+  font-weight:800;
+  opacity:.9;
+}
+
+.balanceRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:6px 0;
+  border-bottom:1px solid rgba(11,18,32,0.06);
+}
+
+.balanceInput{
+  width:140px;
+  padding:8px 10px;
+  border:1px solid rgba(11,18,32,0.12);
+  border-radius:10px;
+  text-align:right;
+}
+
+.balanceTotal{
+  display:flex;
+  justify-content:space-between;
+  padding-top:10px;
+  margin-top:10px;
+  border-top:2px solid rgba(11,18,32,0.12);
+  font-weight:800;
+}
+
+/* ========================================================= */
+/* ===================== NUR FÜR BUCHUNG =================== */
+/* ======= Neu hinzugefügt – beeinflusst nichts anderes === */
+/* ========================================================= */
 
 .bookings-layout{
   display:flex;
@@ -92,7 +170,7 @@ body{
   gap:18px;
 }
 
-/* Tabelle */
+/* Tabelle über die ganze Breite im Card-Kasten */
 .booking-table{
   width:100%;
   border-collapse:collapse;
@@ -113,7 +191,7 @@ body{
   font-weight:700;
 }
 
-/* Bereich unter der Tabelle */
+/* Bereich direkt unter der Tabelle */
 .booking-form{
   border:1px solid rgba(11,18,32,0.10);
   border-radius:12px;
@@ -124,6 +202,7 @@ body{
   gap:12px;
 }
 
+/* Damit die Buchungstatsache über beide Spalten geht */
 .full-row{
   grid-column: 1 / span 2;
 }
@@ -146,12 +225,4 @@ body{
   border-radius:8px;
   border:1px solid rgba(11,18,32,0.12);
   font-size:14px;
-}
-
-/* ===================== FOOTER ===================== */
-.footer{
-  max-width:var(--max-width);
-  margin:18px auto;
-  color:var(--muted);
-  padding:8px 18px;
 }
