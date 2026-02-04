@@ -188,3 +188,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // Start tab
   showTab("balance");
 });
+// TAB-NAVIGATION (Bilanz / Erfolgsrechnung / ...)
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const tab = btn.dataset.tab;
+
+    // alle Inhalte ausblenden
+    document.querySelectorAll(".tab-content").forEach(c => {
+      c.classList.add("hidden");
+    });
+
+    // alle Tabs deaktivieren
+    document.querySelectorAll(".tab-btn").forEach(b => {
+      b.classList.remove("active");
+    });
+
+    // geklickten Tab aktivieren
+    btn.classList.add("active");
+
+    // richtigen Inhalt anzeigen
+    document.getElementById(tab).classList.remove("hidden");
+  });
+});
+
