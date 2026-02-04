@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UWI — Buchungssätze</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">UWI Unternehmenssimulation</div>
+  <nav class="nav-inline">
+    <button id="backBtn" class="btn">Zur Firma</button>
+    <button id="logoutBtn" class="btn">Abmelden</button>
+  </nav>
+</header>
+
+<main class="container">
+
+<section class="card">
+<h1 class="h2">Buchungssätze</h1>
+<p class="muted">Jede Buchung aktualisiert automatisch die Bilanz.</p>
+
+<table class="balanceSheet" style="width:100%; margin-top:12px;">
+  <thead>
+    <tr>
+      <th>Buchungstatsache</th>
+      <th>Soll (Konto)</th>
+      <th>Haben (Konto)</th>
+      <th>Betrag (CHF)</th>
+      <th>Aktion</th>
+    </tr>
+  </thead>
+
+  <tbody id="bookingTableBody">
+  </tbody>
+</table>
+
+<button class="btn primary" id="addRowBtn" style="margin-top:12px;">
++ Neue Buchung hinzufügen
+</button>
+
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
+</footer>
+
+<script src="js/bookings.js"></script>
+</body>
+</html>
