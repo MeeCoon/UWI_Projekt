@@ -21,7 +21,16 @@
   <section class="card">
     <h1 class="h2">Erfolgsrechnung nach Schweizer Kontenrahmen KMU (vereinfachte Version)</h1>
 
-    <!-- Jahre wie bei Bilanz -->
+    <!-- === EINHEITLICHE REITER (NEU) === -->
+    <div class="tabs" style="margin-top:14px;">
+      <a class="tab-link" href="bilanz.html">Bilanz</a>
+      <a class="tab-link active" href="erfolgsrechnung.html">Erfolgsrechnung</a>
+      <a class="tab-link" href="bookings.html">Buchungssätze</a>
+      <a class="tab-link" href="wirtschaft.html">Wirtschaft</a>
+      <a class="tab-link" href="recht.html">Recht</a>
+    </div>
+
+    <!-- Jahre -->
     <div class="yearTabs" id="yearTabs" style="margin-top:12px;"></div>
 
     <div class="balanceHeaderBlue">
@@ -52,7 +61,7 @@
         <div class="balanceRow"><span>6300 Versicherungsaufwand</span><input class="balanceInput" type="number" value="0"></div>
         <div class="balanceRow"><span>6500 Verwaltungsaufwand</span><input class="balanceInput" type="number" value="0"></div>
         <div class="balanceRow"><span>6800 Abschreibungen</span><input class="balanceInput" type="number" value="0"></div>
-        <div class="balanceRow"><span>6900 Finanzaufwand</span><input class="balanceInput" type="number" value="0"></divser>
+        <div class="balanceRow"><span>6900 Finanzaufwand</span><input class="balanceInput" type="number" value="0"></div>
 
         <div class="balanceBlockTitle">8 – Betriebsfremd / ausserordentlich (Aufwand)</div>
         <div class="balanceRow"><span>8000 Betriebsfremder Aufwand</span><input class="balanceInput" type="number" value="0"></div>
@@ -102,7 +111,6 @@
   <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
 </footer>
 
-<!-- WICHTIG: exakt so -->
 <script src="js/erfolgsrechnung-auto.js"></script>
 </body>
 </html>
