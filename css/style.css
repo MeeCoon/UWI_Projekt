@@ -25,8 +25,6 @@ body{
   margin:0;
   background: linear-gradient(180deg, var(--bg), #ffffff);
   color:var(--text);
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
 }
 
 /* Topbar */
@@ -62,75 +60,41 @@ body{
   box-shadow:var(--shadow);
   border:1px solid rgba(11,18,32,0.03);
 }
-.card-small{max-width:540px}
-
-/* Center page helper */
-.center-page{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-height:calc(100vh - 120px);
-}
-
-/* Forms */
-.form-grid{
-  display:grid;
-  grid-template-columns: 140px 1fr;
-  gap:12px 16px;
-  align-items:center;
-}
-.form-grid label{justify-self:end;padding-right:6px;color:var(--muted)}
-.form-grid input, .form-grid select, .form-grid textarea{
-  padding:10px 12px;border-radius:8px;border:1px solid rgba(11,18,32,0.06);font-size:0.95rem;
-  background:transparent; width:100%;
-}
-.form-actions{display:flex;gap:10px}
-
-/* List */
-.list{margin-top:14px;display:flex;flex-direction:column;gap:10px}
-.company-item{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px;border-radius:8px;
-  background: linear-gradient(180deg,#ffffff,#fbfdff);
-  border:1px solid rgba(11,18,32,0.04);
-  cursor:pointer;
-}
-.company-item:hover{box-shadow:0 6px 18px rgba(11,18,32,0.04)}
 
 /* Buttons */
 .btn{
-  padding:8px 12px;border-radius:8px;border:1px solid rgba(11,18,32,0.06);background:#fff;cursor:pointer;
-  transition: transform .08s ease, box-shadow .12s ease;
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid rgba(11,18,32,0.06);
+  background:#fff;
+  cursor:pointer;
 }
-.btn:hover{transform:translateY(-2px); box-shadow:0 8px 18px rgba(11,18,32,0.06)}
-.btn.primary{background:var(--accent);color:white;border:0}
-.btn.ghost{background:transparent;border:1px solid rgba(11,18,32,0.06)}
 
 /* Tabs */
 .tabs{display:flex;gap:8px;margin-top:14px;margin-bottom:12px}
 .tab-btn{
-  padding:8px 12px;border-radius:8px;border:1px solid rgba(11,18,32,0.04);background:#f8fafc;cursor:pointer;
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid rgba(11,18,32,0.04);
+  background:#f8fafc;
+  cursor:pointer;
 }
-.tab-btn.active{background:var(--accent);color:white;border:0}
-
-/* Tab content */
-.tab-content{padding:12px;border-radius:8px;background:#ffffff;border:1px solid rgba(11,18,32,0.03);margin-top:8px}
-.hidden{display:none!important}
+.tab-btn.active{
+  background:var(--accent);
+  color:white;
+  border:0;
+}
 
 /* Footer */
-.footer{max-width:var(--max-width);margin:18px auto;color:var(--muted);padding:8px 18px;display:flex;justify-content:space-between}
+.footer{
+  max-width:var(--max-width);
+  margin:18px auto;
+  color:var(--muted);
+  padding:8px 18px;
+}
 
-/* Year Tabs */
-.yearTabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.yearBtn{
-  padding:6px 10px;border-radius:8px;border:1px solid rgba(11,18,32,.06);background:transparent;cursor:pointer
-}
-.yearBtn.active{background:#eef6ff;border-color:#1e62d0}
-.addYearBtn{
-  padding:6px 10px;border-radius:8px;border:1px dashed rgba(11,18,32,.08);background:transparent;color:var(--muted);cursor:pointer
-}
+/* ===================== BILANZ DESIGN ===================== */
+
 .balanceHeaderBlue{
   background:#1f6feb;
   color:#fff;
@@ -138,11 +102,11 @@ body{
   padding:14px 16px;
   margin: 10px 0 14px;
 }
+
 .balanceTitle{ font-size:22px; font-weight:800; }
 .balanceSub{ opacity:.9; font-size:13px; margin-top:4px; }
- 
+
 .balanceSheet{
-  position: relative;
   display:grid;
   grid-template-columns: 1fr 14px 1fr;
   gap: 14px;
@@ -151,15 +115,24 @@ body{
   border-radius:14px;
   padding:14px;
 }
- 
+
 .balanceDivider{
   background:rgba(11,18,32,0.12);
   border-radius:99px;
 }
- 
-.balanceColTitle{ font-size:18px; font-weight:800; margin-bottom:8px; }
-.balanceBlockTitle{ margin-top:12px; font-weight:800; opacity:.9; }
- 
+
+.balanceColTitle{
+  font-size:18px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+.balanceBlockTitle{
+  margin-top:12px;
+  font-weight:800;
+  opacity:.9;
+}
+
 .balanceRow{
   display:flex;
   align-items:center;
@@ -168,15 +141,15 @@ body{
   padding:6px 0;
   border-bottom:1px solid rgba(11,18,32,0.06);
 }
- 
+
 .balanceInput{
-  width:160px;
+  width:140px;
   padding:8px 10px;
   border:1px solid rgba(11,18,32,0.12);
   border-radius:10px;
   text-align:right;
 }
- 
+
 .balanceTotal{
   display:flex;
   justify-content:space-between;
@@ -184,11 +157,4 @@ body{
   margin-top:10px;
   border-top:2px solid rgba(11,18,32,0.12);
   font-weight:800;
-}
- 
-.balanceActions{
-  margin-top:12px;
-  display:flex;
-  gap:12px;
-  align-items:center;
 }
