@@ -1,84 +1,96 @@
 <!doctype html>
 <html lang="de">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Bilanz — UWI Unternehmenssimulation</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UWI — Bilanz Kontenplan</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<!-- Blauer Headerbalken -->
-<header class="header-bar">
-<div class="header-inner">
-<h1 class="title">Bilanz</h1>
-<div class="subtitle">in Tausend CHF</div>
-</div>
+
+<header class="topbar">
+  <div class="brand">UWI Unternehmenssimulation</div>
 </header>
- 
-  <!-- Weißer Bilanz‑Kasten -->
-<main class="page">
-<section class="bilanz-container" aria-label="Bilanz Aktiva Passiva">
- 
-      <div class="bilanz-grid">
-<!-- Linke Spalte: Aktiva -->
-<div class="column column-left" aria-label="Aktiva">
-<h2 class="column-title">Aktiva</h2>
- 
-          <!-- Umlaufvermögen -->
-<div class="block">
-<div class="block-title">Umlaufvermögen</div>
-<div class="row"><div class="label">Kasse</div><div class="amount">2</div></div>
-<div class="row"><div class="label">Bank</div><div class="amount">20</div></div>
-<div class="row"><div class="label">Forderungen aus Lieferungen und Leistungen</div><div class="amount">35</div></div>
-<div class="row"><div class="label">Vorräte Rohstoffe</div><div class="amount">40</div></div>
-<div class="row"><div class="label">Vorräte Handelswaren</div><div class="amount">55</div></div>
+
+<main class="container">
+<section class="card">
+
+<h1 class="h2">Bilanz nach Schweizer Kontenrahmen KMU (vereinfachte Version)</h1>
+
+<div class="balanceHeaderBlue">
+  <div class="balanceTitle">Bilanz</div>
+  <div class="balanceSub">Alle Beträge starten bei 0 CHF</div>
 </div>
- 
-          <!-- Anlagevermögen -->
-<div class="block">
-<div class="block-title">Anlagevermögen</div>
-<div class="row"><div class="label">Informatik</div><div class="amount">5</div></div>
-<div class="row"><div class="label">Fahrzeuge</div><div class="amount">23</div></div>
-<div class="row"><div class="label">Mobiliar und Einrichtungen</div><div class="amount">30</div></div>
-</div>
- 
-          <!-- Total Aktiven -->
-<div class="total-row">
-<div class="total-label">Total Aktiven</div>
-<div class="total-value">210</div>
-</div>
-</div>
- 
-        <!-- Mittlere Spalte: dicke durchgehende Trennlinie -->
-<div class="divider" aria-hidden="true"></div>
- 
-        <!-- Rechte Spalte: Passiva -->
-<div class="column column-right" aria-label="Passiva">
-<h2 class="column-title">Passiva</h2>
- 
-          <!-- Fremdkapital -->
-<div class="block">
-<div class="block-title">Fremdkapital</div>
-<div class="row"><div class="label">Verbindlichkeiten aus Lieferungen und Leistungen</div><div class="amount">15</div></div>
-<div class="row"><div class="label">Bankverbindlichkeiten</div><div class="amount">25</div></div>
-</div>
- 
-          <!-- Eigenkapital -->
-<div class="block">
-<div class="block-title">Eigenkapital</div>
-<div class="row"><div class="label">Aktienkapital</div><div class="amount">100</div></div>
-<div class="row"><div class="label">Gesetzliche Gewinnreserve</div><div class="amount">50</div></div>
-<div class="row"><div class="label">Jahresgewinn</div><div class="amount">20</div></div>
-</div>
- 
-          <!-- Total Passiven -->
-<div class="total-row">
-<div class="total-label">Total Passiven</div>
-<div class="total-value">210</div>
+
+<div class="balanceSheet">
+
+<!-- ================= AKTIVEN ================= -->
+<div class="balanceCol">
+<div class="balanceColTitle">Aktiven</div>
+
+<div class="balanceBlockTitle">1 – Umlaufvermögen</div>
+<div class="balanceRow"><span>100 Kasse</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1020 Bankguthaben</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1060 Wertschriften</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1100 Forderungen</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1170 Vorsteuer MWST</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1200 Handelswaren</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1210 Rohstoffe</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1300 Aktive Rechnungsabgrenzung</span><input class="balanceInput" type="number" value="0"></div>
+
+<div class="balanceBlockTitle">14 – Anlagevermögen</div>
+<div class="balanceRow"><span>1400 Wertschriften</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1480 Beteiligungen</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1500 Maschinen & Apparate</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1510 Mobiliar</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1520 Büromaschinen</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1530 Fahrzeuge</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1600 Geschäfts-liegenschaften</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>1700 Immaterielle Werte</span><input class="balanceInput" type="number" value="0"></div>
+
+<div class="balanceTotal">
+  <span>Total Aktiven</span>
+  <span>0 CHF</span>
 </div>
 </div>
+
+<div class="balanceDivider"></div>
+
+<!-- ================= PASSIVEN ================= -->
+<div class="balanceCol">
+<div class="balanceColTitle">Passiven</div>
+
+<div class="balanceBlockTitle">20 – Kurzfristiges Fremdkapital</div>
+<div class="balanceRow"><span>2000 Verbindlichkeiten</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>2030 Erhaltene Anzahlungen</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>2100 Bankverbindlichkeiten</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>2200 Geschuldete MWST</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>2300 Passive Rechnungsabgrenzung</span><input class="balanceInput" type="number" value="0"></div>
+
+<div class="balanceBlockTitle">24 – Langfristiges Fremdkapital</div>
+<div class="balanceRow"><span>2450 Darlehen</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>2600 Rückstellungen</span><input class="balanceInput" type="number" value="0"></div>
+
+<div class="balanceBlockTitle">28 – Eigenkapital</div>
+<div class="balanceRow"><span>2800 Aktienkapital</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>2950 Gesetzliche Reserven</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>2970 Gewinnvortrag</span><input class="balanceInput" type="number" value="0"></div>
+<div class="balanceRow"><span>2800 Eigenkapital Einzelunternehmen</span><input class="balanceInput" type="number" value="0"></div>
+
+<div class="balanceTotal">
+  <span>Total Passiven</span>
+  <span>0 CHF</span>
 </div>
+</div>
+
+</div> <!-- Ende balanceSheet -->
+
 </section>
 </main>
+
+<footer class="footer">
+  <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
+</footer>
+
 </body>
 </html>
