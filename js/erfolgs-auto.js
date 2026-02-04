@@ -1,4 +1,5 @@
 console.log("✅ erfolgsrechnung-auto.js geladen");
+
 const USER_KEY = "uwi_user";
 const COMPANIES_PREFIX = "uwi_companies_";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
@@ -7,9 +8,10 @@ const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
 const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
 
-const yearsKey = (companyId) => `uwi_years_${companyId}_income`;
+// Jahre pro Firma
+const yearsStoreKey = (companyId) => `uwi_years_${companyId}_income`;
 const DEFAULT_YEARS = ["2024", "2025", "2026"];
-let currentYear = "2024";
+let currentYear = DEFAULT_YEARS[0];
 
 function fmtCHF(n) {
   const num = Math.round(Number(n || 0));
@@ -22,10 +24,12 @@ function getUserOrRedirect() {
   if (!u) { window.location.href = "index.html"; return null; }
   return u;
 }
+
 function loadCompanies(u) {
   try { return JSON.parse(localStorage.getItem(companiesKey(u)) || "[]"); }
   catch { return []; }
 }
+
 function getSelectedCompany(u) {
   const id = localStorage.getItem(currentCompanyKey(u));
   if (!id) return null;
@@ -34,13 +38,14 @@ function getSelectedCompany(u) {
 
 function getYears(companyId) {
   try {
-    const arr = JSON.parse(localStorage.getItem(yearsKey(companyId)) || "null");
+    const arr = JSON.parse(localStorage.getItem(yearsStoreKey(companyId)) || "null");
     if (Array.isArray(arr) && arr.length) return arr.map(String);
   } catch {}
   return [...DEFAULT_YEARS];
 }
+
 function saveYears(companyId, years) {
-  localStorage.setItem(yearsKey(companyId), JSON.stringify(years));
+  localStorage.setItem(yearsStoreKey(companyId), JSON.stringify(years));
 }
 
 function loadJournal(companyId, year) {
@@ -52,19 +57,19 @@ function loadJournal(companyId, year) {
 function computeSaldo(rows) {
   const saldo = {};
   for (const r of rows) {
-    const debit = String(r.debit || r.soll || "").trim();
+    const debit  = String(r.debit || r.soll  || "").trim();
     const credit = String(r.credit || r.haben || "").trim();
     const amt = Number(r.amount ?? r.betrag ?? 0);
     if (!debit || !credit || !(amt > 0)) continue;
 
-    saldo[debit] = (saldo[debit] || 0) + amt;
+    saldo[debit]  = (saldo[debit]  || 0) + amt;
     saldo[credit] = (saldo[credit] || 0) - amt;
   }
   return saldo;
 }
 
-function isExpense(acct) { return ["4","5","6"].includes(String(acct)[0]); }
-function isRevenue(acct) { return ["3","7","8"].includes(String(acct)[0]); }
+function isExpense(acct) { return ["4","5","6"].includes(String(acct)[0]) || acct === "8000" || acct === "8500"; }
+function isRevenue(acct) { return ["3","7"].includes(String(acct)[0]) || acct === "8100" || acct === "8510"; }
 
 function applyER(companyId, year) {
   document.getElementById("erTitle").textContent = `Erfolgsrechnung ${year}`;
@@ -93,8 +98,8 @@ function applyER(companyId, year) {
     else shown = 0;
 
     input.value = String(Math.round(shown));
-    input.readOnly = true;              // <- wenn du tippen willst: diese Zeile löschen
-    input.style.background = "#f8fafc"; // <- und diese Zeile löschen
+    input.readOnly = true;              // wenn du manuell tippen willst: diese 2 Zeilen löschen
+    input.style.background = "#f8fafc";
   });
 
   document.getElementById("totalAufwand").textContent = fmtCHF(totalA);
@@ -109,7 +114,7 @@ function renderYearTabs(companyId) {
   if (!years.includes(currentYear)) currentYear = years[0];
 
   el.innerHTML =
-    years.map(y => `<button type="button" class="yearBtn ${y===currentYear?"active":""}" data-year="${y}">${y}</button>`).join("") +
+    years.map(y => `<button type="button" class="yearBtn ${y===currentYear ? "active" : ""}" data-year="${y}">${y}</button>`).join("") +
     `<button type="button" class="addYearBtn" id="addYearBtn">+ Jahr hinzufügen</button>`;
 
   el.onclick = (e) => {
@@ -139,18 +144,16 @@ function renderYearTabs(companyId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("ER Script geladen ✅"); // <- wenn du das NICHT siehst: Dateiname/Pfad falsch
-
   const user = getUserOrRedirect();
   if (!user) return;
 
   document.getElementById("userDisplay").textContent = `Angemeldet: ${user}`;
 
-  document.getElementById("backBtn").addEventListener("click", () => {
+  document.getElementById("backBtn")?.addEventListener("click", () => {
     window.location.href = "company.html";
   });
 
-  document.getElementById("logoutBtn").addEventListener("click", () => {
+  document.getElementById("logoutBtn")?.addEventListener("click", () => {
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(currentCompanyKey(user));
     window.location.href = "index.html";
