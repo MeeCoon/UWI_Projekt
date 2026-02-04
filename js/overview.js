@@ -1,102 +1,93 @@
 // js/overview.js
-// Firmenübersicht (overview.html)
-// - Verwaltet Firmen pro angemeldetem Benutzer.
-// - Setzt die ausgewählte Firma pro Benutzer (uwi_currentCompany_<username>).
-// - Logout entfernt nur die Anmeldung und die Auswahl, nicht die Firmen-Daten.
+const USER_KEY = "uwi_user";
+const COMPANIES_PREFIX = "uwi_companies_";
+const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 
-// LocalStorage keys / Prefixes
-const USER_KEY = 'uwi_user';
-const COMPANIES_PREFIX = 'uwi_companies_';
-const SELECTED_COMPANY_PREFIX = 'uwi_currentCompany_';
+const companiesKey = (user) => `${COMPANIES_PREFIX}${user}`;
+const currentCompanyKey = (user) => `${CURRENT_COMPANY_PREFIX}${user}`;
 
-// Helper: get current username or redirect to login
-function getCurrentUserOrRedirect() {
+function getUserOrRedirect() {
   const user = localStorage.getItem(USER_KEY);
   if (!user) {
-    // nicht angemeldet → Login
-    window.location.href = 'index.html';
+    window.location.href = "index.html";
     return null;
   }
   return user;
 }
 
-// Helper: key builders
-function companiesKey(user) { return COMPANIES_PREFIX + user; }
-function selectedCompanyKey(user) { return SELECTED_COMPANY_PREFIX + user; }
-
-// Lade Firmenliste für user
-function loadCompaniesForUser(user) {
-  const raw = localStorage.getItem(companiesKey(user));
+function loadCompanies(user) {
   try {
-    return raw ? JSON.parse(raw) : [];
-  } catch (err) {
-    console.error('Fehler beim Parsen der Firmenliste aus LocalStorage:', err);
+    return JSON.parse(localStorage.getItem(companiesKey(user)) || "[]");
+  } catch {
     return [];
   }
 }
 
-// Escape HTML (einfacher Schutz vor XSS)
-function escapeHtml(str) {
-  if (str === undefined || str === null) return '';
-  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
-}
+function renderCompanies(user) {
+  const list = document.getElementById("companiesList");
+  if (!list) return;
 
-document.addEventListener('DOMContentLoaded', () => {
-  const user = getCurrentUserOrRedirect();
-  if (!user) return;
+  const companies = loadCompanies(user);
+  list.innerHTML = "";
 
-  // UI-Elemente
-  const userDisplay = document.getElementById('userDisplay');
-  const createBtn = document.getElementById('createBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const listEl = document.getElementById('companiesList');
-
-  // Anzeigen wer eingeloggt ist
-  if (userDisplay) userDisplay.textContent = `Angemeldet: ${user}`;
-
-  // Neuer Firma-Button
-  createBtn.addEventListener('click', () => {
-    window.location.href = 'create.html';
-  });
-
-  // Logout: Entfernt nur Anmeldung und Auswahl, nicht Firmen
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(selectedCompanyKey(user)); // Auswahl des Benutzers löschen
-    window.location.href = 'index.html';
-  });
-
-  // Render-Funktion
-  function renderList() {
-    const companies = loadCompaniesForUser(user);
-    listEl.innerHTML = '';
-
-    if (!companies || companies.length === 0) {
-      listEl.innerHTML = '<div class="small muted">Keine Firmen vorhanden. Erstellen Sie eine neue Firma.</div>';
-      return;
-    }
-
-    companies.forEach(c => {
-      const item = document.createElement('div');
-      item.className = 'company-item';
-      item.innerHTML = `
-        <div>
-          <div style="font-weight:600">${escapeHtml(c.name)}</div>
-          <div class="small muted">${escapeHtml(c.legal)} · ${escapeHtml(c.industry || '')}</div>
-        </div>
-        <div class="small muted">Mitarb.: ${escapeHtml(String(c.size || '–'))}</div>
-      `;
-
-      // Klick auf Firma: speichere Auswahl pro-user und weiterleiten
-      item.addEventListener('click', () => {
-        localStorage.setItem(selectedCompanyKey(user), c.id);
-        window.location.href = 'company.html';
-      });
-
-      listEl.appendChild(item);
-    });
+  if (!companies.length) {
+    list.innerHTML = `<div class="muted">Noch keine Firmen erstellt.</div>`;
+    return;
   }
 
-  // initial render
-  renderList();
+  companies.forEach((c) => {
+    const row = document.createElement("div");
+    row.className = "listItem";
+
+    const legal = c.legalForm || c.legal || "–";
+    const industry = c.industry || "–";
+    const employees = c.employees ?? c.size ?? "–";
+
+    row.innerHTML = `
+      <div class="listMain">
+        <div class="listTitle">${escapeHtml(c.name || "Ohne Name")}</div>
+        <div class="muted small">${escapeHtml(legal)} · ${escapeHtml(industry)} · Mitarbeitende: ${escapeHtml(String(employees))}</div>
+      </div>
+      <div class="listActions">
+        <button class="btn" type="button" data-open="${c.id}">Öffnen</button>
+      </div>
+    `;
+
+    row.querySelector(`[data-open="${c.id}"]`).addEventListener("click", () => {
+      localStorage.setItem(currentCompanyKey(user), c.id);
+      window.location.href = "company.html";
+    });
+
+    list.appendChild(row);
+  });
+}
+
+// mini safe html
+function escapeHtml(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const user = getUserOrRedirect();
+  if (!user) return;
+
+  const userDisplay = document.getElementById("userDisplay");
+  if (userDisplay) userDisplay.textContent = `Angemeldet: ${user}`;
+
+  document.getElementById("logoutBtn")?.addEventListener("click", () => {
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(currentCompanyKey(user));
+    window.location.href = "index.html";
+  });
+
+  document.getElementById("createBtn")?.addEventListener("click", () => {
+    window.location.href = "create.html";
+  });
+
+  renderCompanies(user);
 });
