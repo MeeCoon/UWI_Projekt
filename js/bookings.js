@@ -1,119 +1,107 @@
-document.addEventListener("DOMContentLoaded", () => {
-
 const USER_KEY = "uwi_user";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
+const COMPANIES_PREFIX = "uwi_companies_";
+
+const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
+const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
 const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
 
-// ---------- Hilfen ----------
-function currentUser() {
-  return localStorage.getItem(USER_KEY);
+// --- Kontonamen → Kontonummern (für deine Bilanz!) ---
+const ACCOUNT_MAP = {
+  "Bank": "1020",
+  "Kasse": "1000",
+  "Debitoren": "1100",
+  "Mobiliar": "1500",
+  "Verbindlichkeiten": "2000",
+  "Eigenkapital": "2800",
+  "Umsatz": "3400"
+};
+
+function loadCompanies(u){
+  try { return JSON.parse(localStorage.getItem(companiesKey(u)) || "[]"); }
+  catch { return []; }
 }
 
-function currentCompanyId() {
-  const u = currentUser();
-  if (!u) return null;
-  return localStorage.getItem(`${CURRENT_COMPANY_PREFIX}${u}`);
-}
+document.addEventListener("DOMContentLoaded", () => {
 
-// wir buchen IMMER ins aktuelle Bilanz-Jahr
-function currentYear() {
-  return localStorage.getItem("uwi_currentBalanceYear") || "2024";
-}
+  const user = localStorage.getItem(USER_KEY);
+  if (!user) { window.location.href = "index.html"; return; }
+  document.getElementById("userDisplay").textContent = `Angemeldet: ${user}`;
 
-function loadJournal(companyId, year) {
-  try {
-    return JSON.parse(localStorage.getItem(journalKey(companyId, year)) || "[]");
-  } catch {
-    return [];
+  const companyId = localStorage.getItem(currentCompanyKey(user));
+  if (!companyId) { window.location.href = "overview.html"; return; }
+
+  const companies = loadCompanies(user);
+  const company = companies.find(c => c.id === companyId);
+  if (!company) { window.location.href = "overview.html"; return; }
+
+  const year = "2024"; // erstes Jahr
+
+  const tableBody = document.getElementById("bookingTableBody");
+
+  function loadTable(){
+    const rows = JSON.parse(localStorage.getItem(journalKey(companyId, year)) || "[]");
+    tableBody.innerHTML = "";
+
+    rows.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${r.fact}</td>
+        <td>${r.sollName}</td>
+        <td>${r.habenName}</td>
+        <td>${r.amount}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
   }
-}
 
-function saveJournal(companyId, year, rows) {
-  localStorage.setItem(journalKey(companyId, year), JSON.stringify(rows));
-}
+  loadTable();
 
-// ---------- UI ----------
-const tableBody = document.getElementById("bookingTableBody");
-const addBtn = document.getElementById("addRowBtn");
+  document.getElementById("addBookingBtn").addEventListener("click", () => {
+    const fact = document.getElementById("fact").value.trim();
+    const sollName = document.getElementById("soll").value;
+    const habenName = document.getElementById("haben").value;
+    const amount = Number(document.getElementById("betrag").value);
 
-// Neue Zeile hinzufügen
-addBtn.addEventListener("click", () => {
-  const row = document.createElement("tr");
-
-  row.innerHTML = `
-    <td><input type="text" placeholder="z.B. Verkauf Ware" class="fact"></td>
-    <td><input type="number" placeholder="z.B. 1000" class="soll"></td>
-    <td><input type="number" placeholder="z.B. 3200" class="haben"></td>
-    <td><input type="number" placeholder="Betrag" class="betrag"></td>
-    <td>
-      <button class="btn saveBtn">Buchen</button>
-      <button class="btn ghost deleteBtn">Löschen</button>
-    </td>
-  `;
-
-  tableBody.appendChild(row);
-
-  // Löschen
-  row.querySelector(".deleteBtn").addEventListener("click", () => {
-    row.remove();
-  });
-
-  // Buchen
-  row.querySelector(".saveBtn").addEventListener("click", () => {
-
-    const fact = row.querySelector(".fact").value.trim();
-    const soll = row.querySelector(".soll").value.trim();
-    const haben = row.querySelector(".haben").value.trim();
-    const betrag = Number(row.querySelector(".betrag").value);
-
-    if (!soll || !haben || !(betrag > 0)) {
-      alert("Bitte gültige Konten und Betrag eingeben!");
+    if (!fact || !sollName || !habenName || !(amount > 0)) {
+      alert("Bitte alles korrekt ausfüllen!");
       return;
     }
 
-    const companyId = currentCompanyId();
-    if (!companyId) {
-      alert("Keine Firma ausgewählt!");
-      return;
-    }
+    const sollNum = ACCOUNT_MAP[sollName];
+    const habenNum = ACCOUNT_MAP[habenName];
 
-    const year = currentYear();
-
-    const journal = loadJournal(companyId, year);
-
-    const booking = {
+    const entry = {
       fact,
-      debit: soll,   // wichtig für Bilanz
-      credit: haben, // wichtig für Bilanz
-      amount: betrag,
+      sollName,
+      habenName,
+      debit: sollNum,
+      credit: habenNum,
+      amount,
       date: new Date().toISOString()
     };
 
-    journal.push(booking);
-    saveJournal(companyId, year, journal);
+    const key = journalKey(companyId, year);
+    const list = JSON.parse(localStorage.getItem(key) || "[]");
+    list.push(entry);
+    localStorage.setItem(key, JSON.stringify(list));
 
-    alert(`Gebucht in Jahr ${year}!\nÖffne die Bilanz → sie ist jetzt aktualisiert.`);
+    // Felder leeren
+    document.getElementById("fact").value = "";
+    document.getElementById("betrag").value = "";
+    document.getElementById("soll").value = "";
+    document.getElementById("haben").value = "";
 
-    // Felder leeren statt löschen (praktischer)
-    row.querySelector(".fact").value = "";
-    row.querySelector(".soll").value = "";
-    row.querySelector(".haben").value = "";
-    row.querySelector(".betrag").value = "";
+    loadTable();
+    alert("Gebucht! → Bilanz aktualisiert sich automatisch.");
   });
-});
 
-// Zur Firma zurück
-document.getElementById("backBtn").addEventListener("click", () => {
-  window.location.href = "company.html";
-});
+  document.getElementById("backBtn").onclick =
+    () => window.location.href = "company.html";
 
-// Logout
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  const u = currentUser();
-  if (u) {
+  document.getElementById("logoutBtn").onclick = () => {
     localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(`${CURRENT_COMPANY_PREFIX}${u}`);
-  }
-  window.location.href = "index.html";
-});
+    localStorage.removeItem(currentCompanyKey(user));
+    window.location.href = "index.html";
+  };
 });
