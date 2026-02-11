@@ -2,23 +2,22 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <title>Buchungssätze</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UWI — Buchungssätze</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
 <header class="topbar">
   <div class="brand">UWI Unternehmenssimulation</div>
   <nav class="nav-inline">
     <span id="userDisplay" class="muted"></span>
-    <button id="backBtn" class="btn">Zur Firma</button>
-    <button id="logoutBtn" class="btn">Abmelden</button>
+    <button id="backBtn" class="btn" type="button">Zur Firma</button>
+    <button id="logoutBtn" class="btn" type="button">Abmelden</button>
   </nav>
 </header>
 
 <main class="container">
   <section class="card">
-
     <h1 class="h2">Buchungssätze</h1>
 
     <div class="page-tabs">
@@ -29,62 +28,53 @@
       <a href="recht.html" class="page-tab">Recht</a>
     </div>
 
-    <div class="bookings-layout">
+    <!-- Jahre -->
+    <div class="yearTabs" id="yearTabs" style="margin-top:12px;"></div>
 
-      <!-- TABELLE ÜBER GANZE BREITE -->
-      <table class="booking-table">
-        <thead>
-          <tr>
-            <th>Buchungstatsache</th>
-            <th>Soll</th>
-            <th>Haben</th>
-            <th>Betrag (CHF)</th>
-          </tr>
-        </thead>
-        <tbody id="bookingTableBody">
-        </tbody>
-      </table>
+    <!-- Tabelle -->
+    <table class="booking-table" aria-label="Buchungssätze">
+      <thead>
+        <tr>
+          <th>Buchungstatsache</th>
+          <th>Soll</th>
+          <th>Haben</th>
+          <th>Betrag (CHF)</th>
+        </tr>
+      </thead>
+      <tbody id="bookingTableBody"></tbody>
+    </table>
 
-      <!-- FORMULAR DARUNTER -->
-      <div class="booking-form">
-        <div class="field full-row">
-          <label>Buchungstatsache</label>
-          <textarea id="fact" rows="2" placeholder="z.B. Kauf von Mobiliar gegen Rechnung"></textarea>
-        </div>
+    <!-- Profi-Formular: Splittbuchung -->
+    <div class="booking-form" style="margin-top:14px;">
+      <div class="field full-row">
+        <label for="fact">Buchungstatsache</label>
+        <textarea id="fact" rows="2" placeholder="z.B. Kauf Fahrzeug, 20k Bank + 10k Darlehen"></textarea>
+      </div>
 
-        <div class="field">
-          <label>Soll</label>
-          <select id="soll">
-            <option value="">— Konto wählen —</option>
-            <option>Mobiliar</option>
-            <option>Bank</option>
-            <option>Kasse</option>
-            <option>Debitoren</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Haben</label>
-          <select id="haben">
-            <option value="">— Konto wählen —</option>
-            <option>Verbindlichkeiten</option>
-            <option>Eigenkapital</option>
-            <option>Bank</option>
-            <option>Umsatz</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Betrag (CHF)</label>
-          <input type="number" id="betrag" placeholder="z.B. 2500">
-        </div>
-
-        <div class="field">
-          <label>&nbsp;</label>
-          <button id="addBookingBtn" class="btn primary">Buchen</button>
+      <div class="field">
+        <label>Soll‑Zeilen</label>
+        <div id="debitLines"></div>
+        <button type="button" class="btn" id="addDebitLineBtn">+ Soll‑Zeile</button>
+        <div class="muted small" style="margin-top:6px;">
+          Soll‑Summe: <b id="sumDebit">0</b>
         </div>
       </div>
 
+      <div class="field">
+        <label>Haben‑Zeilen</label>
+        <div id="creditLines"></div>
+        <button type="button" class="btn" id="addCreditLineBtn">+ Haben‑Zeile</button>
+        <div class="muted small" style="margin-top:6px;">
+          Haben‑Summe: <b id="sumCredit">0</b>
+        </div>
+      </div>
+
+      <div class="field full-row" style="display:flex;gap:10px;align-items:center;justify-content:space-between;">
+        <div class="muted">
+          Status: <b id="balancedState">nicht ausgeglichen</b>
+        </div>
+        <button id="addBookingBtn" class="btn primary" type="button">Buchen</button>
+      </div>
     </div>
   </section>
 </main>
@@ -93,6 +83,6 @@
   <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
 </footer>
 
-<script src="js/bookings.js"></script>
+<script src="js/bookings-split.js"></script>
 </body>
 </html>
