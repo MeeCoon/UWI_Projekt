@@ -10,7 +10,6 @@ function loadCompanies(user) {
   try { return JSON.parse(localStorage.getItem(companiesKey(user)) || "[]"); }
   catch { return []; }
 }
-
 function saveCompanies(user, companies) {
   localStorage.setItem(companiesKey(user), JSON.stringify(companies));
 }
@@ -20,7 +19,6 @@ function minCapitalFor(legal) {
   if (legal === "GmbH") return 20000;
   return 0; // Einzelunternehmen
 }
-
 function fmtCH(n) {
   return Number(n || 0).toLocaleString("de-CH");
 }
@@ -29,69 +27,62 @@ document.addEventListener("DOMContentLoaded", () => {
   const user = localStorage.getItem(USER_KEY);
   if (!user) { window.location.href = "index.html"; return; }
 
-  // Elemente
-  const userDisplay = document.getElementById("userDisplay");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const backOverviewBtn = document.getElementById("backOverviewBtn");
+  // Header
+  document.getElementById("userDisplay").textContent = `Angemeldet: ${user}`;
+  document.getElementById("backOverviewBtn")?.addEventListener("click", () => {
+    window.location.href = "overview.html";
+  });
+  document.getElementById("logoutBtn")?.addEventListener("click", () => {
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(currentCompanyKey(user));
+    window.location.href = "index.html";
+  });
 
+  // Form
   const form = document.getElementById("createForm");
+  const cancelBtn = document.getElementById("cancelBtn");
+
   const nameEl = document.getElementById("name");
   const legalEl = document.getElementById("legal");
   const capitalEl = document.getElementById("capital");
   const industryEl = document.getElementById("industry");
   const purposeEl = document.getElementById("purpose");
   const sizeEl = document.getElementById("size");
-  const cancelBtn = document.getElementById("cancelBtn");
-  const hintEl = document.getElementById("capitalHint"); // optional
+  const hintEl = document.getElementById("capitalHint");
 
-  if (userDisplay) userDisplay.textContent = `Angemeldet: ${user}`;
-
-  // Buttons
-  backOverviewBtn?.addEventListener("click", () => window.location.href = "overview.html");
-  cancelBtn?.addEventListener("click", () => window.location.href = "overview.html");
-
-  logoutBtn?.addEventListener("click", () => {
-    const u = localStorage.getItem(USER_KEY);
-    localStorage.removeItem(USER_KEY);
-    if (u) localStorage.removeItem(currentCompanyKey(u));
-    window.location.href = "index.html";
+  cancelBtn?.addEventListener("click", () => {
+    window.location.href = "overview.html";
   });
 
-  // Mindestkapital live
   function updateCapitalRule() {
-    const legal = String(legalEl?.value || "").trim();
+    const legal = String(legalEl.value || "").trim();
     const min = minCapitalFor(legal);
 
-    if (capitalEl) {
-      capitalEl.min = String(min);
-      capitalEl.step = "1";
-      const cur = Number(capitalEl.value || 0);
-      if (cur < min) capitalEl.value = String(min);
-    }
+    capitalEl.min = String(min);
+    capitalEl.step = "1";
 
-    if (hintEl) {
-      if (legal === "AG") hintEl.textContent = "AG: Mindest-Startkapital 100'000 CHF";
-      else if (legal === "GmbH") hintEl.textContent = "GmbH: Mindest-Startkapital 20'000 CHF";
-      else hintEl.textContent = "Einzelunternehmen: Kein Mindest-Startkapital";
-    }
+    if (legal === "AG") hintEl.textContent = "AG: Mindest-Startkapital 100'000 CHF";
+    else if (legal === "GmbH") hintEl.textContent = "GmbH: Mindest-Startkapital 20'000 CHF";
+    else hintEl.textContent = "Einzelunternehmen: Kein Mindest-Startkapital";
+
+    const cur = Number(capitalEl.value || 0);
+    if (cur < min) capitalEl.value = String(min);
   }
 
-  legalEl?.addEventListener("change", updateCapitalRule);
+  legalEl.addEventListener("change", updateCapitalRule);
   updateCapitalRule();
 
-  // Speichern
-  form?.addEventListener("submit", (e) => {
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const name = (nameEl?.value || "").trim();
-    const legal = (legalEl?.value || "").trim();
-    const capital = Number(capitalEl?.value || 0);
-    const industry = (industryEl?.value || "").trim();
-    const purpose = (purposeEl?.value || "").trim();
-    const size = Number(sizeEl?.value || 0);
+    const name = (nameEl.value || "").trim();
+    const legal = (legalEl.value || "").trim();
+    const capital = Number(capitalEl.value || 0);
+    const industry = (industryEl.value || "").trim();
+    const purpose = (purposeEl.value || "").trim();
+    const size = Number(sizeEl.value || 0);
 
     if (!name) return alert("Bitte Firmenname eingeben.");
-    if (!legal) return alert("Bitte Rechtsform wählen.");
     if (!(size >= 1)) return alert("Grösse (Mitarbeitende) muss mindestens 1 sein.");
 
     const min = minCapitalFor(legal);
@@ -107,8 +98,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const company = {
       id: `c_${Date.now()}`,
       name,
-      legal,
-      capital,     // CHF
+      legal,      // "AG" | "GmbH" | "Einzelunternehmen"
+      capital,    // CHF
       industry,
       purpose,
       size,
@@ -118,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
     companies.unshift(company);
     saveCompanies(user, companies);
 
-    // neue Firma direkt auswählen
+    // direkt auswählen
     localStorage.setItem(currentCompanyKey(user), company.id);
 
     // zurück zur Übersicht
