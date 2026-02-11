@@ -34,53 +34,68 @@
     <button id="kiGenerateBtn" class="btn" style="margin-bottom:12px;">
       KI-Aufgaben für gewähltes Jahr generieren (TEST)
     </button>
-    
-    <!-- Tabelle -->
+
+    <!-- =================== OBERER TEIL: KI-AUFGABEN =================== -->
     <table class="booking-table" aria-label="Buchungssätze">
       <thead>
         <tr>
           <th>#</th>
           <th>Buchungstatsache (KI)</th>
-          <th>Soll</th>
-          <th>Haben</th>
-          <th>Betrag (CHF)</th>
+          <th>Status</th>
         </tr>
       </thead>
-      <tbody id="bookingTableBody"></tbody>
+      <tbody id="bookingTableBody">
+        <!-- Wird per JS gefüllt -->
+      </tbody>
     </table>
 
-    <!-- Profi-Formular: Splittbuchung -->
+    <div class="muted small" style="margin:10px 0 16px;">
+      👉 Klicke auf eine Zeile, um die Aufgabe unten zu lösen.
+    </div>
+
+    <!-- =================== UNTERER TEIL: DEIN BESTEHENDES FORMULAR =================== -->
     <div class="booking-form" style="margin-top:14px;">
+
+      <!-- Versteckt: Hier merken wir uns, welche Aufgabe gerade gelöst wird -->
+      <input type="hidden" id="activeTaskId">
+
       <div class="field full-row">
         <label for="fact">Buchungstatsache</label>
-        <textarea id="fact" rows="2" placeholder="z.B. Kauf Fahrzeug, 20k Bank + 10k Darlehen"></textarea>
+        <textarea id="fact" rows="2"
+          placeholder="Wähle oben eine Aufgabe – sie erscheint hier automatisch"></textarea>
       </div>
 
       <div class="field">
-        <label>Soll‑Zeilen</label>
+        <label>Soll-Zeilen</label>
         <div id="debitLines"></div>
-        <button type="button" class="btn" id="addDebitLineBtn">+ Soll‑Zeile</button>
+        <button type="button" class="btn" id="addDebitLineBtn">+ Soll-Zeile</button>
         <div class="muted small" style="margin-top:6px;">
-          Soll‑Summe: <b id="sumDebit">0</b>
+          Soll-Summe: <b id="sumDebit">0</b>
         </div>
       </div>
 
       <div class="field">
-        <label>Haben‑Zeilen</label>
+        <label>Haben-Zeilen</label>
         <div id="creditLines"></div>
-        <button type="button" class="btn" id="addCreditLineBtn">+ Haben‑Zeile</button>
+        <button type="button" class="btn" id="addCreditLineBtn">+ Haben-Zeile</button>
         <div class="muted small" style="margin-top:6px;">
-          Haben‑Summe: <b id="sumCredit">0</b>
+          Haben-Summe: <b id="sumCredit">0</b>
         </div>
       </div>
 
-      <div class="field full-row" style="display:flex;gap:10px;align-items:center;justify-content:space-between;">
+      <div class="field full-row"
+           style="display:flex;gap:10px;align-items:center;justify-content:space-between;">
+
         <div class="muted">
           Status: <b id="balancedState">nicht ausgeglichen</b>
         </div>
-        <button id="addBookingBtn" class="btn primary" type="button">Buchen</button>
+
+        <button id="addBookingBtn" class="btn primary" type="button">
+          Buchen
+        </button>
       </div>
     </div>
+
   </section>
 </main>
 
