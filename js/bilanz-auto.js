@@ -1,4 +1,4 @@
-// js/bilanz-auto.js  (mit Jahren + Auto aus Buchungen + Split-Buchungen)
+// js/bilanz-auto.js
 
 const USER_KEY = "uwi_user";
 const COMPANIES_PREFIX = "uwi_companies_";
@@ -7,10 +7,7 @@ const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
 
-// Journal pro Firma + Jahr
 const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
-
-// ✅ Ein gemeinsamer Years-Key (empfohlen für Bilanz/ER/Bookings)
 const yearsKey = (companyId) => `uwi_years_${companyId}`;
 
 const DEFAULT_YEARS = ["2024", "2025", "2026"];
@@ -56,27 +53,25 @@ function loadJournal(companyId, year) {
   catch { return []; }
 }
 
-// ---------- Saldo aus Journal (ALT + SPLIT) ----------
+// ALT + SPLIT
 function computeSaldo(rows) {
   const saldo = {};
 
   for (const r of rows) {
-    // ✅ Splittbuchung
     if (r && r.type === "split") {
       (r.debits || []).forEach(d => {
         const acct = String(d.accountNo || "").trim();
         const amt = Number(d.amount || 0);
-        if (acct && amt > 0) saldo[acct] = (saldo[acct] || 0) + amt; // Soll +
+        if (acct && amt > 0) saldo[acct] = (saldo[acct] || 0) + amt;
       });
       (r.credits || []).forEach(c => {
         const acct = String(c.accountNo || "").trim();
         const amt = Number(c.amount || 0);
-        if (acct && amt > 0) saldo[acct] = (saldo[acct] || 0) - amt; // Haben -
+        if (acct && amt > 0) saldo[acct] = (saldo[acct] || 0) - amt;
       });
       continue;
     }
 
-    // ✅ Normale Buchung (1 Soll / 1 Haben)
     const debit = String(r.debit || r.soll || "").trim();
     const credit = String(r.credit || r.haben || "").trim();
     const amt = Number(r.amount ?? r.betrag ?? 0);
@@ -89,19 +84,9 @@ function computeSaldo(rows) {
   return saldo;
 }
 
-// Bilanz-Regel (vereinfachte Schule-Variante):
-// Aktivkonten: 1xxx und 14xx (bei euch beginnt Anlagevermögen auch mit 14)
-// Passiven/EK: 2xxx und 28xx
-function isAsset(acct) {
-  const a = String(acct);
-  return a.startsWith("1"); // (deckt 1xxx & 14xx ab)
-}
-function isLiabEq(acct) {
-  const a = String(acct);
-  return a.startsWith("2"); // (deckt 2xxx & 28xx ab)
-}
+function isAsset(acct) { return String(acct).startsWith("1"); }
+function isLiabEq(acct) { return String(acct).startsWith("2"); }
 
-// Inputs füllen + Totale berechnen
 function applyBalance(companyId, year) {
   const rows = loadJournal(companyId, year);
   const saldo = computeSaldo(rows);
@@ -114,7 +99,6 @@ function applyBalance(companyId, year) {
     const input = row.querySelector("input.balanceInput");
     if (!input) return;
 
-    // Kontonummer aus Label holen (z.B. "1020 Bankguthaben")
     const m = label.match(/^(\d+)/);
     if (!m) return;
     const acct = m[1];
@@ -128,15 +112,12 @@ function applyBalance(companyId, year) {
     } else if (isLiabEq(acct)) {
       shown = Math.max(-s, 0);
       totalPas += shown;
-    } else {
-      shown = 0;
     }
 
     input.value = String(Math.round(shown));
     input.readOnly = true;
-    input.classList.add("input-readonly"); // CSS: .input-readonly { background:#f8fafc; }
+    input.classList.add("input-readonly");
 
-    // Accessibility (Webhint Warnung weg)
     if (!input.name) input.name = `bal_${acct}_${i}`;
     if (!input.id) input.id = `bal_${acct}_${i}`;
     if (!input.hasAttribute("aria-label")) input.setAttribute("aria-label", `${label} Betrag`);
@@ -147,7 +128,6 @@ function applyBalance(companyId, year) {
   document.getElementById("balanceTitle")?.replaceChildren(document.createTextNode(`Bilanz ${year}`));
 }
 
-// ---------- Jahre Tabs ----------
 function renderYearTabs(companyId) {
   const el = document.getElementById("yearTabs");
   if (!el) return;
@@ -157,7 +137,8 @@ function renderYearTabs(companyId) {
 
   el.innerHTML =
     years.map(y => `<button type="button" class="yearBtn ${y===currentYear?"active":""}" data-year="${y}">${y}</button>`).join("") +
-    `<button type="button" class="addYearBtn" id="addYearBtn">+ Jahr hinzufügen</button>`;
+    `<button type="button" class="addYearBtn" id="addYearBtn">+ Jahr hinzufügen</button>` +
+    `<button type="button" class="addYearBtn" id="delYearBtn" style="border-style:solid;">🗑 Jahr löschen</button>`;
 
   el.onclick = (e) => {
     const b = e.target.closest(".yearBtn");
@@ -171,28 +152,46 @@ function renderYearTabs(companyId) {
     const input = prompt("Jahr eingeben (z.B. 2027):");
     if (!input) return;
     const y = input.trim();
-    if (!/^\d{4}$/.test(y) || +y < 2000 || +y > 2100) {
-      return alert("Ungültiges Jahr (2000–2100).");
-    }
+    if (!/^\d{4}$/.test(y) || +y < 2000 || +y > 2100) return alert("Ungültiges Jahr (2000–2100).");
+
     const next = getYears(companyId);
     if (next.includes(y)) return alert("Dieses Jahr gibt es schon.");
-    next.push(y);
-    next.sort();
+
+    next.push(y); next.sort();
     saveYears(companyId, next);
+
     currentYear = y;
+    renderYearTabs(companyId);
+    applyBalance(companyId, currentYear);
+  };
+
+  document.getElementById("delYearBtn").onclick = () => {
+    const list = getYears(companyId);
+    if (list.length <= 1) return alert("Du kannst nicht das letzte Jahr löschen.");
+
+    const y = prompt(`Welches Jahr löschen?\nVerfügbar: ${list.join(", ")}`, currentYear);
+    if (!y) return;
+    const yearToDelete = y.trim();
+    if (!list.includes(yearToDelete)) return alert("Dieses Jahr existiert nicht.");
+
+    if (!confirm(`Wirklich Jahr ${yearToDelete} löschen?\nAlle Buchungen dieses Jahres werden gelöscht.`)) return;
+
+    const next = list.filter(v => v !== yearToDelete);
+    saveYears(companyId, next);
+    localStorage.removeItem(journalKey(companyId, yearToDelete));
+
+    if (currentYear === yearToDelete) currentYear = next[0];
     renderYearTabs(companyId);
     applyBalance(companyId, currentYear);
   };
 }
 
-// ---------- Start ----------
 document.addEventListener("DOMContentLoaded", () => {
   const user = getUserOrRedirect();
   if (!user) return;
 
   document.getElementById("userDisplay")?.replaceChildren(document.createTextNode(`Angemeldet: ${user}`));
 
-  // Buttons
   document.getElementById("backBtn")?.addEventListener("click", () => window.location.href = "company.html");
   document.getElementById("logoutBtn")?.addEventListener("click", () => {
     const u = localStorage.getItem(USER_KEY);
@@ -204,9 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const company = getSelectedCompany(user);
   if (!company) { window.location.href = "overview.html"; return; }
 
-  const years = getYears(company.id);
-  currentYear = years[0];
-
+  currentYear = getYears(company.id)[0];
   renderYearTabs(company.id);
   applyBalance(company.id, currentYear);
 });
