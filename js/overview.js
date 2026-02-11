@@ -94,3 +94,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderCompanies(user);
 });
+deleteBtn.addEventListener("click", () => {
+  if (!confirm(`"${company.name}" wirklich löschen?`)) return;
+
+  const next = companies.filter(c => c.id !== company.id);
+  localStorage.setItem(companiesKey(user), JSON.stringify(next));
+
+  // falls gelöschte Firma ausgewählt war → selection löschen
+  const cur = localStorage.getItem(currentCompanyKey(user));
+  if (cur === company.id) localStorage.removeItem(currentCompanyKey(user));
+
+  render(); // neu anzeigen
+});
