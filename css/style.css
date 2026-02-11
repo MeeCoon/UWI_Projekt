@@ -2,6 +2,7 @@
    Einfaches, sauberes Schul-Design für die UWI Unternehmenssimulation.
    Einheitliches Layout, zentrierte Formulare, Buttons mit Hover-Effekt.
 */
+
 /* Farben & Variablen */
 :root{
   --bg: #f5f7fb;
@@ -12,7 +13,10 @@
   --accent-2: #0ea5a4;
   --radius: 10px;
   --shadow: 0 8px 24px rgba(11,18,32,0.06);
-  --max-width: 1000px;
+
+  /* ✅ Firmenübersicht grösser / Layout breiter */
+  --max-width: 1200px; /* vorher 1000px */
+
   --gap: 16px;
   font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
@@ -24,6 +28,8 @@ body{
   margin:0;
   background: linear-gradient(180deg, var(--bg), #ffffff);
   color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
 
 /* Topbar */
@@ -60,6 +66,13 @@ body{
   border:1px solid rgba(11,18,32,0.03);
 }
 
+/* ✅ Firmenübersicht: Karte breiter + schöner */
+.card.company-card, .card.card-wide{
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 26px;
+}
+
 /* Buttons */
 .btn{
   padding:8px 12px;
@@ -74,7 +87,20 @@ body{
   box-shadow:0 8px 18px rgba(11,18,32,0.06);
 }
 
-/* ===================== STANDARD TABS (dein Original) ===================== */
+/* Firmenliste Einträge */
+.company-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px;
+  border-radius:10px;
+  background: linear-gradient(180deg,#ffffff,#fbfdff);
+  border:1px solid rgba(11,18,32,0.04);
+  cursor:pointer;
+}
+.company-item:hover{box-shadow:0 6px 18px rgba(11,18,32,0.04)}
+
+/* ===================== STANDARD TABS ===================== */
 .tabs{
   display:flex;
   gap:8px;
@@ -94,7 +120,7 @@ body{
   border:0;
 }
 
-/* ===================== NEU: NAV-REITER FÜR SEITEN ===================== */
+/* ===================== NAV-REITER FÜR SEITEN ===================== */
 .page-tabs{
   display:flex;
   gap:8px;
@@ -124,6 +150,10 @@ body{
   margin:18px auto;
   color:var(--muted);
   padding:8px 18px;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
 }
 
 /* ===================== BILANZ DESIGN (auch für ER) ===================== */
@@ -184,7 +214,7 @@ body{
   font-weight:800;
 }
 
-/* ✅ FEHLTE: Aktionen-Zeile unter Bilanz/ER */
+/* Aktionen-Zeile unter Bilanz/ER */
 .balanceActions{
   margin-top:12px;
   display:flex;
@@ -193,7 +223,7 @@ body{
   flex-wrap:wrap;
 }
 
-/* ✅ FEHLTE: Jahr-Tabs wie bei Bilanz */
+/* Jahr-Tabs */
 .yearTabs{
   display:flex;
   gap:8px;
@@ -223,13 +253,13 @@ body{
   font-weight:700;
 }
 
-/* ✅ FEHLTE: hidden helper (wichtig für Tabs) */
+/* hidden helper */
 .hidden{ display:none !important; }
 
-/* ✅ statt inline-style im JS: readonly inputs hübsch machen */
+/* readonly inputs hübsch machen (statt inline-style im JS) */
 .input-readonly{ background:#f8fafc; }
 
-/* ✅ Accessibility: unsichtbares Label, falls ihr echte <label> wollt */
+/* Accessibility helper */
 .sr-only{
   position:absolute !important;
   width:1px; height:1px;
@@ -240,10 +270,14 @@ body{
   border:0;
 }
 
-/* ========================================================= */
-/* ===================== NUR FÜR BUCHUNG =================== */
-/* ======= Neu hinzugefügt – beeinflusst nichts anderes === */
-/* ========================================================= */
+/* ✅ Optional: Blaues Header-Element nur im Druck zeigen
+   (Nur aktiv, wenn du im HTML die Box als <div class="balanceHeaderBlue printOnly"> setzt) */
+.printOnly{ display:none; }
+@media print{
+  .printOnly{ display:block; }
+}
+
+/* ===================== BUCHUNG ===================== */
 .bookings-layout{
   display:flex;
   flex-direction:column;
@@ -293,6 +327,48 @@ body{
   border:1px solid rgba(11,18,32,0.12);
   font-size:14px;
 }
+
+/* ✅ Login schöner */
+.login-wrap{
+  max-width: 520px;
+  margin: 8vh auto 0;
+}
+.login-title{
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 6px;
+}
+.login-sub{
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+.login-form{
+  display: grid;
+  gap: 12px;
+  margin-top: 10px;
+}
+.login-form input{
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(11,18,32,0.10);
+  font-size: 15px;
+  background: #fff;
+}
+.login-form input:focus{
+  outline: none;
+  border-color: rgba(43,110,246,0.45);
+  box-shadow: 0 0 0 4px rgba(43,110,246,0.10);
+}
+.login-btn{
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 0;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.login-btn:hover{ filter: brightness(0.97); }
 
 /* Responsive */
 @media (max-width: 820px){
