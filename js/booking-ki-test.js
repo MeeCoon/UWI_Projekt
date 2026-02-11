@@ -2,6 +2,7 @@
 // TEST-KI FÜR BUCHUNGSSÄTZE (SCHRITT 1)
 // Generiert 50 realistische Buchungstatsachen pro Jahr
 // OHNE feste Soll/Haben-Vorgabe (Lernaufgabe für Nutzer)
+// NEUE REIHENFOLGE: Text → Soll → Haben → Betrag
 // ==========================================================
 
 const TEST_TEMPLATES = [
@@ -105,13 +106,13 @@ document.addEventListener("DOMContentLoaded", () => {
       row.innerHTML = `
         <td>${index + 1}</td>
         <td>${t.text}</td>
-        <td>${t.betrag}</td>
         <td>
           <input type="text" placeholder="Soll Konto (z.B. 1510)">
         </td>
         <td>
           <input type="text" placeholder="Haben Konto (z.B. 1020)">
         </td>
+        <td>${t.betrag}</td>
       `;
 
       tableBody.appendChild(row);
