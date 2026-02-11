@@ -23,13 +23,17 @@ function loadCompanies(user) {
   }
 }
 
-function escapeHtml(s){
+function saveCompanies(user, companies) {
+  localStorage.setItem(companiesKey(user), JSON.stringify(companies));
+}
+
+function escapeHtml(s) {
   return String(s)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function renderCompanies(user) {
@@ -54,25 +58,48 @@ function renderCompanies(user) {
     row.innerHTML = `
       <div class="listMain">
         <div class="listTitle">${escapeHtml(c.name || "Ohne Name")}</div>
-        <div class="muted small">${escapeHtml(legal)} · ${escapeHtml(industry)} · Mitarbeitende: ${escapeHtml(String(employees))}</div>
+        <div class="muted small">
+          ${escapeHtml(legal)} · ${escapeHtml(industry)} · Mitarbeitende: ${escapeHtml(String(employees))}
+        </div>
       </div>
       <div class="listActions">
         <button class="btn" type="button" data-open="${escapeHtml(c.id)}">Öffnen</button>
+        <button class="btn" type="button" data-del="${escapeHtml(c.id)}" title="Firma löschen">Löschen</button>
       </div>
     `;
     list.appendChild(row);
   });
 
-  // ✅ Event-Delegation: funktioniert auch, wenn später neu gerendert wird
+  // ✅ Event-Delegation für Öffnen + Löschen
   list.onclick = (e) => {
-    const btn = e.target.closest("[data-open]");
-    if (!btn) return;
+    const openBtn = e.target.closest("[data-open]");
+    const delBtn = e.target.closest("[data-del]");
 
-    const id = btn.getAttribute("data-open");
-    localStorage.setItem(currentCompanyKey(user), id);
+    if (openBtn) {
+      const id = openBtn.getAttribute("data-open");
+      localStorage.setItem(currentCompanyKey(user), id);
+      window.location.assign("company.html");
+      return;
+    }
 
-    // ✅ harte Navigation
-    window.location.assign("company.html");
+    if (delBtn) {
+      const id = delBtn.getAttribute("data-del");
+      const companiesNow = loadCompanies(user);
+      const company = companiesNow.find((x) => x.id === id);
+
+      if (!company) return;
+
+      if (!confirm(`"${company.name}" wirklich löschen?`)) return;
+
+      const next = companiesNow.filter((x) => x.id !== id);
+      saveCompanies(user, next);
+
+      // falls gelöschte Firma ausgewählt war → selection löschen
+      const cur = localStorage.getItem(currentCompanyKey(user));
+      if (cur === id) localStorage.removeItem(currentCompanyKey(user));
+
+      renderCompanies(user);
+    }
   };
 }
 
@@ -93,16 +120,4 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   renderCompanies(user);
-});
-deleteBtn.addEventListener("click", () => {
-  if (!confirm(`"${company.name}" wirklich löschen?`)) return;
-
-  const next = companies.filter(c => c.id !== company.id);
-  localStorage.setItem(companiesKey(user), JSON.stringify(next));
-
-  // falls gelöschte Firma ausgewählt war → selection löschen
-  const cur = localStorage.getItem(currentCompanyKey(user));
-  if (cur === company.id) localStorage.removeItem(currentCompanyKey(user));
-
-  render(); // neu anzeigen
 });
