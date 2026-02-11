@@ -207,3 +207,13 @@ document.addEventListener("DOMContentLoaded", () => {
   renderYearTabs(company.id);
   applyBalance(company.id, currentYear);
 });
+document.getElementById("backBtn")?.addEventListener("click", () => {
+  window.location.href = "company.html";
+});
+
+document.getElementById("logoutBtn")?.addEventListener("click", () => {
+  const u = localStorage.getItem(USER_KEY);
+  localStorage.removeItem(USER_KEY);
+  if (u) localStorage.removeItem(currentCompanyKey(u));
+  window.location.href = "index.html";
+});
