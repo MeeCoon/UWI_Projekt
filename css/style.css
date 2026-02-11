@@ -435,3 +435,20 @@ body{
   font-size: 13px;
   margin-top: 6px;
 }
+.center-page{ display:flex; justify-content:center; }
+.card-small{ max-width: 950px; width:100%; }
+
+.form-grid{
+  display:grid;
+  grid-template-columns: 220px 1fr;
+  gap: 12px 14px;
+  margin-top: 14px;
+  align-items:center;
+}
+.form-grid label{ color:var(--muted); font-weight:600; }
+.form-grid input, .form-grid select{
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid rgba(11,18,32,0.12);
+}
+.primary{ background: var(--accent); color:#fff; border:0; }
