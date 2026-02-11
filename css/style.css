@@ -452,3 +452,19 @@ body{
   border:1px solid rgba(11,18,32,0.12);
 }
 .primary{ background: var(--accent); color:#fff; border:0; }
+.listItem{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 0;
+  border-top:1px solid rgba(11,18,32,0.08);
+}
+
+.listActions{
+  display:flex;
+  gap:8px;
+  position: static !important;
+  right: auto !important;
+  bottom: auto !important;
+}
