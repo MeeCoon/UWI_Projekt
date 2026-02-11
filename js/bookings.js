@@ -1,3 +1,24 @@
+// ✅ NAV Buttons immer aktiv (egal was später im Script passiert)
+document.addEventListener("DOMContentLoaded", () => {
+  const backBtn = document.getElementById("backBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  backBtn?.addEventListener("click", () => {
+    // falls bei dir "Zur Übersicht" sein soll: "overview.html"
+    window.location.href = "company.html"; 
+  });
+
+  logoutBtn?.addEventListener("click", () => {
+    const USER_KEY = "uwi_user";
+    const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
+    const u = localStorage.getItem(USER_KEY);
+
+    localStorage.removeItem(USER_KEY);
+    if (u) localStorage.removeItem(`${CURRENT_COMPANY_PREFIX}${u}`);
+
+    window.location.href = "index.html";
+  });
+});
 const USER_KEY = "uwi_user";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 const COMPANIES_PREFIX = "uwi_companies_";
