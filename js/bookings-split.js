@@ -182,3 +182,14 @@ document.addEventListener("DOMContentLoaded",()=>{
     alert(`Gebucht in ${currentYear}`);
   };
 });
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("backBtn")?.addEventListener("click", () => location.href="company.html");
+  document.getElementById("logoutBtn")?.addEventListener("click", () => {
+    const u = localStorage.getItem("uwi_user");
+    localStorage.removeItem("uwi_user");
+    if (u) localStorage.removeItem(`uwi_currentCompany_${u}`);
+    location.href="index.html";
+  });
+});
+</script>
