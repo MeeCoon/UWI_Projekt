@@ -1,0 +1,10 @@
+[
+  {
+    "vorfall": "Kauf von neuem Mobiliar im Wert von CHF 10000 gegen Barzahlung.",
+    "loesung": "Mobiliar / Kasse 10000"
+  },
+  {
+    "vorfall": "Kunde begleicht seine Rechnung in Höhe von CHF 5000 per Banküberweisung",
+    "loesung": "Bank / FLL 5000"
+  }
+]
