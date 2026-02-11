@@ -1,301 +1,184 @@
-// js/bookings-split.js
-
 const USER_KEY = "uwi_user";
 const COMPANIES_PREFIX = "uwi_companies_";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 
 const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
-
 const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
 const yearsKey = (companyId) => `uwi_years_${companyId}`;
 
 const DEFAULT_YEARS = ["2024", "2025", "2026"];
 let currentYear = DEFAULT_YEARS[0];
 
-// Kontenliste (erweitere wenn du willst)
-const ACCOUNTS = [
-  { no: "1000", name: "Kasse" },
-  { no: "1020", name: "Bank" },
-  { no: "1100", name: "Debitoren" },
-  { no: "1500", name: "Mobiliar" },
-  { no: "1530", name: "Fahrzeuge" },
-  { no: "2000", name: "Verbindlichkeiten" },
-  { no: "2450", name: "Darlehen" },
-  { no: "2800", name: "Eigenkapital" },
-  { no: "3000", name: "Produktionserlöse" },
-  { no: "3400", name: "Dienstleistungserlöse" },
+// ===== ZENTRALER KONTENPLAN (für Dropdown) =====
+const KONTENPLAN = [
+  // Bilanz Aktiven
+  { no:"1000", name:"Kasse"},
+  { no:"1020", name:"Bankguthaben"},
+  { no:"1060", name:"Wertschriften"},
+  { no:"1100", name:"Forderungen"},
+  { no:"1170", name:"Vorsteuer MWST"},
+  { no:"1200", name:"Handelswaren"},
+  { no:"1210", name:"Rohstoffe"},
+  { no:"1300", name:"Aktive RA"},
+  { no:"1400", name:"Wertschriften (AV)"},
+  { no:"1480", name:"Beteiligungen"},
+  { no:"1500", name:"Maschinen & Apparate"},
+  { no:"1510", name:"Mobiliar"},
+  { no:"1520", name:"Büromaschinen"},
+  { no:"1530", name:"Fahrzeuge"},
+  { no:"1600", name:"Geschäftsliegenschaften"},
+  { no:"1700", name:"Immaterielle Werte"},
+
+  // Bilanz Passiven
+  { no:"2000", name:"Verbindlichkeiten"},
+  { no:"2030", name:"Erhaltene Anzahlungen"},
+  { no:"2100", name:"Bankverbindlichkeiten"},
+  { no:"2200", name:"Geschuldete MWST"},
+  { no:"2300", name:"Passive RA"},
+  { no:"2450", name:"Darlehen"},
+  { no:"2451", name:"Hypotheken"},
+  { no:"2600", name:"Rückstellungen"},
+  { no:"2800", name:"Eigenkapital"},
+  { no:"2950", name:"Gesetzliche Reserven"},
+  { no:"2970", name:"Gewinnvortrag"},
+
+  // Erfolgsrechnung Ertrag
+  { no:"3000", name:"Produktionserlöse"},
+  { no:"3200", name:"Handelserlöse"},
+  { no:"3400", name:"Dienstleistungserlöse"},
+  { no:"3600", name:"Übrige Erlöse"},
+  { no:"7000", name:"Ertrag Nebenbetrieb"},
+  { no:"8100", name:"Betriebsfremder Ertrag"},
+  { no:"8510", name:"Ausserordentlicher Ertrag"},
+
+  // Erfolgsrechnung Aufwand
+  { no:"4000", name:"Materialaufwand"},
+  { no:"4200", name:"Handelswarenaufwand"},
+  { no:"4400", name:"Aufwand DL"},
+  { no:"5000", name:"Lohnaufwand"},
+  { no:"5700", name:"Sozialversicherungen"},
+  { no:"5800", name:"Übriger Personalaufwand"},
+  { no:"6000", name:"Raumaufwand"},
+  { no:"6100", name:"URE"},
+  { no:"6200", name:"Fahrzeugaufwand"},
+  { no:"6300", name:"Versicherungen"},
+  { no:"6500", name:"Verwaltungsaufwand"},
+  { no:"6800", name:"Abschreibungen"},
+  { no:"6900", name:"Finanzaufwand"},
+  { no:"8000", name:"Betriebsfremder Aufwand"},
+  { no:"8500", name:"Ausserordentlicher Aufwand"}
 ];
 
-function fmt(n) {
-  const num = Math.round(Number(n || 0));
-  return String(num).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+function fmt(n){
+  return String(Math.round(Number(n||0))).replace(/\B(?=(\d{3})+(?!\d))/g,"'");
 }
 
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
-}
-
-function loadCompanies(u) {
-  try { return JSON.parse(localStorage.getItem(companiesKey(u)) || "[]"); }
-  catch { return []; }
-}
-
-function getSelectedCompany(u) {
-  const id = localStorage.getItem(currentCompanyKey(u));
-  if (!id) return null;
-  return loadCompanies(u).find(c => c.id === id) || null;
-}
-
-function getYears(companyId) {
-  try {
-    const arr = JSON.parse(localStorage.getItem(yearsKey(companyId)) || "null");
-    if (Array.isArray(arr) && arr.length) return arr.map(String);
-  } catch {}
-  return [...DEFAULT_YEARS];
-}
-
-function saveYears(companyId, years) {
-  localStorage.setItem(yearsKey(companyId), JSON.stringify(years.map(String)));
-}
-
-function loadJournal(companyId, year) {
-  try { return JSON.parse(localStorage.getItem(journalKey(companyId, year)) || "[]"); }
-  catch { return []; }
-}
-
-function saveJournal(companyId, year, rows) {
-  localStorage.setItem(journalKey(companyId, year), JSON.stringify(rows));
-}
-
-function buildAccountOptions() {
+function buildAccountOptions(){
   return [
     `<option value="">— Konto wählen —</option>`,
-    ...ACCOUNTS.map(a => `<option value="${a.no}">${a.no} ${a.name}</option>`)
+    ...KONTENPLAN.map(a=>`<option value="${a.no}">${a.no} ${a.name}</option>`)
   ].join("");
 }
 
-function renderYearTabs(companyId) {
-  const el = document.getElementById("yearTabs");
-  if (!el) return;
-
-  const years = getYears(companyId);
-  if (!years.includes(currentYear)) currentYear = years[0];
-
-  el.innerHTML =
-    years.map(y => `<button type="button" class="yearBtn ${y===currentYear?"active":""}" data-year="${y}">${y}</button>`).join("") +
-    `<button type="button" class="addYearBtn" id="addYearBtn">+ Jahr hinzufügen</button>` +
-    `<button type="button" class="addYearBtn" id="delYearBtn" style="border-style:solid;">🗑 Jahr löschen</button>`;
-
-  el.onclick = (e) => {
-    const b = e.target.closest(".yearBtn");
-    if (!b) return;
-    currentYear = b.dataset.year;
-    renderYearTabs(companyId);
-    renderTable(companyId);
-  };
-
-  document.getElementById("addYearBtn").onclick = () => {
-    const input = prompt("Jahr eingeben (z.B. 2027):");
-    if (!input) return;
-    const y = input.trim();
-    if (!/^\d{4}$/.test(y) || +y < 2000 || +y > 2100) return alert("Ungültiges Jahr (2000–2100).");
-
-    const next = getYears(companyId);
-    if (next.includes(y)) return alert("Dieses Jahr gibt es schon.");
-
-    next.push(y); next.sort();
-    saveYears(companyId, next);
-
-    currentYear = y;
-    renderYearTabs(companyId);
-    renderTable(companyId);
-  };
-
-  document.getElementById("delYearBtn").onclick = () => {
-    const list = getYears(companyId);
-    if (list.length <= 1) return alert("Du kannst nicht das letzte Jahr löschen.");
-
-    const y = prompt(`Welches Jahr löschen?\nVerfügbar: ${list.join(", ")}`, currentYear);
-    if (!y) return;
-    const yearToDelete = y.trim();
-    if (!list.includes(yearToDelete)) return alert("Dieses Jahr existiert nicht.");
-
-    if (!confirm(`Wirklich Jahr ${yearToDelete} löschen?\nAlle Buchungen dieses Jahres werden gelöscht.`)) return;
-
-    const next = list.filter(v => v !== yearToDelete);
-    saveYears(companyId, next);
-    localStorage.removeItem(journalKey(companyId, yearToDelete));
-
-    if (currentYear === yearToDelete) currentYear = next[0];
-    renderYearTabs(companyId);
-    renderTable(companyId);
-  };
+function loadJournal(cid,year){
+  return JSON.parse(localStorage.getItem(journalKey(cid,year))||"[]");
+}
+function saveJournal(cid,year,rows){
+  localStorage.setItem(journalKey(cid,year),JSON.stringify(rows));
 }
 
-function entryToDisplay(entry) {
-  const fact = entry.fact || "";
-  const deb = (entry.debits || []).map(x => `${x.accountNo} ${x.accountName} (${fmt(x.amount)})`).join(", ");
-  const cre = (entry.credits || []).map(x => `${x.accountNo} ${x.accountName} (${fmt(x.amount)})`).join(", ");
-  const total = Number(entry.total || 0);
-  return { fact, deb, cre, total };
+function getLines(side){
+  const root = document.getElementById(side==="debit"?"debitLines":"creditLines");
+  return Array.from(root.querySelectorAll("div[data-side]"))
+    .map(line=>{
+      const sel=line.querySelector("select");
+      const inp=line.querySelector("input");
+      return {
+        accountNo:(sel.value||"").trim(),
+        accountName:(sel.selectedOptions[0]?.textContent||"").replace(/^\d+\s*/,""),
+        amount:Number(inp.value||0)
+      };
+    })
+    .filter(x=>x.accountNo && x.amount>0);
 }
 
-function renderTable(companyId) {
-  const tbody = document.getElementById("bookingTableBody");
-  if (!tbody) return;
+function sum(arr){ return arr.reduce((a,b)=>a+Number(b.amount||0),0); }
 
-  const rows = loadJournal(companyId, currentYear);
-  tbody.innerHTML = "";
+function updateSums(){
+  const d=sum(getLines("debit"));
+  const c=sum(getLines("credit"));
 
-  rows.forEach(entry => {
-    const d = entryToDisplay(entry);
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${escapeHtml(d.fact)}</td>
-      <td>${escapeHtml(d.deb)}</td>
-      <td>${escapeHtml(d.cre)}</td>
-      <td>${escapeHtml(String(d.total))}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+  document.getElementById("sumDebit").textContent = `${fmt(d)} CHF`;
+  document.getElementById("sumCredit").textContent = `${fmt(c)} CHF`;
+
+  const ok = d>0 && d===c;
+  document.getElementById("balancedState").textContent =
+    ok?"ausgeglichen":"nicht ausgeglichen";
+
+  document.getElementById("addBookingBtn").disabled = !ok;
 }
 
-function createLine(side) {
-  const wrap = document.createElement("div");
-  wrap.style.display = "flex";
-  wrap.style.gap = "8px";
-  wrap.style.alignItems = "center";
-  wrap.style.marginBottom = "8px";
-  wrap.dataset.side = side;
+function createLine(side){
+  const w=document.createElement("div");
+  w.dataset.side=side;
+  w.style.display="flex"; w.style.gap="8px";
 
-  const sel = document.createElement("select");
-  sel.className = "balanceInput";
-  sel.style.textAlign = "left";
-  sel.style.width = "100%";
-  sel.innerHTML = buildAccountOptions();
+  const s=document.createElement("select");
+  s.className="balanceInput"; s.innerHTML=buildAccountOptions();
 
-  const amt = document.createElement("input");
-  amt.className = "balanceInput";
-  amt.type = "number";
-  amt.min = "0";
-  amt.step = "1";
-  amt.placeholder = "Betrag";
-  amt.style.width = "140px";
+  const i=document.createElement("input");
+  i.type="number"; i.min="0"; i.placeholder="Betrag"; i.className="balanceInput";
 
-  const del = document.createElement("button");
-  del.type = "button";
-  del.className = "btn";
-  del.textContent = "✕";
-  del.title = "Zeile entfernen";
+  const b=document.createElement("button");
+  b.textContent="✕"; b.type="button"; b.className="btn";
+  b.onclick=()=>{w.remove();updateSums();};
 
-  del.addEventListener("click", () => { wrap.remove(); updateSums(); });
-  sel.addEventListener("change", updateSums);
-  amt.addEventListener("input", updateSums);
-
-  wrap.appendChild(sel);
-  wrap.appendChild(amt);
-  wrap.appendChild(del);
-  return wrap;
+  s.onchange=updateSums; i.oninput=updateSums;
+  w.append(s,i,b);
+  return w;
 }
 
-function getLines(side) {
-  const root = side === "debit" ? document.getElementById("debitLines") : document.getElementById("creditLines");
-  const lines = Array.from(root?.querySelectorAll("div[data-side]") || []);
-  return lines.map(line => {
-    const sel = line.querySelector("select");
-    const inp = line.querySelector('input[type="number"]');
-    const accountNo = (sel?.value || "").trim();
-    const optText = sel?.selectedOptions?.[0]?.textContent || "";
-    const accountName = optText.replace(/^\d+\s*/, "").trim();
-    const amount = Number(inp?.value || 0);
-    return { accountNo, accountName, amount };
-  }).filter(x => x.accountNo && x.amount > 0);
-}
+document.addEventListener("DOMContentLoaded",()=>{
+  const cid = localStorage.getItem(CURRENT_COMPANY_PREFIX+localStorage.getItem(USER_KEY));
+  currentYear = DEFAULT_YEARS[0];
 
-function sum(lines) {
-  return lines.reduce((a,b) => a + Number(b.amount || 0), 0);
-}
+  document.getElementById("debitLines").append(createLine("debit"));
+  document.getElementById("creditLines").append(createLine("credit"));
 
-function updateSums() {
-  const debits = getLines("debit");
-  const credits = getLines("credit");
-  const sD = sum(debits);
-  const sC = sum(credits);
+  document.getElementById("addDebitLineBtn").onclick =
+    ()=>{document.getElementById("debitLines").append(createLine("debit"));updateSums();};
 
-  document.getElementById("sumDebit").textContent = `${fmt(sD)} CHF`;
-  document.getElementById("sumCredit").textContent = `${fmt(sC)} CHF`;
+  document.getElementById("addCreditLineBtn").onclick =
+    ()=>{document.getElementById("creditLines").append(createLine("credit"));updateSums();};
 
-  const ok = sD > 0 && sD === sC;
-  document.getElementById("balancedState").textContent = ok ? "ausgeglichen ✅" : "nicht ausgeglichen ❌";
+  document.getElementById("addBookingBtn").onclick = ()=>{
+    const fact=document.getElementById("fact").value.trim();
+    const debits=getLines("debit");
+    const credits=getLines("credit");
 
-  const btn = document.getElementById("addBookingBtn");
-  if (btn) btn.disabled = !ok;
-}
+    if(!fact) return alert("Buchungstatsache fehlt.");
+    if(sum(debits)!==sum(credits)) return alert("Soll ≠ Haben");
 
-document.addEventListener("DOMContentLoaded", () => {
-  const user = localStorage.getItem(USER_KEY);
-  if (!user) return (window.location.href = "index.html");
-
-  document.getElementById("userDisplay")?.replaceChildren(document.createTextNode(`Angemeldet: ${user}`));
-
-  document.getElementById("backBtn")?.addEventListener("click", () => window.location.href = "company.html");
-  document.getElementById("logoutBtn")?.addEventListener("click", () => {
-    const u = localStorage.getItem(USER_KEY);
-    localStorage.removeItem(USER_KEY);
-    if (u) localStorage.removeItem(currentCompanyKey(u));
-    window.location.href = "index.html";
-  });
-
-  const company = getSelectedCompany(user);
-  if (!company) return (window.location.href = "overview.html");
-
-  currentYear = getYears(company.id)[0];
-  renderYearTabs(company.id);
-
-  const debitRoot = document.getElementById("debitLines");
-  const creditRoot = document.getElementById("creditLines");
-  debitRoot.appendChild(createLine("debit"));
-  creditRoot.appendChild(createLine("credit"));
-
-  document.getElementById("addDebitLineBtn")?.addEventListener("click", () => { debitRoot.appendChild(createLine("debit")); updateSums(); });
-  document.getElementById("addCreditLineBtn")?.addEventListener("click", () => { creditRoot.appendChild(createLine("credit")); updateSums(); });
-
-  renderTable(company.id);
-  updateSums();
-
-  document.getElementById("addBookingBtn")?.addEventListener("click", () => {
-    const fact = document.getElementById("fact")?.value?.trim() || "";
-    const debits = getLines("debit");
-    const credits = getLines("credit");
-    const totalD = sum(debits);
-    const totalC = sum(credits);
-
-    if (!fact) return alert("Bitte Buchungstatsache eingeben.");
-    if (!(totalD > 0) || totalD !== totalC) return alert("Soll und Haben müssen gleich sein!");
-
-    const entry = {
-      type: "split",
+    const entry={
+      type:"split",
       fact,
-      year: currentYear,
-      debits,
-      credits,
-      total: totalD,
-      date: new Date().toISOString()
+      year:currentYear,
+      debits, credits,
+      total:sum(debits),
+      date:new Date().toISOString()
     };
 
-    const list = loadJournal(company.id, currentYear);
+    const list=loadJournal(cid,currentYear);
     list.unshift(entry);
-    saveJournal(company.id, currentYear, list);
+    saveJournal(cid,currentYear,list);
 
-    document.getElementById("fact").value = "";
-    debitRoot.innerHTML = "";
-    creditRoot.innerHTML = "";
-    debitRoot.appendChild(createLine("debit"));
-    creditRoot.appendChild(createLine("credit"));
-
+    document.getElementById("fact").value="";
+    document.getElementById("debitLines").innerHTML="";
+    document.getElementById("creditLines").innerHTML="";
+    document.getElementById("debitLines").append(createLine("debit"));
+    document.getElementById("creditLines").append(createLine("credit"));
     updateSums();
-    renderTable(company.id);
-    alert(`Gebucht in ${currentYear} ✅`);
-  });
+    alert(`Gebucht in ${currentYear}`);
+  };
 });
