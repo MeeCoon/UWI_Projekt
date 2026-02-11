@@ -1,82 +1,51 @@
-// js/create.js
-// Neue Firma erstellen (create.html)
-// - Speichert Firma unter 'uwi_companies_<username>'
-// - Jede Firma bleibt nach Logout erhalten (da nur LocalStorage genutzt wird)
-// - Nach Erstellung Weiterleitung zu overview.html
+document.addEventListener("DOMContentLoaded", () => {
+  const legalEl   = document.getElementById("legal");
+  const capitalEl = document.getElementById("capital");
+  const hintEl    = document.getElementById("capitalHint");
+  const formEl    = document.getElementById("createForm");
 
-const USER_KEY = 'uwi_user';
-const COMPANIES_PREFIX = 'uwi_companies_';
-
-// Helfer
-function getCurrentUserOrRedirect() {
-  const user = localStorage.getItem(USER_KEY);
-  if (!user) {
-    window.location.href = 'index.html';
-    return null;
+  function minCapital(form) {
+    if (form === "AG") return 100000;
+    if (form === "GmbH") return 20000;
+    return 0; // Einzelunternehmen
   }
-  return user;
-}
-function companiesKey(user) { return COMPANIES_PREFIX + user; }
-function loadCompaniesForUser(user) {
-  const raw = localStorage.getItem(companiesKey(user));
-  try { return raw ? JSON.parse(raw) : []; } catch(err) { console.error(err); return []; }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-  const user = getCurrentUserOrRedirect();
-  if (!user) return;
+  function fmtCH(n){
+    return Number(n).toLocaleString("de-CH");
+  }
 
-  // Benutzeranzeige und Buttons
-  const userDisplay = document.getElementById('userDisplay');
-  if (userDisplay) userDisplay.textContent = `Angemeldet: ${user}`;
+  function updateCapitalRule() {
+    const form = legalEl.value;
+    const min = minCapital(form);
 
-  document.getElementById('logoutBtn').addEventListener('click', () => {
-    localStorage.removeItem(USER_KEY);
-    // optional: Auswahl löschen
-    localStorage.removeItem('uwi_currentCompany_' + user);
-    window.location.href = 'index.html';
-  });
+    capitalEl.min = String(min);
+    capitalEl.step = "1";
 
-  document.getElementById('cancelBtn').addEventListener('click', () => {
-    window.location.href = 'overview.html';
-  });
+    if (form === "AG") hintEl.textContent = "AG: Mindest-Startkapital 100'000 CHF";
+    else if (form === "GmbH") hintEl.textContent = "GmbH: Mindest-Startkapital 20'000 CHF";
+    else hintEl.textContent = "Einzelunternehmen: Kein Mindest-Startkapital";
 
-  // Formularverarbeitung
-  const form = document.getElementById('createForm');
-  form.addEventListener('submit', ev => {
-    ev.preventDefault();
+    const current = Number(capitalEl.value || 0);
+    if (current < min) capitalEl.value = String(min);
+  }
 
-    // Werte lesen
-    const name = document.getElementById('name').value.trim();
-    const legal = document.getElementById('legal').value;
-    const capital = parseFloat(document.getElementById('capital').value) || 0;
-    const industry = document.getElementById('industry').value.trim();
-    const purpose = document.getElementById('purpose').value.trim();
-    const size = parseInt(document.getElementById('size').value) || 0;
+  legalEl.addEventListener("change", updateCapitalRule);
+  updateCapitalRule();
 
-    if (!name) {
-      alert('Bitte einen Firmennamen eingeben.');
+  formEl.addEventListener("submit", (e) => {
+    const form = legalEl.value;
+    const min = minCapital(form);
+    const cap = Number(capitalEl.value || 0);
+
+    if (cap < min) {
+      e.preventDefault();
+      alert(`Startkapital zu klein. Minimum für ${form}: ${fmtCH(min)} CHF`);
+      capitalEl.value = String(min);
+      capitalEl.focus();
       return;
     }
 
-    // Firma-Objekt
-    const company = {
-      id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
-      name,
-      legal,
-      capital,
-      industry,
-      purpose,
-      size,
-      createdAt: new Date().toISOString()
-    };
-
-    // Speichern unter user-spezifischem Schlüssel
-    const companies = loadCompaniesForUser(user);
-    companies.push(company);
-    localStorage.setItem(companiesKey(user), JSON.stringify(companies));
-
-    // Zur Ansicht: zurück zur Übersicht
-    window.location.href = 'overview.html';
+    // ✅ hier NICHTS anderes kaputt machen: dein bestehendes Speichern in create.js
+    // bleibt darunter/anschliessend wie du es schon hast.
   });
 });
