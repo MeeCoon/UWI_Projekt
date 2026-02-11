@@ -11,7 +11,8 @@
     <div class="brand">UWI Unternehmenssimulation</div>
     <nav class="nav-inline">
       <span id="userDisplay" class="muted"></span>
-      <button id="logoutBtn" class="btn">Abmelden</button>
+      <button id="backOverviewBtn" class="btn" type="button">Zur Übersicht</button>
+      <button id="logoutBtn" class="btn" type="button">Abmelden</button>
     </nav>
   </header>
 
@@ -30,8 +31,11 @@
           <option>AG</option>
         </select>
 
-        <label for="capital">Startkapital (€)</label>
-        <input id="capital" type="number" min="0" step="0.01" placeholder="10000">
+        <label for="capital">Startkapital (CHF)</label>
+        <input id="capital" type="number" min="0" step="1" placeholder="10000">
+
+        <!-- Hinweis (AG/GmbH Minimum) -->
+        <div id="capitalHint" class="muted small" style="grid-column:1 / -1;"></div>
 
         <label for="industry">Branche</label>
         <input id="industry" placeholder="z. B. Handel">
