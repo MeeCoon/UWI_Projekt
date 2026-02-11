@@ -173,4 +173,13 @@ document.addEventListener("DOMContentLoaded", () => {
   currentYear = getYears(companyId)[0];
   renderYearTabs(companyId);
   applyER(companyId, currentYear);
+})
+  
+  ;document.querySelectorAll(".balanceRow").forEach(row => {
+  const name = row.querySelector("span")?.textContent?.trim();
+  const input = row.querySelector("input.balanceInput");
+  if (name && input && !input.hasAttribute("aria-label")) {
+    input.setAttribute("aria-label", `${name} Betrag`);
+  }
 });
+
