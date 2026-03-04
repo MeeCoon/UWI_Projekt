@@ -1,110 +1,129 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>UWI — Buchungssätze</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>UWI — Buchungssätze</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
+
 <header class="topbar">
-  <div class="brand">UWI Unternehmenssimulation</div>
-  <nav class="nav-inline">
-    <span id="userDisplay" class="muted"></span>
-    <button id="backBtn" class="btn" type="button">Zur Firma</button>
-    <button id="logoutBtn" class="btn" type="button">Abmelden</button>
-  </nav>
+<div class="brand">UWI Unternehmenssimulation</div>
+
+<nav class="nav-inline">
+<span id="userDisplay" class="muted"></span>
+<button id="backBtn" class="btn" type="button">Zur Firma</button>
+<button id="logoutBtn" class="btn" type="button">Abmelden</button>
+</nav>
 </header>
 
 <main class="container">
-  <section class="card">
-    <h1 class="h2">Buchungssätze</h1>
 
-    <div class="page-tabs">
-      <a href="bilanz.html" class="page-tab">Bilanz</a>
-      <a href="erfolgsrechnung.html" class="page-tab">Erfolgsrechnung</a>
-      <a href="bookings.html" class="page-tab active">Buchungssätze</a>
-      <a href="wirtschaft.html" class="page-tab">Wirtschaft</a>
-      <a href="recht.html" class="page-tab">Recht</a>
-    </div>
+<section class="card">
 
-    <!-- Jahre -->
-    <div class="yearTabs" id="yearTabs" style="margin-top:12px;"></div>
+<h1 class="h2">Buchungssätze</h1>
 
-    <button id="kiGenerateBtn" class="btn" style="margin-bottom:12px;">
-      KI-Aufgaben für gewähltes Jahr generieren (TEST)
-    </button>
+<div class="page-tabs">
+<a href="bilanz.html" class="page-tab">Bilanz</a>
+<a href="erfolgsrechnung.html" class="page-tab">Erfolgsrechnung</a>
+<a href="bookings.html" class="page-tab active">Buchungssätze</a>
+<a href="wirtschaft.html" class="page-tab">Wirtschaft</a>
+<a href="recht.html" class="page-tab">Recht</a>
+</div>
 
-    <!-- =================== OBERER TEIL: KI-AUFGABEN =================== -->
-    <table class="booking-table" aria-label="Buchungssätze">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Buchungstatsache (KI)</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="bookingTableBody">
-        <!-- Wird per JS gefüllt -->
-      </tbody>
-    </table>
+<div class="yearTabs" id="yearTabs" style="margin-top:12px;"></div>
 
-    <div class="muted small" style="margin:10px 0 16px;">
-      👉 Klicke auf eine Zeile, um die Aufgabe unten zu lösen.
-    </div>
+<button id="kiGenerateBtn" class="btn" style="margin-bottom:12px;">
+KI-Aufgaben für gewähltes Jahr generieren (TEST)
+</button>
 
-    <!-- =================== UNTERER TEIL: DEIN BESTEHENDES FORMULAR =================== -->
-    <div class="booking-form" style="margin-top:14px;">
+<table class="booking-table">
 
-      <!-- Versteckt: Hier merken wir uns, welche Aufgabe gerade gelöst wird -->
-      <input type="hidden" id="activeTaskId">
+<thead>
+<tr>
+<th>#</th>
+<th>Buchungstatsache (KI)</th>
+<th>Status</th>
+</tr>
+</thead>
 
-      <div class="field full-row">
-        <label for="fact">Buchungstatsache</label>
-        <textarea id="fact" rows="2"
-          placeholder="Wähle oben eine Aufgabe – sie erscheint hier automatisch"></textarea>
-      </div>
+<tbody id="bookingTableBody"></tbody>
 
-      <div class="field">
-        <label>Soll-Zeilen</label>
-        <div id="debitLines"></div>
-        <button type="button" class="btn" id="addDebitLineBtn">+ Soll-Zeile</button>
-        <div class="muted small" style="margin-top:6px;">
-          Soll-Summe: <b id="sumDebit">0</b>
-        </div>
-      </div>
+</table>
 
-      <div class="field">
-        <label>Haben-Zeilen</label>
-        <div id="creditLines"></div>
-        <button type="button" class="btn" id="addCreditLineBtn">+ Haben-Zeile</button>
-        <div class="muted small" style="margin-top:6px;">
-          Haben-Summe: <b id="sumCredit">0</b>
-        </div>
-      </div>
+<div class="muted small" style="margin:10px 0 16px;">
+👉 Klicke auf eine Zeile, um die Aufgabe unten zu lösen.
+</div>
 
-      <div class="field full-row"
-           style="display:flex;gap:10px;align-items:center;justify-content:space-between;">
+<div class="booking-form" style="margin-top:14px;">
 
-        <div class="muted">
-          Status: <b id="balancedState">nicht ausgeglichen</b>
-        </div>
+<input type="hidden" id="activeTaskId">
 
-        <button id="addBookingBtn" class="btn primary" type="button">
-          Buchen
-        </button>
-      </div>
-    </div>
+<div class="field full-row">
+<label for="fact">Buchungstatsache</label>
+<textarea id="fact" rows="2"
+placeholder="Wähle oben eine Aufgabe – sie erscheint hier automatisch"></textarea>
+</div>
 
-  </section>
+<div class="field">
+
+<label>Soll-Zeilen</label>
+
+<div id="debitLines"></div>
+
+<button type="button" class="btn" id="addDebitLineBtn">
++ Soll-Zeile
+</button>
+
+<div class="muted small" style="margin-top:6px;">
+Soll-Summe: <b id="sumDebit">0</b>
+</div>
+
+</div>
+
+<div class="field">
+
+<label>Haben-Zeilen</label>
+
+<div id="creditLines"></div>
+
+<button type="button" class="btn" id="addCreditLineBtn">
++ Haben-Zeile
+</button>
+
+<div class="muted small" style="margin-top:6px;">
+Haben-Summe: <b id="sumCredit">0</b>
+</div>
+
+</div>
+
+<div class="field full-row"
+style="display:flex;gap:10px;align-items:center;justify-content:space-between;">
+
+<div class="muted">
+Status: <b id="balancedState">nicht ausgeglichen</b>
+</div>
+
+<button id="addBookingBtn" class="btn primary" type="button">
+Buchen
+</button>
+
+</div>
+
+</div>
+
+</section>
+
 </main>
 
 <footer class="footer">
-  <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
+<div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
 </footer>
 
-
-<script src="js/bookings.js"></script>
+<script src="js/bookings-split.js"></script>
 <script src="js/booking-ki-test.js"></script>
+
 </body>
 </html>
