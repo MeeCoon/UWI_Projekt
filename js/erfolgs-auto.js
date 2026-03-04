@@ -115,8 +115,14 @@ function applyER(companyId, year) {
     const s = Number(saldo[acct] || 0);
     let shown = 0;
 
-    if (isExpense(acct)) { shown = Math.max(s, 0); totalA += shown; }
-    else if (isRevenue(acct)) { shown = Math.max(-s, 0); totalE += shown; }
+  if (isExpense(acct)) { 
+    shown = s;            // kein Math.max mehr
+    totalA += shown; 
+  }
+  else if (isRevenue(acct)) { 
+    shown = -s;           // Vorzeichen drehen
+    totalE += shown; 
+  }
 
     input.value = String(Math.round(shown));
     input.readOnly = true;
