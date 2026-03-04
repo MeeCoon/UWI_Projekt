@@ -54,23 +54,28 @@ function renderCompanies(user){
   list.innerHTML = "";
 
   if(!companies.length){
+
     list.innerHTML =
       `<div class="muted">Noch keine Firmen erstellt.</div>`;
+
     return;
+
   }
 
   companies.forEach((c)=>{
 
-    const legal = c.legalForm || c.legal || "–";
+    const legal = c.legal || "–";
     const industry = c.industry || "–";
-    const employees = c.employees ?? c.size ?? "–";
+    const employees = c.size ?? "–";
 
     const row = document.createElement("div");
 
     row.className = "listItem";
 
     row.innerHTML = `
+
       <div class="listMain">
+
         <div class="listTitle">
           ${escapeHtml(c.name || "Ohne Name")}
         </div>
@@ -80,13 +85,13 @@ function renderCompanies(user){
           ${escapeHtml(industry)} ·
           Mitarbeitende: ${escapeHtml(String(employees))}
         </div>
+
       </div>
 
       <div class="listActions">
 
         <button
           class="btn"
-          type="button"
           data-open="${escapeHtml(c.id)}">
 
           Öffnen
@@ -95,29 +100,25 @@ function renderCompanies(user){
 
         <button
           class="btn"
-          type="button"
-          data-del="${escapeHtml(c.id)}"
-          title="Firma löschen">
+          data-del="${escapeHtml(c.id)}">
 
           Löschen
 
         </button>
 
       </div>
+
     `;
 
     list.appendChild(row);
 
   });
 
-  // Klick Events
-
   list.onclick = (e)=>{
 
     const openBtn = e.target.closest("[data-open]");
     const delBtn = e.target.closest("[data-del]");
 
-    // Firma öffnen
     if(openBtn){
 
       const id = openBtn.getAttribute("data-open");
@@ -127,12 +128,12 @@ function renderCompanies(user){
         id
       );
 
-      window.location.assign("company.html");
+      window.location.href = "company.html";
 
       return;
+
     }
 
-    // Firma löschen
     if(delBtn){
 
       const id = delBtn.getAttribute("data-del");
