@@ -108,6 +108,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     companies.unshift(company);
     saveCompanies(user, companies);
+    // Firebase speichern
+    if (window.saveCompanyFirebase) {
+      saveCompanyFirebase(company);
+    }
 
     // direkt auswählen
     localStorage.setItem(currentCompanyKey(user), company.id);
