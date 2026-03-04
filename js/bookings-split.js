@@ -39,73 +39,63 @@ const KONTENPLAN = [
 ];
 
 
+// =======================
+// ACCOUNT OPTIONS
+// =======================
+
 function buildAccountOptions(){
-
 return [
-
 `<option value="">— Konto wählen —</option>`,
-
 ...KONTENPLAN.map(a=>
 `<option value="${a.no}">${a.no} ${a.name}</option>`
 )
-
 ].join("");
-
 }
 
 
-function loadJournal(cid,year){
+// =======================
+// STORAGE
+// =======================
 
+function loadJournal(cid,year){
 return JSON.parse(
 localStorage.getItem(journalKey(cid,year)) || "[]"
 );
-
 }
 
-
 function saveJournal(cid,year,data){
-
 localStorage.setItem(
 journalKey(cid,year),
 JSON.stringify(data)
 );
-
 }
 
-
 function getYears(cid){
-
 try{
-
 const y = JSON.parse(
 localStorage.getItem(yearsKey(cid))
 );
-
 if(Array.isArray(y) && y.length)
 return y;
-
 }catch{}
-
 return [...DEFAULT_YEARS];
-
 }
 
-
 function saveYears(cid,years){
-
 localStorage.setItem(
 yearsKey(cid),
 JSON.stringify(years)
 );
-
 }
 
 
+// =======================
+// YEAR TABS
+// =======================
 
 function renderYearTabs(cid){
 
 const el = document.getElementById("yearTabs");
-
 if(!el) return;
 
 const years = getYears(cid);
@@ -115,191 +105,133 @@ currentYear = years[0];
 
 el.innerHTML =
 years.map(y=>
-
 `<button class="yearBtn ${y===currentYear?"active":""}" data-year="${y}">${y}</button>`
-
 ).join("")
 +
 `<button id="addYearBtn" class="addYearBtn">+ Jahr</button>`;
 
-
 el.onclick = e=>{
-
 const btn = e.target.closest(".yearBtn");
-
 if(!btn) return;
 
 currentYear = btn.dataset.year;
-
 renderYearTabs(cid);
-
 renderJournal(cid);
-
 };
 
-
 document.getElementById("addYearBtn").onclick = ()=>{
-
 const y = prompt("Neues Jahr (z.B. 2027)");
-
 if(!y) return;
-
 if(!/^\d{4}$/.test(y))
 return alert("Ungültiges Jahr");
 
 const list = getYears(cid);
-
 if(list.includes(y))
 return alert("Jahr existiert");
 
 list.push(y);
-
 list.sort();
-
 saveYears(cid,list);
 
 currentYear = y;
-
 renderYearTabs(cid);
-
+renderJournal(cid);
 };
-
 }
 
 
+// =======================
+// SPLIT LINES
+// =======================
 
 function createLine(side){
 
 const row = document.createElement("div");
-
 row.dataset.side = side;
-
 row.style.display="flex";
-
 row.style.gap="8px";
 
-
 const select = document.createElement("select");
-
 select.innerHTML = buildAccountOptions();
 
-
 const amount = document.createElement("input");
-
 amount.type="number";
-
 amount.placeholder="Betrag";
 
-
 const remove = document.createElement("button");
-
 remove.textContent="✕";
-
 remove.className="btn";
-
 remove.onclick = ()=>row.remove();
 
-
 row.append(select,amount,remove);
-
 return row;
-
 }
-
-
 
 function getLines(side){
 
 const root = document.getElementById(
-
 side==="debit" ? "debitLines" : "creditLines"
-
 );
 
-
 return Array.from(
-
 root.querySelectorAll("div[data-side]")
-
 ).map(line=>{
 
 const sel = line.querySelector("select");
-
 const inp = line.querySelector("input");
 
-
 return{
-
 accountNo:sel.value,
-
 amount:Number(inp.value||0)
-
 };
 
-})
-
-.filter(x=>x.accountNo && x.amount>0);
-
+}).filter(x=>x.accountNo && x.amount>0);
 }
-
-
 
 function sum(arr){
-
 return arr.reduce((a,b)=>a+b.amount,0);
-
 }
 
 
+// =======================
+// JOURNAL RENDER
+// =======================
 
 function renderJournal(cid){
 
-const rows = loadJournal(cid,currentYear);
+const rows = loadJournal(cid,currentYear)
+.sort((a,b)=> new Date(a.date)-new Date(b.date));
 
 const body = document.getElementById("journalBody");
-
 if(!body) return;
 
 body.innerHTML="";
 
-
 rows.forEach((r,i)=>{
 
-
 const debit = r.debits.map(d=>d.accountNo).join(",");
-
 const credit = r.credits.map(c=>c.accountNo).join(",");
 
-
 const tr = document.createElement("tr");
-
 tr.innerHTML = `
-
 <td>${new Date(r.date).toLocaleDateString()}</td>
-
 <td>${r.fact}</td>
-
 <td>${debit}</td>
-
 <td>${credit}</td>
-
 <td>${r.total} CHF</td>
-
 <td>
-
 <button class="btn deleteBooking" data-i="${i}">🗑</button>
-
 </td>
-
 `;
 
 body.appendChild(tr);
-
 });
-
 }
 
 
+// =======================
+// DELETE BOOKING
+// =======================
 
 document.addEventListener("click",e=>{
 
@@ -307,173 +239,130 @@ if(!e.target.classList.contains("deleteBooking"))
 return;
 
 const index = e.target.dataset.i;
-
 const user = localStorage.getItem(USER_KEY);
-
-const cid = localStorage.getItem(
-
-`${CURRENT_COMPANY_PREFIX}${user}`
-
-);
-
+const cid = localStorage.getItem(`${CURRENT_COMPANY_PREFIX}${user}`);
 
 const list = loadJournal(cid,currentYear);
-
 list.splice(index,1);
-
 saveJournal(cid,currentYear,list);
-
 renderJournal(cid);
-
 });
 
 
+// =======================
+// INIT
+// =======================
 
 document.addEventListener("DOMContentLoaded",()=>{
 
 const user = localStorage.getItem(USER_KEY);
-
 if(!user){
-
 location.href="index.html";
-
 return;
-
 }
 
-
-const cid = localStorage.getItem(
-
-`${CURRENT_COMPANY_PREFIX}${user}`
-
-);
-
+const cid = localStorage.getItem(`${CURRENT_COMPANY_PREFIX}${user}`);
+if(!cid) return;
 
 renderYearTabs(cid);
 
-
 document.getElementById("debitLines")
 .append(createLine("debit"));
 
 document.getElementById("creditLines")
 .append(createLine("credit"));
-
 
 document.getElementById("addDebitLineBtn").onclick=()=>{
-
 document.getElementById("debitLines")
 .append(createLine("debit"));
-
 };
-
 
 document.getElementById("addCreditLineBtn").onclick=()=>{
-
 document.getElementById("creditLines")
 .append(createLine("credit"));
-
 };
-
 
 document.getElementById("addBookingBtn").onclick=()=>{
 
-
 const fact = document.getElementById("fact").value.trim();
-
 const debits = getLines("debit");
-
 const credits = getLines("credit");
-
 
 if(!fact)
 return alert("Buchungstatsache fehlt");
 
-
 if(sum(debits)!==sum(credits))
 return alert("Soll ≠ Haben");
 
-
 const entry = {
-
 type:"split",
-
 fact,
-
 debits,
-
 credits,
-
 year:currentYear,
-
 total:sum(debits),
-
 date:new Date().toISOString()
-
 };
 
-
 const list = loadJournal(cid,currentYear);
-
-list.unshift(entry);
+list.push(entry);
 
 saveJournal(cid,currentYear,list);
 
-
 document.getElementById("fact").value="";
-
 document.getElementById("debitLines").innerHTML="";
-
 document.getElementById("creditLines").innerHTML="";
-
 
 document.getElementById("debitLines")
 .append(createLine("debit"));
-
 document.getElementById("creditLines")
 .append(createLine("credit"));
 
-
 renderJournal(cid);
-
-
 alert(`Gebucht in ${currentYear}`);
-
 };
 
 
-renderJournal(cid);
-
-
-document.getElementById("backBtn").onclick=()=>{
-
-location.href="company.html";
-
-};
-
-
-document.getElementById("logoutBtn").onclick=()=>{
-
-localStorage.removeItem(USER_KEY);
-
-location.href="index.html";
-
-};
+// =======================
+// GENERATE 100 CASES
+// =======================
 
 document.getElementById("generateCasesBtn")?.addEventListener("click", () => {
 
-  const user = localStorage.getItem("uwi_user");
-  const companyId = localStorage.getItem("uwi_currentCompany_"+user);
+const user = localStorage.getItem(USER_KEY);
+const companyId = localStorage.getItem(`${CURRENT_COMPANY_PREFIX}${user}`);
 
-  const companies = JSON.parse(localStorage.getItem("uwi_companies_"+user) || "[]");
-  const company = companies.find(c=>c.id===companyId);
+const companies = JSON.parse(
+localStorage.getItem(`uwi_companies_${user}`) || "[]"
+);
 
-  if(!company) return alert("Firma nicht gefunden.");
+const company = companies.find(c=>c.id===companyId);
+if(!company) return alert("Firma nicht gefunden.");
 
-  const count = generate100Cases(companyId, currentYear, company.legalForm);
+if(typeof generate100Cases !== "function")
+return alert("Generator nicht geladen.");
 
-  renderTable(companyId);
+const count = generate100Cases(companyId, currentYear, company.type);
 
-  alert(count + " Buchungen im Journal gespeichert.");
+renderJournal(companyId);
+
+alert(count + " Buchungen im Journal gespeichert.");
 });
+
+
+// =======================
+// NAVIGATION
+// =======================
+
+document.getElementById("backBtn").onclick=()=>{
+location.href="company.html";
+};
+
+document.getElementById("logoutBtn").onclick=()=>{
+localStorage.removeItem(USER_KEY);
+location.href="index.html";
+};
+
+renderJournal(cid);
 
 });
