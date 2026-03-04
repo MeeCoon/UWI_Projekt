@@ -1,4 +1,6 @@
-// js/create.js
+// Firebase import
+import { saveCompany } from "./firebase.js";
+
 const USER_KEY = "uwi_user";
 const COMPANIES_PREFIX = "uwi_companies_";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
@@ -6,39 +8,49 @@ const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
 
-function loadCompanies(user) {
-  try { return JSON.parse(localStorage.getItem(companiesKey(user)) || "[]"); }
-  catch { return []; }
-}
-function saveCompanies(user, companies) {
-  localStorage.setItem(companiesKey(user), JSON.stringify(companies));
+function loadCompanies(user){
+  try{
+    return JSON.parse(localStorage.getItem(companiesKey(user)) || "[]");
+  }catch{
+    return [];
+  }
 }
 
-function minCapitalFor(legal) {
-  if (legal === "AG") return 100000;
-  if (legal === "GmbH") return 20000;
-  return 0; // Einzelunternehmen
+function saveCompanies(user,companies){
+  localStorage.setItem(companiesKey(user),JSON.stringify(companies));
 }
-function fmtCH(n) {
+
+function minCapitalFor(legal){
+  if(legal === "AG") return 100000;
+  if(legal === "GmbH") return 20000;
+  return 0;
+}
+
+function fmtCH(n){
   return Number(n || 0).toLocaleString("de-CH");
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded",()=>{
+
   const user = localStorage.getItem(USER_KEY);
-  if (!user) { window.location.href = "index.html"; return; }
+  if(!user){
+    window.location.href="index.html";
+    return;
+  }
 
   // Header
   document.getElementById("userDisplay").textContent = `Angemeldet: ${user}`;
-  document.getElementById("backOverviewBtn")?.addEventListener("click", () => {
-    window.location.href = "overview.html";
-  });
-  document.getElementById("logoutBtn")?.addEventListener("click", () => {
-    localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(currentCompanyKey(user));
-    window.location.href = "index.html";
+
+  document.getElementById("backOverviewBtn")?.addEventListener("click",()=>{
+    window.location.href="overview.html";
   });
 
-  // Form
+  document.getElementById("logoutBtn")?.addEventListener("click",()=>{
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(currentCompanyKey(user));
+    window.location.href="index.html";
+  });
+
   const form = document.getElementById("createForm");
   const cancelBtn = document.getElementById("cancelBtn");
 
@@ -50,29 +62,40 @@ document.addEventListener("DOMContentLoaded", () => {
   const sizeEl = document.getElementById("size");
   const hintEl = document.getElementById("capitalHint");
 
-  cancelBtn?.addEventListener("click", () => {
-    window.location.href = "overview.html";
+  cancelBtn?.addEventListener("click",()=>{
+    window.location.href="overview.html";
   });
 
-  function updateCapitalRule() {
+  function updateCapitalRule(){
+
     const legal = String(legalEl.value || "").trim();
     const min = minCapitalFor(legal);
 
     capitalEl.min = String(min);
     capitalEl.step = "1";
 
-    if (legal === "AG") hintEl.textContent = "AG: Mindest-Startkapital 100'000 CHF";
-    else if (legal === "GmbH") hintEl.textContent = "GmbH: Mindest-Startkapital 20'000 CHF";
-    else hintEl.textContent = "Einzelunternehmen: Kein Mindest-Startkapital";
+    if(legal === "AG"){
+      hintEl.textContent="AG: Mindest-Startkapital 100'000 CHF";
+    }
+    else if(legal === "GmbH"){
+      hintEl.textContent="GmbH: Mindest-Startkapital 20'000 CHF";
+    }
+    else{
+      hintEl.textContent="Einzelunternehmen: Kein Mindest-Startkapital";
+    }
 
     const cur = Number(capitalEl.value || 0);
-    if (cur < min) capitalEl.value = String(min);
+    if(cur < min){
+      capitalEl.value = String(min);
+    }
+
   }
 
-  legalEl.addEventListener("change", updateCapitalRule);
+  legalEl.addEventListener("change",updateCapitalRule);
   updateCapitalRule();
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e)=>{
+
     e.preventDefault();
 
     const name = (nameEl.value || "").trim();
@@ -82,11 +105,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const purpose = (purposeEl.value || "").trim();
     const size = Number(sizeEl.value || 0);
 
-    if (!name) return alert("Bitte Firmenname eingeben.");
-    if (!(size >= 1)) return alert("Grösse (Mitarbeitende) muss mindestens 1 sein.");
+    if(!name){
+      alert("Bitte Firmenname eingeben.");
+      return;
+    }
+
+    if(!(size >= 1)){
+      alert("Grösse muss mindestens 1 sein.");
+      return;
+    }
 
     const min = minCapitalFor(legal);
-    if (capital < min) {
+
+    if(capital < min){
       alert(`Startkapital zu klein. Minimum für ${legal}: ${fmtCH(min)} CHF`);
       capitalEl.value = String(min);
       capitalEl.focus();
@@ -96,27 +127,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const companies = loadCompanies(user);
 
     const company = {
-      id: `c_${Date.now()}`,
+      id:`c_${Date.now()}`,
       name,
-      legal,      // "AG" | "GmbH" | "Einzelunternehmen"
-      capital,    // CHF
+      legal,
+      capital,
       industry,
       purpose,
       size,
-      createdAt: new Date().toISOString()
+      createdAt:new Date().toISOString()
     };
 
+    // Local speichern
     companies.unshift(company);
-    saveCompanies(user, companies);
+    saveCompanies(user,companies);
+
     // Firebase speichern
-    if (window.saveCompanyFirebase) {
-      saveCompanyFirebase(company);
+    try{
+      await saveCompany(company);
+      console.log("Firma in Firebase gespeichert");
+    }catch(err){
+      console.error("Firebase Fehler:",err);
     }
 
-    // direkt auswählen
-    localStorage.setItem(currentCompanyKey(user), company.id);
+    // aktuelle Firma merken
+    localStorage.setItem(currentCompanyKey(user),company.id);
 
     // zurück zur Übersicht
-    window.location.href = "overview.html";
+    window.location.href="overview.html";
+
   });
+
 });
