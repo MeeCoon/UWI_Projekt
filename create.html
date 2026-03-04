@@ -1,75 +1,83 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>UWI Unternehmenssimulation — Neue Firma</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>UWI Unternehmenssimulation — Neue Firma</title>
+
+<link rel="stylesheet" href="css/style.css">
+
 </head>
+
 <body>
-  <header class="topbar">
-    <div class="brand">UWI Unternehmenssimulation</div>
-    <nav class="nav-inline">
-      <span id="userDisplay" class="muted"></span>
-      <button id="backOverviewBtn" class="btn" type="button">Zur Übersicht</button>
-      <button id="logoutBtn" class="btn" type="button">Abmelden</button>
-    </nav>
-  </header>
 
-  <main class="container center-page">
-    <section class="card card-small">
-      <h1 class="h2">Neue Firma erstellen</h1>
+<header class="topbar">
+<div class="brand">UWI Unternehmenssimulation</div>
 
-      <form id="createForm" class="form-grid">
-        <label for="name">Firmenname</label>
-        <input id="name" required placeholder="z. B. Müller GmbH">
+<nav class="nav-inline">
+<span id="userDisplay" class="muted"></span>
+<button id="backOverviewBtn" class="btn" type="button">Zur Übersicht</button>
+<button id="logoutBtn" class="btn" type="button">Abmelden</button>
+</nav>
 
-        <label for="legal">Rechtsform</label>
-        <select id="legal">
-          <option>Einzelunternehmen</option>
-          <option>GmbH</option>
-          <option>AG</option>
-        </select>
+</header>
 
-        <label for="capital">Startkapital (CHF)</label>
-        <input id="capital" type="number" min="0" step="1" placeholder="10000">
+<main class="container center-page">
 
-        <div id="capitalHint" class="muted small" style="grid-column:1 / -1;"></div>
+<section class="card card-small">
 
-        <label for="industry">Branche</label>
-        <input id="industry" placeholder="z. B. Handel">
+<h1 class="h2">Neue Firma erstellen</h1>
 
-        <label for="purpose">Zweck</label>
-        <input id="purpose" placeholder="Kurzbeschreibung des Zwecks">
+<form id="createForm" class="form-grid">
 
-        <label for="size">Grösse (Anzahl Mitarbeitende)</label>
-        <input id="size" type="number" min="1" step="1" placeholder="5">
+<label for="name">Firmenname</label>
+<input id="name" required placeholder="z. B. Müller GmbH">
 
-        <div class="form-actions" style="grid-column:1 / -1; justify-content:center;">
-          <button type="submit" class="btn primary">Firma erstellen</button>
-          <button type="button" id="cancelBtn" class="btn">Abbrechen</button>
-        </div>
-      </form>
+<label for="legal">Rechtsform</label>
+<select id="legal">
+<option>Einzelunternehmen</option>
+<option>GmbH</option>
+<option>AG</option>
+</select>
 
-      <p class="muted small">Alle Daten werden im LocalStorage des angemeldeten Benutzers gespeichert.</p>
-    </section>
-  </main>
+<label for="capital">Startkapital (CHF)</label>
+<input id="capital" type="number" min="0" step="1" placeholder="10000">
 
-  <script src="js/create.js"></script>
-</body>
-</html>
+<div id="capitalHint" class="muted small" style="grid-column:1 / -1;"></div>
+
+<label for="industry">Branche</label>
+<input id="industry" placeholder="z. B. Handel">
+
+<label for="purpose">Zweck</label>
+<input id="purpose" placeholder="Kurzbeschreibung des Zwecks">
+
+<label for="size">Grösse (Anzahl Mitarbeitende)</label>
+<input id="size" type="number" min="1" step="1" placeholder="5">
+
+<div class="form-actions" style="grid-column:1 / -1; justify-content:center;">
+<button type="submit" class="btn primary">Firma erstellen</button>
+<button type="button" id="cancelBtn" class="btn">Abbrechen</button>
+</div>
+
+</form>
+
+<p class="muted small">
+Alle Daten werden lokal gespeichert und zusätzlich in Firebase gesichert.
+</p>
+
+</section>
+
+</main>
+
+<!-- Create Script -->
 <script src="js/create.js"></script>
 
 <!-- Firebase -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { 
-  getFirestore,
-  collection,
-  addDoc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+import { getFirestore, collection, addDoc }
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "XXXX",
@@ -83,8 +91,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-
-// Firma in Firebase speichern
 window.saveCompanyFirebase = async function(company){
 
   await addDoc(
@@ -94,7 +100,7 @@ window.saveCompanyFirebase = async function(company){
 
   console.log("Firma gespeichert:", company);
 
-}
+};
 
 </script>
 
