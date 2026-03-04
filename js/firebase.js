@@ -23,15 +23,12 @@ const firebaseConfig = {
 
 };
 
-
 const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
 
 
-/* ======================
-   FIRMA SPEICHERN
-====================== */
+/* Firma speichern */
 
 export async function saveCompany(company){
 
@@ -43,9 +40,7 @@ export async function saveCompany(company){
 }
 
 
-/* ======================
-   FIRMEN LADEN
-====================== */
+/* Firmen laden */
 
 export async function loadCompanies(){
 
@@ -55,7 +50,7 @@ export async function loadCompanies(){
 
   const list = [];
 
-  snapshot.forEach(docItem=>{
+  snapshot.forEach(docItem => {
 
     list.push({
       id: docItem.id,
@@ -69,9 +64,7 @@ export async function loadCompanies(){
 }
 
 
-/* ======================
-   FIRMA LÖSCHEN
-====================== */
+/* Firma löschen */
 
 export async function deleteCompany(id){
 
