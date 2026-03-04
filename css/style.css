@@ -157,6 +157,17 @@ body{
 }
 
 /* ===================== BILANZ DESIGN (auch für ER) ===================== */
+/* Entfernt Pfeile bei number-Inputs */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
 .balanceHeaderBlue{
   background:#1f6feb;
   color:#fff;
