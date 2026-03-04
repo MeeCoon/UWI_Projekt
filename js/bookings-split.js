@@ -459,4 +459,21 @@ location.href="index.html";
 
 };
 
+document.getElementById("generateCasesBtn")?.addEventListener("click", () => {
+
+  const user = localStorage.getItem("uwi_user");
+  const companyId = localStorage.getItem("uwi_currentCompany_"+user);
+
+  const companies = JSON.parse(localStorage.getItem("uwi_companies_"+user) || "[]");
+  const company = companies.find(c=>c.id===companyId);
+
+  if(!company) return alert("Firma nicht gefunden.");
+
+  const count = generate100Cases(companyId, currentYear, company.legalForm);
+
+  renderTable(companyId);
+
+  alert(count + " Buchungen im Journal gespeichert.");
+});
+
 });
