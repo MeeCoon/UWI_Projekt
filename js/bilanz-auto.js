@@ -124,14 +124,14 @@ function applyBalance(companyId, year) {
     const s = Number(saldo[acct] || 0);
     let shown = 0;
 
-    if (isAsset(acct)) {
-      shown = Math.max(s, 0);
-      totalAkt += shown;
-    } 
-    else if (isLiabEq(acct)) {
-      shown = Math.max(-s, 0);
-      totalPas += shown;
-    }
+  if (isAsset(acct)) {
+    shown = s;              // kein Math.max mehr
+    totalAkt += shown;
+  } 
+  else if (isLiabEq(acct)) {
+    shown = -s;             // Vorzeichen drehen
+    totalPas += shown;
+  }
 
     input.value = String(Math.round(shown));
     input.readOnly = true;
