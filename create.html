@@ -62,7 +62,7 @@
 </form>
 
 <p class="muted small">
-Alle Daten werden lokal gespeichert und zusätzlich in Firebase gesichert.
+Alle Daten werden lokal gespeichert.
 </p>
 
 </section>
@@ -72,37 +72,7 @@ Alle Daten werden lokal gespeichert und zusätzlich in Firebase gesichert.
 <!-- Create Script -->
 <script src="js/create.js"></script>
 
-<!-- Firebase -->
-<script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc }
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "XXXX",
-  authDomain: "XXXX.firebaseapp.com",
-  projectId: "XXXX",
-  storageBucket: "XXXX.appspot.com",
-  messagingSenderId: "XXXX",
-  appId: "XXXX"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.saveCompanyFirebase = async function(company){
-
-  await addDoc(
-    collection(db,"companies"),
-    company
-  );
-
-  console.log("Firma gespeichert:", company);
-
-};
-
-</script>
 
 </body>
 </html>
