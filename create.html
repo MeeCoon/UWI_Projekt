@@ -91,7 +91,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.saveCompanyFirebase = async function(company){
+window.saveCompany = async function(company){
 
   await addDoc(
     collection(db,"companies"),
