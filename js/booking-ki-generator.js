@@ -46,7 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Buchungsvorlagen
   // -------------------------
   const templates = [
-
     "Die {firma} kauft Mobiliar für {betrag} CHF gegen Bank.",
     "Die {firma} kauft ein Fahrzeug für {betrag} CHF und bezahlt per Bank.",
     "Die {firma} kauft Maschinen für {betrag} CHF gegen Bank.",
@@ -87,14 +86,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Generator
   // -------------------------
   function generateTasks(year) {
-
     const tasks = [];
 
     for (let i = 1; i <= 100; i++) {
-
-      const template =
-        templates[Math.floor(Math.random() * templates.length)];
-
+      const template = templates[Math.floor(Math.random() * templates.length)];
       const amount = randomAmount();
       const company = randomCompany();
 
@@ -114,6 +109,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // -------------------------
+  // Funktion für externen Zugriff (Button "100 Fälle generieren")
+  // -------------------------
+  window.generate100Cases = function(companyId, year, type) {
+    // Ignoriere companyId/type, generiere einfach Tasks fürs Jahr
+    return generateTasks(year).length;
+  };
+
+  // -------------------------
   // Laden
   // -------------------------
   function loadTasks(year) {
@@ -126,16 +129,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Tabelle anzeigen
   // -------------------------
   function renderTable(tasks) {
-
     tableBody.innerHTML = "";
 
     tasks.forEach((t, index) => {
-
       const tr = document.createElement("tr");
       tr.style.cursor = "pointer";
 
-      const statusIcon =
-        t.status === "done" ? "✅ erledigt" : "⏳ offen";
+      const statusIcon = t.status === "done" ? "✅ erledigt" : "⏳ offen";
 
       tr.innerHTML = `
         <td>${index + 1}</td>
@@ -156,7 +156,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initial laden
   // -------------------------
   function initForYear() {
-
     const year = getSelectedYear();
     let tasks = loadTasks(year);
 
@@ -172,31 +171,25 @@ document.addEventListener("DOMContentLoaded", () => {
   // -------------------------
   // Neu generieren
   // -------------------------
-  generateBtn.addEventListener("click", () => {
-
+  generateBtn?.addEventListener("click", () => {
     const year = getSelectedYear();
     const tasks = generateTasks(year);
-
     renderTable(tasks);
-
   });
 
   // -------------------------
   // Jahr wechseln
   // -------------------------
   document.addEventListener("click", (e) => {
-
     if (e.target.classList.contains("yearBtn")) {
       setTimeout(initForYear, 100);
     }
-
   });
 
   // -------------------------
   // Beim Buchen: Aufgabe erledigt
   // -------------------------
   addBookingBtn.addEventListener("click", () => {
-
     const year = getSelectedYear();
     const id = activeTaskId.value;
 
@@ -215,7 +208,6 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem(storageKey(year), JSON.stringify(tasks));
       renderTable(tasks);
     }
-
   });
 
 });
