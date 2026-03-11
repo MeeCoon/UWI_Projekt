@@ -8,13 +8,40 @@ const companiesKey = (u) => COMPANIES_PREFIX + u;
 const currentCompanyKey = (u) => CURRENT_COMPANY_PREFIX + u;
 
 
-// ===============================
-// Firma laden
-// ===============================
+// ==============================
+// USER & FIRMA LADEN
+// ==============================
 
 const user = localStorage.getItem(USER_KEY);
 
-if(!user) return;
+if(!user){
+window.location.href = "index.html";
+return;
+}
+
+document.getElementById("userDisplay").textContent =
+"Angemeldet: " + user;
+
+
+// ==============================
+// BUTTONS FIXEN
+// ==============================
+
+document.getElementById("backBtn").onclick = () => {
+window.location.href = "company.html";
+};
+
+document.getElementById("logoutBtn").onclick = () => {
+
+localStorage.removeItem(USER_KEY);
+window.location.href = "index.html";
+
+};
+
+
+// ==============================
+// FIRMA FINDEN
+// ==============================
 
 const companies =
 JSON.parse(localStorage.getItem(companiesKey(user)) || "[]");
@@ -30,11 +57,11 @@ if(!company) return;
 const legal = company.legal;
 
 
-// ===============================
-// Konten wechseln je Rechtsform
-// ===============================
+// ==============================
+// KONTEN JE NACH RECHTSFORM
+// ==============================
 
-function hide(text){
+function hideRow(text){
 
 document.querySelectorAll(".balanceRow")
 .forEach(row => {
@@ -51,31 +78,32 @@ row.style.display = "none";
 // Einzelunternehmen
 if(legal === "Einzelunternehmen"){
 
-hide("Aktienkapital");
-hide("Gesetzliche Reserven");
+hideRow("Aktienkapital");
+hideRow("Gesetzliche Reserven");
 
 }
 
 // GmbH
 if(legal === "GmbH"){
 
-hide("Eigenkapital Einzelunternehmen");
+hideRow("Eigenkapital Einzelunternehmen");
 
 }
 
 // AG
 if(legal === "AG"){
 
-hide("Eigenkapital Einzelunternehmen");
+hideRow("Eigenkapital Einzelunternehmen");
 
 }
 
 
-// ===============================
-// Bilanz automatisch rechnen
-// ===============================
+// ==============================
+// BILANZ AUTOMATISCH RECHNEN
+// ==============================
 
-const inputs = document.querySelectorAll(".balanceInput");
+const inputs =
+document.querySelectorAll(".balanceInput");
 
 function formatCHF(n){
 
@@ -95,11 +123,11 @@ document.querySelectorAll(".balanceCol:first-child .balanceInput");
 const passivenInputs =
 document.querySelectorAll(".balanceCol:last-child .balanceInput");
 
-aktivenInputs.forEach(i=>{
+aktivenInputs.forEach(i => {
 aktiven += Number(i.value || 0);
 });
 
-passivenInputs.forEach(i=>{
+passivenInputs.forEach(i => {
 passiven += Number(i.value || 0);
 });
 
