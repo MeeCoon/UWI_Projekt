@@ -106,6 +106,21 @@ function renderYearTabs(companyId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+
+  document.getElementById("generateCaseBtn")?.addEventListener("click", () => {
+
+const user = localStorage.getItem(USER_KEY);
+const companyId = localStorage.getItem(currentCompanyKey(user));
+
+const company = loadCompanies(user).find(c => c.id === companyId);
+if(!company) return;
+
+const fact = generateBookingCase(company.name,currentYear);
+
+document.getElementById("fact").value = fact;
+
+});
+  
   // ✅ Buttons IMMER verbinden (kein doppeltes USER_KEY!)
   document.getElementById("backBtn")?.addEventListener("click", () => {
     window.location.href = "company.html";
