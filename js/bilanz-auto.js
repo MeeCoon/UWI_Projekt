@@ -1,37 +1,126 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-const inputs = document.querySelectorAll(".balanceInput");
+const USER_KEY = "uwi_user";
+const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
+const COMPANIES_PREFIX = "uwi_companies_";
 
-function formatCHF(n){
-  const num = Math.round(Number(n || 0));
-  return num.toLocaleString("de-CH") + " CHF";
+function companiesKey(user){
+ return COMPANIES_PREFIX + user;
 }
 
-function calculateBalance(){
-
-  let aktiven = 0;
-  let passiven = 0;
-
-  const aktivenInputs = document.querySelectorAll(".balanceCol:first-child .balanceInput");
-  const passivenInputs = document.querySelectorAll(".balanceCol:last-child .balanceInput");
-
-  aktivenInputs.forEach(i=>{
-    aktiven += Number(i.value || 0);
-  });
-
-  passivenInputs.forEach(i=>{
-    passiven += Number(i.value || 0);
-  });
-
-  document.getElementById("totalAktiven").textContent = formatCHF(aktiven);
-  document.getElementById("totalPassiven").textContent = formatCHF(passiven);
-
+function currentCompanyKey(user){
+ return CURRENT_COMPANY_PREFIX + user;
 }
 
-inputs.forEach(input=>{
-  input.addEventListener("input", calculateBalance);
+// ===============================
+// Firma laden
+// ===============================
+
+const user = localStorage.getItem(USER_KEY);
+
+if(!user) return;
+
+const companies =
+ JSON.parse(localStorage.getItem(companiesKey(user)) || "[]");
+
+const currentId =
+ localStorage.getItem(currentCompanyKey(user));
+
+const company =
+ companies.find(c => c.id === currentId);
+
+if(!company) return;
+
+const legal = company.legal;
+
+
+// ===============================
+// Konten ein/ausblenden
+// ===============================
+
+function hideRow(text){
+
+document
+.querySelectorAll(".balanceRow")
+.forEach(row => {
+
+if(row.textContent.includes(text)){
+ row.style.display = "none";
+}
+
 });
 
-calculateBalance();
+}
+
+
+// Einzelunternehmen
+if(legal === "Einzelunternehmen"){
+
+hideRow("Aktienkapital");
+hideRow("Gesetzliche Reserven");
+
+}
+
+// GmbH
+if(legal === "GmbH"){
+
+hideRow("Eigenkapital Einzelunternehmen");
+
+}
+
+// AG
+if(legal === "AG"){
+
+hideRow("Eigenkapital Einzelunternehmen");
+
+}
+
+
+// ===============================
+// Totale berechnen
+// ===============================
+
+const inputs =
+ document.querySelectorAll(".balanceInput");
+
+function formatCHF(n){
+
+return Number(n)
+.toLocaleString("de-CH") + " CHF";
+
+}
+
+function calculate(){
+
+let aktiven = 0;
+let passiven = 0;
+
+const aktivenInputs =
+ document.querySelectorAll(".balanceCol:first-child .balanceInput");
+
+const passivenInputs =
+ document.querySelectorAll(".balanceCol:last-child .balanceInput");
+
+aktivenInputs.forEach(i => {
+ aktiven += Number(i.value || 0);
+});
+
+passivenInputs.forEach(i => {
+ passiven += Number(i.value || 0);
+});
+
+document.getElementById("totalAktiven")
+.textContent = formatCHF(aktiven);
+
+document.getElementById("totalPassiven")
+.textContent = formatCHF(passiven);
+
+}
+
+inputs.forEach(i=>{
+ i.addEventListener("input",calculate);
+});
+
+calculate();
 
 });
