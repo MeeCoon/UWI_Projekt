@@ -6,15 +6,15 @@ const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 
 const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
+
 const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
 const yearsKey = (companyId) => `uwi_years_${companyId}_balance`;
 
 const DEFAULT_YEARS = ["2024","2025","2026"];
 let currentYear = "2024";
 
-
 /* =========================
-   Kontenplan
+   Aktiven (immer gleich)
 ========================= */
 
 const ASSETS = [
@@ -26,34 +26,80 @@ const ASSETS = [
 ["1170","Vorsteuer MWST"],
 ["1200","Handelswaren"],
 ["1210","Rohstoffe"],
-["1300","Aktive Rechnungsabgrenzungen"],
+["1300","Aktive Rechnungsabgrenzung"],
+["1400","Wertschriften"],
+["1480","Beteiligungen"],
 ["1500","Maschinen & Apparate"],
 ["1510","Mobiliar"],
+["1520","Büromaschinen"],
 ["1530","Fahrzeuge"],
 ["1600","Geschäftsliegenschaften"],
 ["1700","Immaterielle Werte"]
 
 ];
 
-const LIAB_EQUITY = [
+/* =========================
+   Passiven je nach Rechtsform
+========================= */
+
+function getLiabilityAccounts(legal){
+
+if(legal === "Einzelunternehmen"){
+
+return [
 
 ["2000","Verbindlichkeiten"],
-["2030","Erhaltene Anzahlungen"],
 ["2100","Bankverbindlichkeiten"],
 ["2200","Geschuldete MWST"],
-["2300","Passive Rechnungsabgrenzungen"],
-["2450","Darlehen"],
+["2300","Passive Rechnungsabgrenzung"],
 ["2600","Rückstellungen"],
-["2800","Eigenkapital"],
-["2950","Gesetzliche Reserven"],
-["2970","Gewinnvortrag"],
+["2800","Eigenkapital Einzelunternehmen"],
+["2850","Privat"],
 ["2891","Jahresgewinn/-verlust"]
 
 ];
 
+}
+
+if(legal === "GmbH"){
+
+return [
+
+["2000","Verbindlichkeiten"],
+["2100","Bankverbindlichkeiten"],
+["2200","Geschuldete MWST"],
+["2300","Passive Rechnungsabgrenzung"],
+["2600","Rückstellungen"],
+["2800","Stammkapital"],
+["2970","Gewinnvortrag"]
+
+];
+
+}
+
+if(legal === "AG"){
+
+return [
+
+["2000","Verbindlichkeiten"],
+["2100","Bankverbindlichkeiten"],
+["2200","Geschuldete MWST"],
+["2300","Passive Rechnungsabgrenzung"],
+["2600","Rückstellungen"],
+["2800","Aktienkapital"],
+["2950","Gesetzliche Reserven"],
+["2970","Gewinnvortrag"]
+
+];
+
+}
+
+return [];
+
+}
 
 /* =========================
-   Helper Funktionen
+   Helper
 ========================= */
 
 function getUserOrRedirect(){
@@ -138,7 +184,6 @@ return [];
 
 }
 
-
 /* =========================
    Saldo berechnen
 ========================= */
@@ -165,7 +210,6 @@ return bal;
 
 }
 
-
 /* =========================
    Jahr Tabs
 ========================= */
@@ -182,9 +226,7 @@ currentYear = years[0];
 el.innerHTML =
 
 years.map(y=>`
-<button
-class="yearBtn ${y===currentYear?"active":""}"
-data-year="${y}">
+<button class="yearBtn ${y===currentYear?"active":""}" data-year="${y}">
 ${y}
 </button>
 `).join("")
@@ -192,7 +234,6 @@ ${y}
 +
 
 `<button class="addYearBtn" id="addYearBtn">+ Jahr</button>`;
-
 
 el.onclick=(e)=>{
 
@@ -206,7 +247,6 @@ renderYearTabs(companyId);
 renderBalance(companyId,currentYear);
 
 };
-
 
 document.getElementById("addYearBtn").onclick=()=>{
 
@@ -236,7 +276,6 @@ renderBalance(companyId,currentYear);
 
 }
 
-
 /* =========================
    Bilanz anzeigen
 ========================= */
@@ -249,6 +288,13 @@ const rows = loadJournal(companyId,year);
 
 const saldo = computeBalancesFromJournal(rows);
 
+/* Rechtsform bestimmen */
+
+const company = getSelectedCompany(localStorage.getItem(USER_KEY));
+
+const LIAB_EQUITY = getLiabilityAccounts(company.legal);
+
+/* Aktiven */
 
 const assetRows = ASSETS.map(([no,name])=>{
 
@@ -259,6 +305,7 @@ return row(`${no} ${name}`,fmtCHF(shown));
 
 }).join("");
 
+/* Passiven */
 
 const liabRows = LIAB_EQUITY.map(([no,name])=>{
 
@@ -269,77 +316,27 @@ return row(`${no} ${name}`,fmtCHF(shown));
 
 }).join("");
 
-
-const totalAssets = ASSETS.reduce((sum,[no])=>
-sum + Math.max(Number(saldo[no]||0),0)
-,0);
-
-
-const totalLiabEq = LIAB_EQUITY.reduce((sum,[no])=>
-sum + Math.max(-Number(saldo[no]||0),0)
-,0);
-
-
 root.innerHTML = `
 
 <div class="balanceHeaderBlue">
-
-<div class="balanceTitle">
-Bilanz ${year}
+<div class="balanceTitle">Bilanz ${year}</div>
+<div class="balanceSub">Automatisch aus Buchungen berechnet</div>
 </div>
-
-<div class="balanceSub">
-Automatisch aus Buchungen berechnet
-</div>
-
-</div>
-
 
 <div class="balanceSheet">
 
 <div class="balanceCol">
-
-<div class="balanceColTitle">
-Aktiven
-</div>
-
+<div class="balanceColTitle">Aktiven</div>
 ${assetRows}
-
-<div class="balanceTotal">
-
-<span>Total Aktiven</span>
-<span>${fmtCHF(totalAssets)}</span>
-
 </div>
-
-</div>
-
 
 <div class="balanceDivider"></div>
 
-
 <div class="balanceCol">
-
-<div class="balanceColTitle">
-Passiven
-</div>
-
+<div class="balanceColTitle">Passiven</div>
 ${liabRows}
-
-<div class="balanceTotal">
-
-<span>Total Passiven</span>
-<span>${fmtCHF(totalLiabEq)}</span>
-
 </div>
 
-</div>
-
-</div>
-
-
-<div class="muted small" style="margin-top:10px;">
-Buchungen im Jahr: <b>${rows.length}</b>
 </div>
 
 `;
@@ -349,16 +346,13 @@ function row(label,value){
 return `
 <div class="balanceRow">
 <span>${label}</span>
-<span style="font-weight:600;">
-${value}
-</span>
+<span style="font-weight:600;">${value}</span>
 </div>
 `;
 
 }
 
 }
-
 
 /* =========================
    Start
@@ -384,17 +378,17 @@ window.location.href="index.html";
 
 };
 
-
 const company = getSelectedCompany(user);
 
 if(!company){
+
 window.location.href="overview.html";
 return;
+
 }
 
 document.getElementById("companyInfo").textContent=
 `Firma: ${company.name}`;
-
 
 const years = getYears(company.id);
 
