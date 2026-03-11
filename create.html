@@ -70,7 +70,7 @@ Alle Daten werden lokal gespeichert und zusätzlich in Firebase gesichert.
 </main>
 
 <!-- Create Script -->
-<script type="module" src="js/create.js"></script>
+<script src="js/create.js"></script>
 
 <!-- Firebase -->
 <script type="module">
@@ -91,7 +91,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.saveCompany = async function(company){
+window.saveCompanyFirebase = async function(company){
 
   await addDoc(
     collection(db,"companies"),
