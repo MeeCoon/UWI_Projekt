@@ -1,8 +1,24 @@
-import { saveCompany } from "./firebase.js";
-
 const USER_KEY = "uwi_user";
+const COMPANIES_PREFIX = "uwi_companies_";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
+
+const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
+
+function loadCompanies(user){
+  try{
+    return JSON.parse(localStorage.getItem(companiesKey(user)) || "[]");
+  }catch{
+    return [];
+  }
+}
+
+function saveCompanies(user, companies){
+  localStorage.setItem(
+    companiesKey(user),
+    JSON.stringify(companies)
+  );
+}
 
 function minCapital(legal){
   if(legal === "AG") return 100000;
@@ -38,17 +54,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const capitalEl = document.getElementById("capital");
   const hint = document.getElementById("capitalHint");
 
-  // Kapitalregel anzeigen
   function updateCapitalRule(){
 
     const legal = legalEl.value;
     const min = minCapital(legal);
 
     if(legal === "AG"){
-      hint.textContent = "AG benötigt mindestens 100'000 CHF Startkapital";
+      hint.textContent = "AG benötigt mindestens 100'000 CHF";
     }
     else if(legal === "GmbH"){
-      hint.textContent = "GmbH benötigt mindestens 20'000 CHF Startkapital";
+      hint.textContent = "GmbH benötigt mindestens 20'000 CHF";
     }
     else{
       hint.textContent = "Einzelunternehmen hat kein Mindestkapital";
@@ -65,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   updateCapitalRule();
 
-  form.addEventListener("submit", async (e) => {
+  form.addEventListener("submit", (e) => {
 
     e.preventDefault();
 
@@ -88,7 +103,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const companies = loadCompanies(user);
+
     const company = {
+      id: `c_${Date.now()}`,
       name,
       legal,
       capital,
@@ -98,20 +116,18 @@ document.addEventListener("DOMContentLoaded", () => {
       createdAt: new Date().toISOString()
     };
 
-    try{
+    companies.unshift(company);
 
-      await saveCompany(company);
+    saveCompanies(user, companies);
 
-      alert("Firma gespeichert");
+    localStorage.setItem(
+      currentCompanyKey(user),
+      company.id
+    );
 
-      window.location.href = "overview.html";
+    alert("Firma erstellt");
 
-    }catch(err){
-
-      console.error(err);
-      alert("Fehler beim Speichern");
-
-    }
+    window.location.href = "overview.html";
 
   });
 
