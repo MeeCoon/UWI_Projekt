@@ -1,3 +1,5 @@
+// js/create.js
+
 const USER_KEY = "uwi_user";
 const COMPANIES_PREFIX = "uwi_companies_";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
@@ -14,10 +16,7 @@ function loadCompanies(user){
 }
 
 function saveCompanies(user, companies){
-  localStorage.setItem(
-    companiesKey(user),
-    JSON.stringify(companies)
-  );
+  localStorage.setItem(companiesKey(user), JSON.stringify(companies));
 }
 
 function minCapital(legal){
@@ -60,10 +59,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const min = minCapital(legal);
 
     if(legal === "AG"){
-      hint.textContent = "AG benötigt mindestens 100'000 CHF";
+      hint.textContent = "AG benötigt mindestens 100'000 CHF Startkapital";
     }
     else if(legal === "GmbH"){
-      hint.textContent = "GmbH benötigt mindestens 20'000 CHF";
+      hint.textContent = "GmbH benötigt mindestens 20'000 CHF Startkapital";
     }
     else{
       hint.textContent = "Einzelunternehmen hat kein Mindestkapital";
@@ -120,10 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     saveCompanies(user, companies);
 
-    localStorage.setItem(
-      currentCompanyKey(user),
-      company.id
-    );
+    localStorage.setItem(currentCompanyKey(user), company.id);
 
     alert("Firma erstellt");
 
