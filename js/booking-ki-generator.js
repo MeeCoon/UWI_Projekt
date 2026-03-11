@@ -1,11 +1,11 @@
 // ====================================
 // booking-ki-generator.js
-// Generiert viele Buchungstatsachen
+// KI-Buchungstatsachen für Tabelle
 // ====================================
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  const generateBtn = document.getElementById("kiGenerateBtn");
+  const generateBtn = document.getElementById("generateCasesBtn");
   const tableBody = document.getElementById("bookingTableBody");
   const factField = document.getElementById("fact");
   const activeTaskId = document.getElementById("activeTaskId");
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // -------------------------
-  // Storage-Key
+  // Storage-Key für Jahr
   // -------------------------
   function storageKey(year) {
     return "uwi-ki-tasks-" + year;
@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // -------------------------
-  // Generator
+  // Buchungstatsachen generieren
   // -------------------------
   function generateTasks(year) {
     const tasks = [];
@@ -104,29 +104,13 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    // Optional: lokal speichern, falls Seite neu geladen wird
     localStorage.setItem(storageKey(year), JSON.stringify(tasks));
     return tasks;
   }
 
   // -------------------------
-  // Funktion für externen Zugriff (Button "100 Fälle generieren")
-  // -------------------------
-  window.generate100Cases = function(companyId, year, type) {
-    // Ignoriere companyId/type, generiere einfach Tasks fürs Jahr
-    return generateTasks(year).length;
-  };
-
-  // -------------------------
-  // Laden
-  // -------------------------
-  function loadTasks(year) {
-    const raw = localStorage.getItem(storageKey(year));
-    if (!raw) return null;
-    return JSON.parse(raw);
-  }
-
-  // -------------------------
-  // Tabelle anzeigen
+  // Tabelle rendern
   // -------------------------
   function renderTable(tasks) {
     tableBody.innerHTML = "";
@@ -157,11 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // -------------------------
   function initForYear() {
     const year = getSelectedYear();
-    let tasks = loadTasks(year);
-
-    if (!tasks) {
-      tasks = generateTasks(year);
-    }
+    let tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
 
     renderTable(tasks);
   }
@@ -169,21 +149,12 @@ document.addEventListener("DOMContentLoaded", () => {
   initForYear();
 
   // -------------------------
-  // Neu generieren
+  // Button: 100 Buchungstatsachen generieren
   // -------------------------
-  generateBtn?.addEventListener("click", () => {
+  generateBtn.addEventListener("click", () => {
     const year = getSelectedYear();
-    const tasks = generateTasks(year);
-    renderTable(tasks);
-  });
-
-  // -------------------------
-  // Jahr wechseln
-  // -------------------------
-  document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("yearBtn")) {
-      setTimeout(initForYear, 100);
-    }
+    const tasks = generateTasks(year); // erstellt 100 Fälle
+    renderTable(tasks); // direkt in Tabelle anzeigen
   });
 
   // -------------------------
@@ -198,9 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    let tasks = loadTasks(year);
-    if (!tasks) return;
-
+    const tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
     const task = tasks.find(t => t.id === id);
 
     if (task) {
