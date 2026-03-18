@@ -4,32 +4,23 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>UWI Unternehmenssimulation — Neue Firma</title>
-
 <link rel="stylesheet" href="css/style.css">
-
 </head>
-
 <body>
-
 <header class="topbar">
 <div class="brand">UWI Unternehmenssimulation</div>
-
 <nav class="nav-inline">
 <span id="userDisplay" class="muted"></span>
 <button id="backOverviewBtn" class="btn" type="button">Zur Übersicht</button>
 <button id="logoutBtn" class="btn" type="button">Abmelden</button>
 </nav>
-
 </header>
 
 <main class="container center-page">
-
 <section class="card card-small">
-
 <h1 class="h2">Neue Firma erstellen</h1>
 
 <form id="createForm" class="form-grid">
-
 <label for="name">Firmenname</label>
 <input id="name" required placeholder="z. B. Müller GmbH">
 
@@ -46,7 +37,11 @@
 <div id="capitalHint" class="muted small" style="grid-column:1 / -1;"></div>
 
 <label for="industry">Branche</label>
-<input id="industry" placeholder="z. B. Handel">
+<select id="industry">
+<option value="Handel">Handel</option>
+<option value="Produktion">Produktion</option>
+<option value="Dienstleistung">Dienstleistung</option>
+</select>
 
 <label for="purpose">Zweck</label>
 <input id="purpose" placeholder="Kurzbeschreibung des Zwecks">
@@ -58,21 +53,14 @@
 <button type="submit" class="btn primary">Firma erstellen</button>
 <button type="button" id="cancelBtn" class="btn">Abbrechen</button>
 </div>
-
 </form>
 
 <p class="muted small">
 Alle Daten werden lokal gespeichert.
 </p>
-
 </section>
-
 </main>
 
-<!-- Create Script -->
 <script src="js/create.js"></script>
-
-
-
 </body>
 </html>
