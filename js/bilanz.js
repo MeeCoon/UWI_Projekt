@@ -12,7 +12,7 @@ const DEFAULT_YEARS = ["2024", "2025", "2026"];
 let currentYear = "2024";
 
 /* =========================
-   AKTIVEN ALS BLÖCKE
+   AKTIVEN
 ========================= */
 const ASSET_GROUPS = [
   {
@@ -20,7 +20,7 @@ const ASSET_GROUPS = [
     accounts: [
       ["1000", "Kasse"],
       ["1020", "Bankguthaben"],
-      ["1060", "Wertschriften"],
+      ["1060", "Wertschriften (Aktien)"],
       ["1100", "Forderungen aus Lieferungen und Leistungen"],
       ["1170", "Vorsteuer MWST"],
       ["1200", "Handelswaren"],
@@ -31,27 +31,24 @@ const ASSET_GROUPS = [
   {
     title: "Anlagevermögen",
     accounts: [
-      ["1400", "Wertschriften"],
+      ["1400", "Wertschriften (Obligationen)"],
       ["1480", "Beteiligungen"],
       ["1500", "Maschinen und Apparate"],
       ["1510", "Mobiliar und Einrichtungen"],
-      ["1520", "Büromaschinen"],
       ["1530", "Fahrzeuge"],
-      ["1600", "Geschäftsliegenschaften"],
-      ["1700", "Patente, Lizenzen"]
+      ["1600", "Geschäftsliegenschaften"]
     ]
   }
 ];
 
 /* =========================
-   PASSIVEN ALS BLÖCKE
+   PASSIVEN
 ========================= */
 function getLiabilityGroups(legal) {
   const baseShort = {
     title: "Kurzfristiges Fremdkapital",
     accounts: [
       ["2000", "Verbindlichkeiten aus Lieferungen und Leistungen"],
-      ["2030", "Erhaltene Anzahlungen"],
       ["2100", "Bankverbindlichkeiten"],
       ["2200", "Geschuldete MWST"],
       ["2300", "Passive Rechnungsabgrenzungen"]
