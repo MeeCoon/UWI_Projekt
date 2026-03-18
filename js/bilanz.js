@@ -16,7 +16,7 @@ let currentYear = "2024";
 ========================= */
 const ASSET_GROUPS = [
   {
-    title: "10 – Umlaufvermögen",
+    title: "Umlaufvermögen",
     accounts: [
       ["1000", "Kasse"],
       ["1020", "Bankguthaben"],
@@ -29,7 +29,7 @@ const ASSET_GROUPS = [
     ]
   },
   {
-    title: "14 / 15 / 16 / 17 – Anlagevermögen",
+    title: "Anlagevermögen",
     accounts: [
       ["1400", "Wertschriften"],
       ["1480", "Beteiligungen"],
@@ -48,7 +48,7 @@ const ASSET_GROUPS = [
 ========================= */
 function getLiabilityGroups(legal) {
   const baseShort = {
-    title: "20 / 21 / 22 / 23 – Kurzfristiges Fremdkapital",
+    title: "Kurzfristiges Fremdkapital",
     accounts: [
       ["2000", "Verbindlichkeiten aus Lieferungen und Leistungen"],
       ["2030", "Erhaltene Anzahlungen"],
@@ -59,7 +59,7 @@ function getLiabilityGroups(legal) {
   };
 
   const baseLong = {
-    title: "24 / 26 – Langfristiges Fremdkapital",
+    title: "Langfristiges Fremdkapital",
     accounts: [
       ["2450", "Darlehen"],
       ["2451", "Hypotheken"],
@@ -72,7 +72,7 @@ function getLiabilityGroups(legal) {
       baseShort,
       baseLong,
       {
-        title: "28 – Eigenkapital Einzelunternehmen",
+        title: "Eigenkapital Einzelunternehmen",
         accounts: [
           ["2800", "Eigenkapital"],
           ["2850", "Privat"],
@@ -87,7 +87,7 @@ function getLiabilityGroups(legal) {
       baseShort,
       baseLong,
       {
-        title: "28 – Eigenkapital GmbH",
+        title: "Eigenkapital GmbH",
         accounts: [
           ["2800", "Stammkapital"],
           ["2950", "Gesetzliche Gewinnreserve"],
@@ -104,7 +104,7 @@ function getLiabilityGroups(legal) {
       baseShort,
       baseLong,
       {
-        title: "28 – Eigenkapital Aktiengesellschaft",
+        title: "Eigenkapital Aktiengesellschaft",
         accounts: [
           ["2800", "Aktienkapital"],
           ["2950", "Gesetzliche Gewinnreserve"],
