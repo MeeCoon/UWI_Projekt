@@ -6,543 +6,375 @@ const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 
 const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
-
 const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
 const yearsKey = (companyId) => `uwi_years_${companyId}_balance`;
 
-const DEFAULT_YEARS = ["2024","2025","2026"];
-
+const DEFAULT_YEARS = ["2024", "2025", "2026"];
 let currentYear = "2024";
 
-
+/* =========================
+   AKTIVEN ALS BLÖCKE
+========================= */
+const ASSET_GROUPS = [
+  {
+    title: "1 – Umlaufvermögen",
+    accounts: [
+      ["1000", "Kasse"],
+      ["1020", "Bankguthaben"],
+      ["1060", "Wertschriften"],
+      ["1100", "Forderungen"],
+      ["1170", "Vorsteuer MWST"],
+      ["1200", "Handelswaren"],
+      ["1210", "Rohstoffe"],
+      ["1300", "Aktive Rechnungsabgrenzung"]
+    ]
+  },
+  {
+    title: "14 – Anlagevermögen",
+    accounts: [
+      ["1400", "Wertschriften"],
+      ["1480", "Beteiligungen"],
+      ["1500", "Maschinen & Apparate"],
+      ["1510", "Mobiliar"],
+      ["1520", "Büromaschinen"],
+      ["1530", "Fahrzeuge"],
+      ["1600", "Geschäftsliegenschaften"],
+      ["1700", "Immaterielle Werte"]
+    ]
+  }
+];
 
 /* =========================
-   AKTIVEN (immer gleich)
+   PASSIVEN ALS BLÖCKE
 ========================= */
+function getLiabilityGroups(legal) {
+  const baseShort = {
+    title: "20 – Kurzfristiges Fremdkapital",
+    accounts: [
+      ["2000", "Verbindlichkeiten"],
+      ["2030", "Erhaltene Anzahlungen"],
+      ["2100", "Bankverbindlichkeiten"],
+      ["2200", "Geschuldete MWST"],
+      ["2300", "Passive Rechnungsabgrenzung"]
+    ]
+  };
 
-const ASSETS = [
+  const baseLong = {
+    title: "24 – Langfristiges Fremdkapital",
+    accounts: [
+      ["2450", "Darlehen"],
+      ["2451", "Hypotheken"],
+      ["2600", "Rückstellungen"]
+    ]
+  };
 
-["1000","Kasse"],
-["1020","Bankguthaben"],
-["1060","Wertschriften"],
-["1100","Forderungen"],
-["1170","Vorsteuer MWST"],
-["1200","Handelswaren"],
-["1210","Rohstoffe"],
-["1300","Aktive Rechnungsabgrenzung"],
+  if (legal === "Einzelunternehmen") {
+    return [
+      baseShort,
+      baseLong,
+      {
+        title: "28 – Eigenkapital",
+        accounts: [
+          ["2800", "Eigenkapital"],
+          ["2850", "Privat"],
+          ["2891", "Jahresgewinn / Jahresverlust"]
+        ]
+      }
+    ];
+  }
 
-["1400","Wertschriften"],
-["1480","Beteiligungen"],
-["1500","Maschinen & Apparate"],
-["1510","Mobiliar"],
-["1520","Büromaschinen"],
-["1530","Fahrzeuge"],
-["1600","Geschäftsliegenschaften"],
-["1700","Immaterielle Werte"]
+  if (legal === "GmbH") {
+    return [
+      baseShort,
+      baseLong,
+      {
+        title: "28 – Eigenkapital",
+        accounts: [
+          ["2800", "Stammkapital"],
+          ["2970", "Gewinnvortrag"]
+        ]
+      }
+    ];
+  }
 
-];
+  if (legal === "AG") {
+    return [
+      baseShort,
+      baseLong,
+      {
+        title: "28 – Eigenkapital",
+        accounts: [
+          ["2800", "Aktienkapital"],
+          ["2950", "Gesetzliche Reserven"],
+          ["2970", "Gewinnvortrag"]
+        ]
+      }
+    ];
+  }
 
-
-
-/* =========================
-   PASSIVEN JE RECHTSFORM
-========================= */
-
-function getLiabilityAccounts(legal){
-
-if(legal === "Einzelunternehmen"){
-
-return [
-
-["2000","Verbindlichkeiten"],
-["2100","Bankverbindlichkeiten"],
-["2200","Geschuldete MWST"],
-["2300","Passive Rechnungsabgrenzung"],
-["2600","Rückstellungen"],
-
-["2800","Eigenkapital"],
-["2850","Privat"],
-["2891","Jahresgewinn / Jahresverlust"]
-
-];
-
+  return [baseShort, baseLong];
 }
-
-
-
-if(legal === "GmbH"){
-
-return [
-
-["2000","Verbindlichkeiten"],
-["2100","Bankverbindlichkeiten"],
-["2200","Geschuldete MWST"],
-["2300","Passive Rechnungsabgrenzung"],
-["2600","Rückstellungen"],
-
-["2800","Stammkapital"],
-["2970","Gewinnvortrag"]
-
-];
-
-}
-
-
-
-if(legal === "AG"){
-
-return [
-
-["2000","Verbindlichkeiten"],
-["2100","Bankverbindlichkeiten"],
-["2200","Geschuldete MWST"],
-["2300","Passive Rechnungsabgrenzung"],
-["2600","Rückstellungen"],
-
-["2800","Aktienkapital"],
-["2950","Gesetzliche Reserven"],
-["2970","Gewinnvortrag"]
-
-];
-
-}
-
-
-
-return [];
-
-}
-
-
 
 /* =========================
    HELPER
 ========================= */
-
-function getUserOrRedirect(){
-
-const u = localStorage.getItem(USER_KEY);
-
-if(!u){
-
-window.location.href = "index.html";
-
-return null;
-
+function getUserOrRedirect() {
+  const u = localStorage.getItem(USER_KEY);
+  if (!u) {
+    window.location.href = "index.html";
+    return null;
+  }
+  return u;
 }
 
-return u;
-
+function loadCompanies(u) {
+  try {
+    return JSON.parse(localStorage.getItem(companiesKey(u)) || "[]");
+  } catch {
+    return [];
+  }
 }
 
-
-
-function loadCompanies(u){
-
-try{
-
-return JSON.parse(localStorage.getItem(companiesKey(u)) || "[]");
-
+function getSelectedCompany(u) {
+  const id = localStorage.getItem(currentCompanyKey(u));
+  if (!id) return null;
+  return loadCompanies(u).find(c => c.id === id) || null;
 }
 
-catch{
-
-return [];
-
+function getYears(companyId) {
+  try {
+    const raw = localStorage.getItem(yearsKey(companyId));
+    const arr = raw ? JSON.parse(raw) : null;
+    if (Array.isArray(arr) && arr.length) {
+      return arr.map(String);
+    }
+  } catch {}
+  return [...DEFAULT_YEARS];
 }
 
+function saveYears(companyId, years) {
+  localStorage.setItem(yearsKey(companyId), JSON.stringify(years));
 }
 
-
-
-function getSelectedCompany(u){
-
-const id = localStorage.getItem(currentCompanyKey(u));
-
-if(!id) return null;
-
-return loadCompanies(u).find(c => c.id === id) || null;
-
+function fmtCHF(n) {
+  const num = Math.round(Number(n || 0));
+  const s = String(num).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+  return `${s} CHF`;
 }
 
-
-
-function getYears(companyId){
-
-try{
-
-const raw = localStorage.getItem(yearsKey(companyId));
-
-const arr = raw ? JSON.parse(raw) : null;
-
-if(Array.isArray(arr) && arr.length)
-
-return arr.map(String);
-
+function loadJournal(companyId, year) {
+  try {
+    return JSON.parse(localStorage.getItem(journalKey(companyId, year)) || "[]");
+  } catch {
+    return [];
+  }
 }
-
-catch{}
-
-return [...DEFAULT_YEARS];
-
-}
-
-
-
-function saveYears(companyId,years){
-
-localStorage.setItem(
-
-yearsKey(companyId),
-
-JSON.stringify(years)
-
-);
-
-}
-
-
-
-function fmtCHF(n){
-
-const num = Math.round(Number(n || 0));
-
-const s = String(num)
-
-.replace(/\B(?=(\d{3})+(?!\d))/g,"'");
-
-return `${s} CHF`;
-
-}
-
-
-
-function loadJournal(companyId,year){
-
-try{
-
-return JSON.parse(
-
-localStorage.getItem(journalKey(companyId,year)) || "[]"
-
-);
-
-}
-
-catch{
-
-return [];
-
-}
-
-}
-
-
 
 /* =========================
    SALDO BERECHNEN
 ========================= */
+function computeBalancesFromJournal(rows) {
+  const bal = {};
 
-function computeBalancesFromJournal(rows){
+  for (const r of rows) {
+    const debit = String(r.debit || "").trim();
+    const credit = String(r.credit || "").trim();
+    const amt = Number(r.amount || 0);
 
-const bal = {};
+    if (!debit || !credit || !(amt > 0)) continue;
 
-for(const r of rows){
+    bal[debit] = (bal[debit] || 0) + amt;
+    bal[credit] = (bal[credit] || 0) - amt;
+  }
 
-const debit = String(r.debit || "").trim();
-
-const credit = String(r.credit || "").trim();
-
-const amt = Number(r.amount || 0);
-
-if(!debit || !credit || !(amt > 0)) continue;
-
-bal[debit] = (bal[debit] || 0) + amt;
-
-bal[credit] = (bal[credit] || 0) - amt;
-
+  return bal;
 }
-
-return bal;
-
-}
-
-
 
 /* =========================
    JAHR TABS
 ========================= */
+function renderYearTabs(companyId) {
+  const el = document.getElementById("yearTabs");
+  if (!el) return;
 
-function renderYearTabs(companyId){
+  const years = getYears(companyId);
 
-const el = document.getElementById("yearTabs");
+  if (!years.includes(currentYear)) {
+    currentYear = years[0];
+  }
 
-const years = getYears(companyId);
+  el.innerHTML =
+    years.map(y => `
+      <button class="yearBtn ${y === currentYear ? "active" : ""}" data-year="${y}">
+        ${y}
+      </button>
+    `).join("") +
+    `<button class="addYearBtn" id="addYearBtn" type="button">+ Jahr</button>`;
 
+  el.onclick = (e) => {
+    const b = e.target.closest(".yearBtn");
+    if (!b) return;
 
+    currentYear = b.dataset.year;
+    renderYearTabs(companyId);
+    renderBalance(companyId, currentYear);
+  };
 
-if(!years.includes(currentYear))
+  const addYearBtn = document.getElementById("addYearBtn");
+  if (addYearBtn) {
+    addYearBtn.onclick = () => {
+      const y = prompt("Jahr eingeben (z.B. 2027)");
+      if (!y) return;
 
-currentYear = years[0];
+      const year = y.trim();
 
+      if (!/^\d{4}$/.test(year)) {
+        alert("Ungültiges Jahr");
+        return;
+      }
 
+      const list = getYears(companyId);
 
-el.innerHTML =
+      if (list.includes(year)) {
+        alert("Jahr existiert bereits");
+        return;
+      }
 
-years.map(y=>`
+      list.push(year);
+      list.sort();
+      saveYears(companyId, list);
 
-<button class="yearBtn ${y===currentYear?"active":""}" data-year="${y}">
-
-${y}
-
-</button>
-
-`).join("")
-
-+
-
-`<button class="addYearBtn" id="addYearBtn">+ Jahr</button>`;
-
-
-
-el.onclick = (e)=>{
-
-const b = e.target.closest(".yearBtn");
-
-if(!b) return;
-
-
-
-currentYear = b.dataset.year;
-
-
-
-renderYearTabs(companyId);
-
-renderBalance(companyId,currentYear);
-
-};
-
-
-
-document.getElementById("addYearBtn").onclick = ()=>{
-
-const y = prompt("Jahr eingeben (z.B. 2027)");
-
-if(!y) return;
-
-
-
-if(!/^\d{4}$/.test(y))
-
-return alert("Ungültiges Jahr");
-
-
-
-const list = getYears(companyId);
-
-
-
-if(list.includes(y))
-
-return alert("Jahr existiert bereits");
-
-
-
-list.push(y);
-
-list.sort();
-
-
-
-saveYears(companyId,list);
-
-
-
-currentYear = y;
-
-
-
-renderYearTabs(companyId);
-
-renderBalance(companyId,currentYear);
-
-};
-
+      currentYear = year;
+      renderYearTabs(companyId);
+      renderBalance(companyId, currentYear);
+    };
+  }
 }
 
+/* =========================
+   HTML HILFSFUNKTIONEN
+========================= */
+function renderAccountRow(no, name, value) {
+  return `
+    <div class="balanceRow">
+      <span>${no} ${name}</span>
+      <span style="font-weight:600;">${value}</span>
+    </div>
+  `;
+}
 
+function renderGroup(group, saldo, isAssetSide) {
+  const rowsHtml = group.accounts.map(([no, name]) => {
+    const raw = Number(saldo[no] || 0);
+    const shown = isAssetSide ? Math.max(raw, 0) : Math.max(-raw, 0);
+    return renderAccountRow(no, name, fmtCHF(shown));
+  }).join("");
+
+  return `
+    <div class="balanceBlockTitle">${group.title}</div>
+    ${rowsHtml}
+  `;
+}
 
 /* =========================
    BILANZ RENDER
 ========================= */
+function renderBalance(companyId, year) {
+  const root = document.getElementById("balanceRoot");
+  if (!root) return;
 
-function renderBalance(companyId,year){
+  const rows = loadJournal(companyId, year);
+  const saldo = computeBalancesFromJournal(rows);
 
-const root = document.getElementById("balanceRoot");
+  const user = localStorage.getItem(USER_KEY);
+  const company = getSelectedCompany(user);
+  if (!company) return;
 
-if(!root) return;
+  const liabilityGroups = getLiabilityGroups(company.legal);
 
+  const assetHtml = ASSET_GROUPS.map(group =>
+    renderGroup(group, saldo, true)
+  ).join("");
 
+  const liabilityHtml = liabilityGroups.map(group =>
+    renderGroup(group, saldo, false)
+  ).join("");
 
-const rows = loadJournal(companyId,year);
+  const totalAssets = ASSET_GROUPS.flatMap(g => g.accounts).reduce((sum, [no]) => {
+    return sum + Math.max(Number(saldo[no] || 0), 0);
+  }, 0);
 
-const saldo = computeBalancesFromJournal(rows);
+  const totalLiabilities = liabilityGroups.flatMap(g => g.accounts).reduce((sum, [no]) => {
+    return sum + Math.max(-Number(saldo[no] || 0), 0);
+  }, 0);
 
+  root.innerHTML = `
+    <div class="balanceSheet">
+      <div class="balanceCol">
+        <div class="balanceColTitle">Aktiven</div>
+        ${assetHtml}
+        <div class="balanceTotal">
+          <span>Total Aktiven</span>
+          <span>${fmtCHF(totalAssets)}</span>
+        </div>
+      </div>
 
+      <div class="balanceDivider"></div>
 
-const user = localStorage.getItem(USER_KEY);
-
-const company = getSelectedCompany(user);
-
-
-
-if(!company) return;
-
-
-
-const LIAB_EQUITY = getLiabilityAccounts(company.legal);
-
-
-
-const assetRows = ASSETS.map(([no,name])=>{
-
-const s = Number(saldo[no] || 0);
-
-const shown = Math.max(s,0);
-
-return row(`${no} ${name}`,fmtCHF(shown));
-
-}).join("");
-
-
-
-const liabRows = LIAB_EQUITY.map(([no,name])=>{
-
-const s = Number(saldo[no] || 0);
-
-const shown = Math.max(-s,0);
-
-return row(`${no} ${name}`,fmtCHF(shown));
-
-}).join("");
-
-
-
-root.innerHTML = `
-
-<div class="balanceSheet">
-
-<div class="balanceCol">
-
-<div class="balanceColTitle">Aktiven</div>
-
-${assetRows}
-
-</div>
-
-
-
-<div class="balanceDivider"></div>
-
-
-
-<div class="balanceCol">
-
-<div class="balanceColTitle">Passiven</div>
-
-${liabRows}
-
-</div>
-
-
-
-</div>
-
-`;
-
-
-
-function row(label,value){
-
-return `
-
-<div class="balanceRow">
-
-<span>${label}</span>
-
-<span style="font-weight:600;">${value}</span>
-
-</div>
-
-`;
-
+      <div class="balanceCol">
+        <div class="balanceColTitle">Passiven</div>
+        ${liabilityHtml}
+        <div class="balanceTotal">
+          <span>Total Passiven</span>
+          <span>${fmtCHF(totalLiabilities)}</span>
+        </div>
+      </div>
+    </div>
+  `;
 }
-
-}
-
-
 
 /* =========================
    START
 ========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  const user = getUserOrRedirect();
+  if (!user) return;
 
-document.addEventListener("DOMContentLoaded",()=>{
+  const userDisplay = document.getElementById("userDisplay");
+  if (userDisplay) {
+    userDisplay.textContent = `Angemeldet: ${user}`;
+  }
 
-const user = getUserOrRedirect();
+  const backBtn = document.getElementById("backBtn");
+  if (backBtn) {
+    backBtn.onclick = () => {
+      window.location.href = "company.html";
+    };
+  }
 
-if(!user) return;
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.onclick = () => {
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(currentCompanyKey(user));
+      window.location.href = "index.html";
+    };
+  }
 
+  const company = getSelectedCompany(user);
+  if (!company) {
+    window.location.href = "overview.html";
+    return;
+  }
 
+  const companyInfo = document.getElementById("companyInfo");
+  if (companyInfo) {
+    companyInfo.textContent = `Firma: ${company.name}`;
+  }
 
-document.getElementById("userDisplay").textContent =
+  const years = getYears(company.id);
+  currentYear = years[0];
 
-`Angemeldet: ${user}`;
-
-
-
-document.getElementById("backBtn").onclick =
-
-()=> window.location.href = "company.html";
-
-
-
-document.getElementById("logoutBtn").onclick = ()=>{
-
-localStorage.removeItem(USER_KEY);
-
-localStorage.removeItem(currentCompanyKey(user));
-
-window.location.href = "index.html";
-
-};
-
-
-
-const company = getSelectedCompany(user);
-
-
-
-if(!company){
-
-window.location.href = "overview.html";
-
-return;
-
-}
-
-
-
-const years = getYears(company.id);
-
-
-
-currentYear = years[0];
-
-
-
-renderYearTabs(company.id);
-
-renderBalance(company.id,currentYear);
-
+  renderYearTabs(company.id);
+  renderBalance(company.id, currentYear);
 });
