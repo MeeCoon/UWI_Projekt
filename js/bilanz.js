@@ -12,37 +12,103 @@ const DEFAULT_YEARS = ["2024", "2025", "2026"];
 let currentYear = "2024";
 
 /* =========================
-   AKTIVEN
+   AKTIVEN JE NACH BRANCHE
 ========================= */
-const ASSET_GROUPS = [
-  {
-    title: "Umlaufvermögen",
-    accounts: [
-      ["1000", "Kasse"],
-      ["1020", "Bankguthaben"],
-      ["1060", "Wertschriften (Aktien)"],
-      ["1100", "Forderungen aus Lieferungen und Leistungen"],
-      ["1170", "Vorsteuer MWST"],
-      ["1200", "Handelswaren"],
-      ["1210", "Rohstoffe"],
-      ["1300", "Aktive Rechnungsabgrenzung"]
-    ]
-  },
-  {
-    title: "Anlagevermögen",
-    accounts: [
-      ["1400", "Wertschriften (Obligationen)"],
-      ["1480", "Beteiligungen"],
-      ["1500", "Maschinen und Apparate"],
-      ["1510", "Mobiliar und Einrichtungen"],
-      ["1530", "Fahrzeuge"],
-      ["1600", "Geschäftsliegenschaften"]
-    ]
+function getAssetGroups(industry) {
+  const commonCurrentAssets = [
+    ["1000", "Kasse"],
+    ["1020", "Bankguthaben"],
+    ["1170", "Vorsteuer MWST"],
+    ["1300", "Aktive Rechnungsabgrenzung"]
+  ];
+
+  const commonFixedAssets = [
+    ["1400", "Wertschriften (Obligationen)"],
+    ["1480", "Beteiligungen"],
+    ["1510", "Mobiliar und Einrichtungen"],
+    ["1530", "Fahrzeuge"],
+    ["1600", "Geschäftsliegenschaften"]
+  ];
+
+  if (industry === "Handel") {
+    return [
+      {
+        title: "Umlaufvermögen",
+        accounts: [
+          ...commonCurrentAssets,
+          ["1060", "Wertschriften (Aktien)"],
+          ["1100", "Forderungen aus Lieferungen und Leistungen"],
+          ["1200", "Handelswaren"]
+        ]
+      },
+      {
+        title: "Anlagevermögen",
+        accounts: [
+          ...commonFixedAssets
+        ]
+      }
+    ];
   }
-];
+
+  if (industry === "Produktion") {
+    return [
+      {
+        title: "Umlaufvermögen",
+        accounts: [
+          ...commonCurrentAssets,
+          ["1100", "Forderungen aus Lieferungen und Leistungen"],
+          ["1210", "Rohstoffe"]
+        ]
+      },
+      {
+        title: "Anlagevermögen",
+        accounts: [
+          ...commonFixedAssets,
+          ["1500", "Maschinen und Apparate"]
+        ]
+      }
+    ];
+  }
+
+  if (industry === "Dienstleistung") {
+    return [
+      {
+        title: "Umlaufvermögen",
+        accounts: [
+          ...commonCurrentAssets,
+          ["1100", "Forderungen aus Lieferungen und Leistungen"]
+        ]
+      },
+      {
+        title: "Anlagevermögen",
+        accounts: [
+          ...commonFixedAssets,
+          ["1520", "Büromaschinen"],
+          ["1700", "Patente, Lizenzen"]
+        ]
+      }
+    ];
+  }
+
+  return [
+    {
+      title: "Umlaufvermögen",
+      accounts: [
+        ...commonCurrentAssets,
+        ["1100", "Forderungen aus Lieferungen und Leistungen"]
+      ]
+    },
+    {
+      title: "Anlagevermögen",
+      accounts: [
+        ...commonFixedAssets
+      ]
+    }
+  ];
+}
 
 /* =========================
-   PASSIVEN
+   PASSIVEN JE NACH RECHTSFORM
 ========================= */
 function getLiabilityGroups(legal) {
   const baseShort = {
@@ -320,9 +386,10 @@ function renderBalance(companyId, year) {
   const company = getSelectedCompany(user);
   if (!company) return;
 
+  const assetGroups = getAssetGroups(company.industry);
   const liabilityGroups = getLiabilityGroups(company.legal);
 
-  const assetHtml = ASSET_GROUPS.map(group =>
+  const assetHtml = assetGroups.map(group =>
     renderGroup(group, saldo, true)
   ).join("");
 
@@ -330,7 +397,7 @@ function renderBalance(companyId, year) {
     renderGroup(group, saldo, false)
   ).join("");
 
-  const totalAssets = ASSET_GROUPS.flatMap(g => g.accounts).reduce((sum, [no]) => {
+  const totalAssets = assetGroups.flatMap(g => g.accounts).reduce((sum, [no]) => {
     return sum + Math.max(Number(saldo[no] || 0), 0);
   }, 0);
 
