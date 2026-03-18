@@ -300,7 +300,6 @@ function renderGroup(group, saldo, isAssetSide) {
   const rowsHtml = group.accounts.map(([no, name]) => {
     const raw = Number(saldo[no] || 0);
     const shown = isAssetSide ? Math.max(raw, 0) : Math.max(-raw, 0);
-
     return renderAccountRow(no, name, shown);
   }).join("");
 
@@ -343,6 +342,11 @@ function renderBalance(companyId, year) {
   }, 0);
 
   root.innerHTML = `
+    <div class="balanceHeaderBlue">
+      <div class="balanceTitle">Bilanz ${year}</div>
+      <div class="balanceSub">Beträge werden aus Buchungen berechnet (Start = 0)</div>
+    </div>
+
     <div class="balanceSheet">
       <div class="balanceCol">
         <div class="balanceColTitle">Aktiven</div>
@@ -399,11 +403,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!company) {
     window.location.href = "overview.html";
     return;
-  }
-
-  const companyInfo = document.getElementById("companyInfo");
-  if (companyInfo) {
-    companyInfo.textContent = `Firma: ${company.name}`;
   }
 
   const years = getYears(company.id);
