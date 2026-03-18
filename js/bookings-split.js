@@ -11,30 +11,37 @@ let currentYear = DEFAULT_YEARS[0];
 
 const KONTENPLAN = [
 
-{no:"1000",name:"Kasse"},
-{no:"1020",name:"Bank"},
-{no:"1100",name:"Forderungen"},
+{name:"Kasse"},
+{name:"Bank"},
+{name:"Wertschriften (Aktien)"},
+{name:"Forderungen"},
+{name:"Vorsteuer MWST"},
+{name:"Handelswaren"},
+{name:"Rohstoffe"},
+{name:"Aktive Rechnungsabgrenzung"},
+{name:"Wertschriften (Obligationen)"},
+{name:"Beteiligungen"}
 
-{no:"1500",name:"Maschinen"},
-{no:"1510",name:"Mobiliar"},
-{no:"1530",name:"Fahrzeuge"},
+{name:"Maschinen"},
+{name:"Mobiliar"},
+{name:"Fahrzeuge"},
 
-{no:"2000",name:"Verbindlichkeiten"},
-{no:"2450",name:"Darlehen"},
-{no:"2451",name:"Hypotheken"},
+{name:"Verbindlichkeiten"},
+{name:"Darlehen"},
+{name:"Hypotheken"},
 
-{no:"2800",name:"Eigenkapital"},
+{name:"Eigenkapital"},
 
-{no:"3000",name:"Produktionserlöse"},
-{no:"3200",name:"Handelserlöse"},
-{no:"3400",name:"Dienstleistungserlöse"},
+{name:"Produktionserlöse"},
+{name:"Handelserlöse"},
+{name:"Dienstleistungserlöse"},
 
-{no:"4000",name:"Materialaufwand"},
-{no:"4200",name:"Handelswarenaufwand"},
-{no:"5000",name:"Lohnaufwand"},
-{no:"6000",name:"Raumaufwand"},
-{no:"6500",name:"Verwaltungsaufwand"},
-{no:"6800",name:"Abschreibungen"}
+{name:"Materialaufwand"},
+{name:"Handelswarenaufwand"},
+{name:"Lohnaufwand"},
+{name:"Raumaufwand"},
+{name:"Verwaltungsaufwand"},
+{name:"Abschreibungen"}
 
 ];
 
