@@ -19,18 +19,29 @@ const KONTENPLAN = [
 {name:"Handelswaren"},
 {name:"Rohstoffe"},
 {name:"Aktive Rechnungsabgrenzung"},
+
 {name:"Wertschriften (Obligationen)"},
 {name:"Beteiligungen"},
-
-{name:"Maschinen"},
+{name:"Maschinen & Apparate"},
 {name:"Mobiliar"},
 {name:"Fahrzeuge"},
+{name:"Geschäftsliegenschaften"},
 
 {name:"Verbindlichkeiten"},
+{name:"Bankverbindlichkeiten"},
+{name:"Geschuldete MWST"},
+{name:"Pasive Rechnungsabgrenzung"},
+
 {name:"Darlehen"},
 {name:"Hypotheken"},
+{name:"Rückstellungen"},
 
 {name:"Eigenkapital"},
+{name:"Jahresgewinn / Jahresverlust"},
+{name:"Privat"},
+{name:"Aktienkapital"},
+{name:"Reserven"},
+{name:"Gewinnvortrag"},
 
 {name:"Produktionserlöse"},
 {name:"Handelserlöse"},
