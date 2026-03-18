@@ -1,5 +1,4 @@
 // js/create.js
-
 const USER_KEY = "uwi_user";
 const COMPANIES_PREFIX = "uwi_companies_";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
@@ -26,7 +25,6 @@ function minCapital(legal){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-
   const user = localStorage.getItem(USER_KEY);
 
   if(!user){
@@ -47,14 +45,19 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "index.html";
   };
 
-  const form = document.getElementById("createForm");
+  const cancelBtn = document.getElementById("cancelBtn");
+  if (cancelBtn) {
+    cancelBtn.onclick = () => {
+      window.location.href = "overview.html";
+    };
+  }
 
+  const form = document.getElementById("createForm");
   const legalEl = document.getElementById("legal");
   const capitalEl = document.getElementById("capital");
   const hint = document.getElementById("capitalHint");
 
   function updateCapitalRule(){
-
     const legal = legalEl.value;
     const min = minCapital(legal);
 
@@ -76,11 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   legalEl.addEventListener("change", updateCapitalRule);
-
   updateCapitalRule();
 
   form.addEventListener("submit", (e) => {
-
     e.preventDefault();
 
     const name = document.getElementById("name").value.trim();
@@ -116,15 +117,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     companies.unshift(company);
-
     saveCompanies(user, companies);
-
     localStorage.setItem(currentCompanyKey(user), company.id);
 
     alert("Firma erstellt");
-
     window.location.href = "overview.html";
-
   });
-
 });
