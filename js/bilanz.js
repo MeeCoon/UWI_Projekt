@@ -1,5 +1,4 @@
 // js/bilanz.js
-
 const USER_KEY = "uwi_user";
 const COMPANIES_PREFIX = "uwi_companies_";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
@@ -15,7 +14,6 @@ let currentYear = "2024";
 /* =========================
    AKTIVEN ALS BLÖCKE
 ========================= */
-
 const ASSET_GROUPS = [
   {
     title: "10 – Umlaufvermögen",
@@ -48,7 +46,6 @@ const ASSET_GROUPS = [
 /* =========================
    PASSIVEN ALS BLÖCKE
 ========================= */
-
 function getLiabilityGroups(legal) {
   const baseShort = {
     title: "20 / 21 / 22 / 23 – Kurzfristiges Fremdkapital",
@@ -125,7 +122,6 @@ function getLiabilityGroups(legal) {
 /* =========================
    HELPER
 ========================= */
-
 function getUserOrRedirect() {
   const u = localStorage.getItem(USER_KEY);
   if (!u) {
@@ -181,7 +177,6 @@ function loadJournal(companyId, year) {
 /* =========================
    SALDO BERECHNEN
 ========================= */
-
 function computeBalancesFromJournal(rows) {
   const bal = {};
 
@@ -202,7 +197,6 @@ function computeBalancesFromJournal(rows) {
 /* =========================
    JAHR TABS
 ========================= */
-
 function renderYearTabs(companyId) {
   const el = document.getElementById("yearTabs");
   if (!el) return;
@@ -288,12 +282,16 @@ function renderYearTabs(companyId) {
 /* =========================
    HTML HILFSFUNKTIONEN
 ========================= */
-
 function renderAccountRow(no, name, value) {
   return `
     <div class="balanceRow">
       <span>${no} ${name}</span>
-      <span style="font-weight:600;">${value}</span>
+      <input
+        class="balanceInput input-readonly"
+        type="text"
+        value="${value}"
+        readonly
+      >
     </div>
   `;
 }
@@ -302,7 +300,12 @@ function renderGroup(group, saldo, isAssetSide) {
   const rowsHtml = group.accounts.map(([no, name]) => {
     const raw = Number(saldo[no] || 0);
     const shown = isAssetSide ? Math.max(raw, 0) : Math.max(-raw, 0);
-    return renderAccountRow(no, name, fmtCHF(shown));
+
+    return renderAccountRow(
+      no,
+      name,
+      shown.toLocaleString("de-CH")
+    );
   }).join("");
 
   return `
@@ -314,7 +317,6 @@ function renderGroup(group, saldo, isAssetSide) {
 /* =========================
    BILANZ RENDER
 ========================= */
-
 function renderBalance(companyId, year) {
   const root = document.getElementById("balanceRoot");
   if (!root) return;
@@ -372,7 +374,6 @@ function renderBalance(companyId, year) {
 /* =========================
    START
 ========================= */
-
 document.addEventListener("DOMContentLoaded", () => {
   const user = getUserOrRedirect();
   if (!user) return;
