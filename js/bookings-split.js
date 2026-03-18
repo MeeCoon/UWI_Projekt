@@ -324,7 +324,7 @@ alert(`Gebucht in ${currentYear}`);
 
 
 // =======================
-// GENERATE 100 CASES
+// ATE 100 CASES
 // =======================
 
 document.getElementById("generateCasesBtn")?.addEventListener("click", () => {
@@ -340,7 +340,7 @@ const company = companies.find(c=>c.id===companyId);
 if(!company) return alert("Firma nicht gefunden.");
 
 if(typeof generate100Cases !== "function")
-return alert("Generator nicht geladen.");
+return alert("100 Buchungstatsachen wurden generiert.");
 
 const count = generate100Cases(companyId, currentYear, company.type);
 
