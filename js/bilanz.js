@@ -1,4 +1,5 @@
 // js/bilanz.js
+
 const USER_KEY = "uwi_user";
 const COMPANIES_PREFIX = "uwi_companies_";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
@@ -14,14 +15,15 @@ let currentYear = "2024";
 /* =========================
    AKTIVEN ALS BLÖCKE
 ========================= */
+
 const ASSET_GROUPS = [
   {
-    title: "1 – Umlaufvermögen",
+    title: "10 – Umlaufvermögen",
     accounts: [
       ["1000", "Kasse"],
       ["1020", "Bankguthaben"],
       ["1060", "Wertschriften"],
-      ["1100", "Forderungen"],
+      ["1100", "Forderungen aus Lieferungen und Leistungen"],
       ["1170", "Vorsteuer MWST"],
       ["1200", "Handelswaren"],
       ["1210", "Rohstoffe"],
@@ -29,16 +31,16 @@ const ASSET_GROUPS = [
     ]
   },
   {
-    title: "14 – Anlagevermögen",
+    title: "14 / 15 / 16 / 17 – Anlagevermögen",
     accounts: [
       ["1400", "Wertschriften"],
       ["1480", "Beteiligungen"],
-      ["1500", "Maschinen & Apparate"],
-      ["1510", "Mobiliar"],
+      ["1500", "Maschinen und Apparate"],
+      ["1510", "Mobiliar und Einrichtungen"],
       ["1520", "Büromaschinen"],
       ["1530", "Fahrzeuge"],
       ["1600", "Geschäftsliegenschaften"],
-      ["1700", "Immaterielle Werte"]
+      ["1700", "Patente, Lizenzen"]
     ]
   }
 ];
@@ -46,20 +48,21 @@ const ASSET_GROUPS = [
 /* =========================
    PASSIVEN ALS BLÖCKE
 ========================= */
+
 function getLiabilityGroups(legal) {
   const baseShort = {
-    title: "20 – Kurzfristiges Fremdkapital",
+    title: "20 / 21 / 22 / 23 – Kurzfristiges Fremdkapital",
     accounts: [
-      ["2000", "Verbindlichkeiten"],
+      ["2000", "Verbindlichkeiten aus Lieferungen und Leistungen"],
       ["2030", "Erhaltene Anzahlungen"],
       ["2100", "Bankverbindlichkeiten"],
       ["2200", "Geschuldete MWST"],
-      ["2300", "Passive Rechnungsabgrenzung"]
+      ["2300", "Passive Rechnungsabgrenzungen"]
     ]
   };
 
   const baseLong = {
-    title: "24 – Langfristiges Fremdkapital",
+    title: "24 / 26 – Langfristiges Fremdkapital",
     accounts: [
       ["2450", "Darlehen"],
       ["2451", "Hypotheken"],
@@ -72,11 +75,11 @@ function getLiabilityGroups(legal) {
       baseShort,
       baseLong,
       {
-        title: "28 – Eigenkapital",
+        title: "28 – Eigenkapital Einzelunternehmen",
         accounts: [
           ["2800", "Eigenkapital"],
           ["2850", "Privat"],
-          ["2891", "Jahresgewinn / Jahresverlust"]
+          ["2891", "Jahresgewinn oder Jahresverlust"]
         ]
       }
     ];
@@ -87,10 +90,13 @@ function getLiabilityGroups(legal) {
       baseShort,
       baseLong,
       {
-        title: "28 – Eigenkapital",
+        title: "28 – Eigenkapital GmbH",
         accounts: [
           ["2800", "Stammkapital"],
-          ["2970", "Gewinnvortrag"]
+          ["2950", "Gesetzliche Gewinnreserve"],
+          ["2960", "Freiwillige Gewinnreserven"],
+          ["2970", "Gewinnvortrag / Verlustvortrag"],
+          ["2979", "Jahresgewinn oder Jahresverlust"]
         ]
       }
     ];
@@ -101,11 +107,13 @@ function getLiabilityGroups(legal) {
       baseShort,
       baseLong,
       {
-        title: "28 – Eigenkapital",
+        title: "28 – Eigenkapital Aktiengesellschaft",
         accounts: [
           ["2800", "Aktienkapital"],
-          ["2950", "Gesetzliche Reserven"],
-          ["2970", "Gewinnvortrag"]
+          ["2950", "Gesetzliche Gewinnreserve"],
+          ["2960", "Freiwillige Gewinnreserven"],
+          ["2970", "Gewinnvortrag / Verlustvortrag"],
+          ["2979", "Jahresgewinn oder Jahresverlust"]
         ]
       }
     ];
@@ -117,6 +125,7 @@ function getLiabilityGroups(legal) {
 /* =========================
    HELPER
 ========================= */
+
 function getUserOrRedirect() {
   const u = localStorage.getItem(USER_KEY);
   if (!u) {
@@ -148,7 +157,6 @@ function getYears(companyId) {
       return arr.map(String);
     }
   } catch {}
-
   return [...DEFAULT_YEARS];
 }
 
@@ -173,6 +181,7 @@ function loadJournal(companyId, year) {
 /* =========================
    SALDO BERECHNEN
 ========================= */
+
 function computeBalancesFromJournal(rows) {
   const bal = {};
 
@@ -193,6 +202,7 @@ function computeBalancesFromJournal(rows) {
 /* =========================
    JAHR TABS
 ========================= */
+
 function renderYearTabs(companyId) {
   const el = document.getElementById("yearTabs");
   if (!el) return;
@@ -205,10 +215,7 @@ function renderYearTabs(companyId) {
 
   el.innerHTML =
     years.map(y => `
-      <button
-        class="yearBtn ${y === currentYear ? "active" : ""}"
-        data-year="${y}"
-        type="button">
+      <button class="yearBtn ${y === currentYear ? "active" : ""}" data-year="${y}" type="button">
         ${y}
       </button>
     `).join("") +
@@ -239,7 +246,6 @@ function renderYearTabs(companyId) {
       }
 
       const list = getYears(companyId);
-
       if (list.includes(year)) {
         alert("Jahr existiert bereits");
         return;
@@ -270,7 +276,6 @@ function renderYearTabs(companyId) {
 
       const next = list.filter(y => y !== currentYear);
       saveYears(companyId, next);
-
       localStorage.removeItem(journalKey(companyId, currentYear));
 
       currentYear = next[0];
@@ -283,6 +288,7 @@ function renderYearTabs(companyId) {
 /* =========================
    HTML HILFSFUNKTIONEN
 ========================= */
+
 function renderAccountRow(no, name, value) {
   return `
     <div class="balanceRow">
@@ -308,6 +314,7 @@ function renderGroup(group, saldo, isAssetSide) {
 /* =========================
    BILANZ RENDER
 ========================= */
+
 function renderBalance(companyId, year) {
   const root = document.getElementById("balanceRoot");
   if (!root) return;
@@ -365,6 +372,7 @@ function renderBalance(companyId, year) {
 /* =========================
    START
 ========================= */
+
 document.addEventListener("DOMContentLoaded", () => {
   const user = getUserOrRedirect();
   if (!user) return;
