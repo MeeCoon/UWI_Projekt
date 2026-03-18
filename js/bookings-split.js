@@ -13,7 +13,7 @@ const KONTENPLAN = [
 
 // Umlaufsvermögen
 {no:"1000", name:"Kasse"},
-{no:"1020", name:"Bank"},
+{no:"1020", name:"Bankguthaben"},
 {no:"1060", name:"Wertschriften (Aktien)"},
 {no:"1100", name:"Forderungen aus Lieferungen und Leistungen"},
 {no:"1170", name:"Vorsteuer MWST"},
