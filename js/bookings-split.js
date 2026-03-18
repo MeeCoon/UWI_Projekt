@@ -15,7 +15,7 @@ const KONTENPLAN = [
 {no:"1000", name:"Kasse"},
 {no:"1020", name:"Bank"},
 {no:"1060", name:"Wertschriften (Aktien)"},
-{no:"1100", name:"Forderungen"},
+{no:"1100", name:"Forderungen aus Lieferungen und Leistungen"},
 {no:"1170", name:"Vorsteuer MWST"},
 {no:"1200", name:"Handelswaren"},
 {no:"1210", name:"Rohstoffe"},
@@ -30,7 +30,7 @@ const KONTENPLAN = [
 {no:"1600", name:"Geschäftsliegenschaften"},
   
 // Kurzfristiges Fremdkapital
-{no:"2000", name:"Verbindlichkeiten"},
+{no:"2000", name:"Verbindlichkeiten aus Lieferungen und Leistungen"},
 {no:"2100", name:"Bankverbindlichkeiten"},
 {no:"2200", name:"Geschuldete MWST"},
 {no:"2300", name:"Passive Rechnungsabgrenzung"},
