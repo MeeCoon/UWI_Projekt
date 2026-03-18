@@ -1,5 +1,4 @@
 // js/bilanz.js
-
 const USER_KEY = "uwi_user";
 const COMPANIES_PREFIX = "uwi_companies_";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
@@ -149,6 +148,7 @@ function getYears(companyId) {
       return arr.map(String);
     }
   } catch {}
+
   return [...DEFAULT_YEARS];
 }
 
@@ -205,24 +205,29 @@ function renderYearTabs(companyId) {
 
   el.innerHTML =
     years.map(y => `
-      <button class="yearBtn ${y === currentYear ? "active" : ""}" data-year="${y}">
+      <button
+        class="yearBtn ${y === currentYear ? "active" : ""}"
+        data-year="${y}"
+        type="button">
         ${y}
       </button>
     `).join("") +
-    `<button class="addYearBtn" id="addYearBtn" type="button">+ Jahr</button>`;
+    `
+      <button class="addYearBtn" id="addYearBtn" type="button">+ Jahr hinzufügen</button>
+      <button class="addYearBtn" id="deleteYearBtn" type="button">🗑 Jahr löschen</button>
+    `;
 
   el.onclick = (e) => {
-    const b = e.target.closest(".yearBtn");
-    if (!b) return;
+    const yearBtn = e.target.closest(".yearBtn");
+    if (yearBtn) {
+      currentYear = yearBtn.dataset.year;
+      renderYearTabs(companyId);
+      renderBalance(companyId, currentYear);
+      return;
+    }
 
-    currentYear = b.dataset.year;
-    renderYearTabs(companyId);
-    renderBalance(companyId, currentYear);
-  };
-
-  const addYearBtn = document.getElementById("addYearBtn");
-  if (addYearBtn) {
-    addYearBtn.onclick = () => {
+    const addBtn = e.target.closest("#addYearBtn");
+    if (addBtn) {
       const y = prompt("Jahr eingeben (z.B. 2027)");
       if (!y) return;
 
@@ -247,8 +252,32 @@ function renderYearTabs(companyId) {
       currentYear = year;
       renderYearTabs(companyId);
       renderBalance(companyId, currentYear);
-    };
-  }
+      return;
+    }
+
+    const deleteBtn = e.target.closest("#deleteYearBtn");
+    if (deleteBtn) {
+      const list = getYears(companyId);
+
+      if (list.length <= 1) {
+        alert("Mindestens ein Jahr muss bleiben.");
+        return;
+      }
+
+      if (!confirm(`Jahr ${currentYear} wirklich löschen?`)) {
+        return;
+      }
+
+      const next = list.filter(y => y !== currentYear);
+      saveYears(companyId, next);
+
+      localStorage.removeItem(journalKey(companyId, currentYear));
+
+      currentYear = next[0];
+      renderYearTabs(companyId);
+      renderBalance(companyId, currentYear);
+    }
+  };
 }
 
 /* =========================
