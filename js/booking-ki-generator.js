@@ -1,261 +1,477 @@
-// ====================================
-// booking-ki-generator.js
-// KI-Buchungstatsachen für Tabelle
-// ====================================
+// js/bilanz.js
+const USER_KEY = "uwi_user";
+const COMPANIES_PREFIX = "uwi_companies_";
+const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 
-document.addEventListener("DOMContentLoaded", () => {
+const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
+const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
+const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
+const yearsKey = (companyId) => `uwi_years_${companyId}_balance`;
 
-  const generateBtn = document.getElementById("generateCasesBtn");
-  const tableBody = document.getElementById("bookingTableBody");
-  const factField = document.getElementById("fact");
-  const activeTaskId = document.getElementById("activeTaskId");
-  const addBookingBtn = document.getElementById("addBookingBtn");
+const DEFAULT_YEARS = ["2024", "2025", "2026"];
+let currentYear = "2024";
 
-  // -------------------------
-  // Aktuelles Jahr
-  // -------------------------
-  function getSelectedYear() {
-    const active = document.querySelector(".yearBtn.active");
-    if (active) return active.textContent.trim();
-    return new Date().getFullYear().toString();
-  }
-
-  // -------------------------
-  // Storage-Key für Jahr
-  // -------------------------
-  function storageKey(year) {
-    return "uwi-ki-tasks-" + year;
-  }
-
-  // -------------------------
-  // Firmenliste
-  // -------------------------
-  const companyNames = [
-    "Nova AG",
-    "Helvetia GmbH",
-    "Alpenblick AG",
-    "Sonnenberg GmbH",
-    "BergTech AG",
-    "Seeland GmbH",
-    "ProTrade AG",
-    "Meyer & Co",
-    "Urban Systems AG"
+/* =========================
+   AKTIVEN JE NACH BRANCHE
+========================= */
+function getAssetGroups(industry) {
+  const commonCurrentAssets = [
+    ["1000", "Kasse"],
+    ["1020", "Bankguthaben"],
+    ["1170", "Vorsteuer MWST"],
+    ["1300", "Aktive Rechnungsabgrenzung"]
   ];
 
-  // -------------------------
-  // Buchungsvorlagen
-  // -------------------------
-  const templates = [
+  const commonFixedAssets = [
+    ["1400", "Wertschriften (Obligationen)"],
+    ["1480", "Beteiligungen"],
+    ["1510", "Mobiliar und Einrichtungen"],
+    ["1530", "Fahrzeuge"],
+    ["1600", "Geschäftsliegenschaften"]
+  ];
 
-  // — Basis & Handelsbetrieb
-  "Die {firma} kauft Mobiliar für {betrag} CHF gegen Bank.",
-  "Die {firma} kauft ein Fahrzeug für {betrag} CHF und bezahlt per Bank.",
-  "Die {firma} kauft Maschinen für {betrag} CHF gegen Bank.",
-  "Die {firma} kauft Handelswaren für {betrag} CHF auf Rechnung.",
-  "Die {firma} bezahlt eine Lieferantenrechnung über {betrag} CHF per Bank.",
-  "Die {firma} verkauft Waren bar für {betrag} CHF.",
-  "Die {firma} verkauft Waren auf Rechnung für {betrag} CHF.",
-  "Ein Kunde bezahlt eine offene Rechnung von {betrag} CHF per Bank.",
-  "Die {firma} bezahlt Büromaterial von {betrag} CHF per Bank.",
-  "Die {firma} bezahlt die Miete von {betrag} CHF per Bank.",
-  "Die {firma} bezahlt Löhne von {betrag} CHF per Bank.",
-  "Der Eigentümer legt {betrag} CHF auf das Bankkonto der {firma} ein.",
-  "Die {firma} nimmt ein Bankdarlehen über {betrag} CHF auf.",
-  "Die {firma} zahlt ein Darlehen über {betrag} CHF per Bank zurück.",
-  "Die {firma} kauft Wertschriften für {betrag} CHF gegen Bank.",
-  "Die {firma} erhält Zinsen auf dem Bankkonto von {betrag} CHF.",
-  "Die {firma} bezahlt Versicherungen von {betrag} CHF per Bank.",
-  "Die {firma} kauft Computer für {betrag} CHF bar.",
-  "Die {firma} verkauft ein altes Fahrzeug für {betrag} CHF und erhält eine Bankgutschrift.",
-  "Die {firma} tätigt eine Abschreibung auf Maschinen von {betrag} CHF.",
-
-  // — Forderungsverluste & Umsatzkorrekturen
-  "Die {firma} verbucht Verluste aus Forderungen von {betrag} CHF.",
-  "Die {firma} kassiert einen Abschreibungsbetrag auf Debitoren von {betrag} CHF.",
-  "Die {firma} korrigiert eine Umsatzsteuerüberzahlung von {betrag} CHF.",
-  "Die {firma} schreibt uneinbringliche Forderungen endgültig ab für {betrag} CHF.",
-
-  // — Rechnungsabgrenzungen
-  "Die {firma} macht eine aktive Rechnungsabgrenzung für Aufwand von {betrag} CHF.",
-  "Die {firma} löst eine passive Rechnungsabgrenzung für Ertrag über {betrag} CHF auf.",
-  "Die {firma} bucht periodengerechten Aufwand (Rechnungsabgrenzung) von {betrag} CHF.",
-  "Die {firma} bucht periodengerechten Ertrag (Rechnungsabgrenzung) von {betrag} CHF.",
-
-  // — Abschreibungen (direkt & indirekt)
-  "Die {firma} bucht direkte Abschreibung auf Mobiliar von {betrag} CHF.",
-  "Die {firma} bucht indirekte Abschreibung auf Fahrzeuge von {betrag} CHF.",
-  "Die {firma} korrigiert indirekte Abschreibung auf Maschinen um {betrag} CHF.",
-
-  // — Personalaufwand & Nebenkosten
-  "Die {firma} bezahlt Spesen für Mitarbeitende von {betrag} CHF per Bank.",
-  "Die {firma} schreibt Familienzulagen als Personalaufwand von {betrag} CHF ab.",
-  "Die {firma} zahlt Weihnachtsgratifikation von {betrag} CHF an Personal.",
-  "Die {firma} überweist Sozialversicherungsbeiträge von {betrag} CHF per Bank.",
-  "Die {firma} bucht Überstundenvergütungen von {betrag} CHF als Aufwand.",
-
-  // — Spezifisch Einzelunternehmen
-  "Der Einzelunternehmer entnimmt Waren für private Nutzung im Wert von {betrag} CHF.",
-  "Der Einzelunternehmer entnimmt Geld aus der Kasse zur privaten Nutzung von {betrag} CHF.",
-  "Der Einzelunternehmer tätigt eine Privateinlage von {betrag} CHF auf das Bankkonto.",
-
-  // — Spezifisch Aktiengesellschaft (AG)
-  "Die {firma} schreibt Dividenden an Aktionäre von {betrag} CHF aus.",
-  "Die {firma} überweist Dividenden an Aktionäre von {betrag} CHF per Bank.",
-  "Die {firma} zahlt gesetzliche Reserven an Gewinnvortrag von {betrag} CHF.",
-  "Die {firma} bucht Agio aus Aktienkapitalerhöhung von {betrag} CHF.",
-  "Die {firma} schreibt Rückstellungen für Pensionsverpflichtungen von {betrag} CHF ab.",
-
-  // — Wertschriften & Finanzen
-  "Die {firma} realisiert einen Kursgewinn aus Wertschriften von {betrag} CHF.",
-  "Die {firma} realisiert einen Kursverlust aus Wertschriften von {betrag} CHF.",
-  "Die {firma} bucht Verrechnungssteuer auf Erträge von {betrag} CHF.",
-  "Die {firma} erhält Dividenden aus Wertschriften von {betrag} CHF per Bank.",
-  "Die {firma} verkauft Wertschriften und verbucht Depotgebühren von {betrag} CHF.",
-
-  // — Liegenschaften & Immobilien
-  "Die {firma} kauft ein Gebäude für {betrag} CHF gegen Bank.",
-  "Die {firma} verkauft eine Liegenschaft für {betrag} CHF und erhält Bankgutschrift.",
-  "Die {firma} bezahlt Unterhaltskosten für Liegenschaft von {betrag} CHF per Bank.",
-  "Die {firma} erneuert eine Liegenschaft (Bauteile) für {betrag} CHF per Bank.",
-  "Die {firma} schreibt Abschreibungen auf Liegenschaft von {betrag} CHF.",
-  "Die {firma} erhält Mietzinseinnahmen von {betrag} CHF auf Bank.",
-  "Die {firma} bezahlt Mietzinsen für Geschäftsräume von {betrag} CHF per Bank.",
-  "Die {firma} verbucht Handänderungssteuer auf Immobilienkauf von {betrag} CHF.",
-
-  // — Aufwand & Ertrag allgemein
-  "Die {firma} bucht Werbeaufwand von {betrag} CHF.",
-  "Die {firma} bucht Reisekosten als Aufwand von {betrag} CHF.",
-  "Die {firma} erhält Beratungserlöse von {betrag} CHF per Bank.",
-  "Die {firma} schreibt Bildungsaufwand von {betrag} CHF als Aufwand.",
-  "Die {firma} erhält Mietzins von {betrag} CHF per Bank.",
-  "Die {firma} bezahlt Lizenzkosten von {betrag} CHF per Bank.",
-  "Die {firma} schreibt Energiekosten von {betrag} CHF ab.",
-  "Die {firma} bezahlt Telekommunikationskosten von {betrag} CHF per Bank.",
-
-  // — Bank & Kasse
-  "Die {firma} hebt Bargeld von der Bank im Betrag von {betrag} CHF ab.",
-  "Die {firma} zahlt Bargeld in die Kasse ein über {betrag} CHF.",
-  "Die {firma} tätigt Bankspesen von {betrag} CHF.",
-  "Die {firma} schreibt Kassenfehlbetrag von {betrag} CHF ab.",
-  "Die {firma} bucht Bankgutschrift aus Zinszahlung von {betrag} CHF.",
-
-  // — Debitoren & Kreditoren
-  "Die {firma} gewährt einem Kunden Skonto von {betrag} CHF auf Rechnung.",
-  "Die {firma} erhält Gutschrift vom Lieferanten über {betrag} CHF.",
-  "Die {firma} schreibt verzugszinsen von Debitoren von {betrag} CHF ab.",
-  "Die {firma} bucht Lieferantenskonto von {betrag} CHF als Aufwand."
-
-];
-
-  // -------------------------
-  // Zufallsbetrag
-  // -------------------------
-  function randomAmount() {
-    return (Math.floor(Math.random() * 90) + 10) * 100;
+  if (industry === "Handel") {
+    return [
+      {
+        title: "Umlaufvermögen",
+        accounts: [
+          ...commonCurrentAssets,
+          ["1060", "Wertschriften (Aktien)"],
+          ["1100", "Forderungen aus Lieferungen und Leistungen"],
+          ["1200", "Handelswaren"]
+        ]
+      },
+      {
+        title: "Anlagevermögen",
+        accounts: [
+          ...commonFixedAssets
+        ]
+      }
+    ];
   }
 
-  // -------------------------
-  // Zufallsfirma
-  // -------------------------
-  function randomCompany() {
-    return companyNames[Math.floor(Math.random() * companyNames.length)];
+  if (industry === "Produktion") {
+    return [
+      {
+        title: "Umlaufvermögen",
+        accounts: [
+          ...commonCurrentAssets,
+          ["1100", "Forderungen aus Lieferungen und Leistungen"],
+          ["1210", "Rohstoffe"]
+        ]
+      },
+      {
+        title: "Anlagevermögen",
+        accounts: [
+          ...commonFixedAssets,
+          ["1500", "Maschinen und Apparate"]
+        ]
+      }
+    ];
   }
 
-  // -------------------------
-  // Buchungstatsachen generieren
-  // -------------------------
-  function generateTasks(year) {
-    const tasks = [];
+  if (industry === "Dienstleistung") {
+    return [
+      {
+        title: "Umlaufvermögen",
+        accounts: [
+          ...commonCurrentAssets,
+          ["1100", "Forderungen aus Lieferungen und Leistungen"]
+        ]
+      },
+      {
+        title: "Anlagevermögen",
+        accounts: [
+          ...commonFixedAssets,
+          ["1520", "Büromaschinen"],
+          ["1700", "Patente, Lizenzen"]
+        ]
+      }
+    ];
+  }
 
-    for (let i = 1; i <= 100; i++) {
-      const template = templates[Math.floor(Math.random() * templates.length)];
-      const amount = randomAmount();
-      const company = randomCompany();
-
-      const fact = template
-        .replace("{firma}", company)
-        .replace("{betrag}", amount.toLocaleString("de-CH"));
-
-      tasks.push({
-        id: year + "-" + i,
-        fact: fact,
-        status: "open"
-      });
+  return [
+    {
+      title: "Umlaufvermögen",
+      accounts: [
+        ...commonCurrentAssets,
+        ["1100", "Forderungen aus Lieferungen und Leistungen"]
+      ]
+    },
+    {
+      title: "Anlagevermögen",
+      accounts: [
+        ...commonFixedAssets
+      ]
     }
+  ];
+}
 
-    // Optional: lokal speichern, falls Seite neu geladen wird
-    localStorage.setItem(storageKey(year), JSON.stringify(tasks));
-    return tasks;
+/* =========================
+   PASSIVEN JE NACH RECHTSFORM
+========================= */
+function getLiabilityGroups(legal) {
+  const baseShort = {
+    title: "Kurzfristiges Fremdkapital",
+    accounts: [
+      ["2000", "Verbindlichkeiten aus Lieferungen und Leistungen"],
+      ["2100", "Bankverbindlichkeiten"],
+      ["2200", "Geschuldete MWST"],
+      ["2300", "Passive Rechnungsabgrenzungen"]
+    ]
+  };
+
+  const baseLong = {
+    title: "Langfristiges Fremdkapital",
+    accounts: [
+      ["2450", "Darlehen"],
+      ["2451", "Hypotheken"],
+      ["2600", "Rückstellungen"]
+    ]
+  };
+
+  if (legal === "Einzelunternehmen") {
+    return [
+      baseShort,
+      baseLong,
+      {
+        title: "Eigenkapital Einzelunternehmen",
+        accounts: [
+          ["2800", "Eigenkapital"],
+          ["2850", "Privat"],
+          ["2891", "Jahresgewinn oder Jahresverlust"]
+        ]
+      }
+    ];
   }
 
-  // -------------------------
-  // Tabelle rendern
-  // -------------------------
-  function renderTable(tasks) {
-    tableBody.innerHTML = "";
-
-    tasks.forEach((t, index) => {
-      const tr = document.createElement("tr");
-      tr.style.cursor = "pointer";
-
-      const statusIcon = t.status === "done" ? "✅ erledigt" : "⏳ offen";
-
-      tr.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${t.fact}</td>
-        <td>${statusIcon}</td>
-      `;
-
-      tr.addEventListener("click", () => {
-        activeTaskId.value = t.id;
-        factField.value = t.fact;
-      });
-
-      tableBody.appendChild(tr);
-    });
+  if (legal === "GmbH") {
+    return [
+      baseShort,
+      baseLong,
+      {
+        title: "Eigenkapital GmbH",
+        accounts: [
+          ["2800", "Stammkapital"],
+          ["2950", "Gesetzliche Gewinnreserve"],
+          ["2960", "Freiwillige Gewinnreserven"],
+          ["2970", "Gewinnvortrag / Verlustvortrag"],
+          ["2979", "Jahresgewinn oder Jahresverlust"]
+        ]
+      }
+    ];
   }
 
-  // -------------------------
-  // Initial laden
-  // -------------------------
-  function initForYear() {
-    const year = getSelectedYear();
-    let tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
-
-    renderTable(tasks);
+  if (legal === "AG") {
+    return [
+      baseShort,
+      baseLong,
+      {
+        title: "Eigenkapital Aktiengesellschaft",
+        accounts: [
+          ["2800", "Aktienkapital"],
+          ["2950", "Gesetzliche Gewinnreserve"],
+          ["2960", "Freiwillige Gewinnreserven"],
+          ["2970", "Gewinnvortrag / Verlustvortrag"],
+          ["2979", "Jahresgewinn oder Jahresverlust"]
+        ]
+      }
+    ];
   }
 
-  initForYear();
+  return [baseShort, baseLong];
+}
 
-  // -------------------------
-  // Button: 100 Buchungstatsachen generieren
-  // -------------------------
-  generateBtn.addEventListener("click", () => {
-    const year = getSelectedYear();
-    const tasks = generateTasks(year); // erstellt 100 Fälle
-    renderTable(tasks); // direkt in Tabelle anzeigen
-  });
+/* =========================
+   HELPER
+========================= */
+function getUserOrRedirect() {
+  const u = localStorage.getItem(USER_KEY);
+  if (!u) {
+    window.location.href = "index.html";
+    return null;
+  }
+  return u;
+}
 
-  // -------------------------
-  // Beim Buchen: Aufgabe erledigt
-  // -------------------------
-  addBookingBtn.addEventListener("click", () => {
-    const year = getSelectedYear();
-    const id = activeTaskId.value;
+function loadCompanies(u) {
+  try {
+    return JSON.parse(localStorage.getItem(companiesKey(u)) || "[]");
+  } catch {
+    return [];
+  }
+}
 
-    if (!id) {
-      alert("Wähle zuerst eine Buchungstatsache.");
+function getSelectedCompany(u) {
+  const id = localStorage.getItem(currentCompanyKey(u));
+  if (!id) return null;
+  return loadCompanies(u).find(c => c.id === id) || null;
+}
+
+function getYears(companyId) {
+  try {
+    const raw = localStorage.getItem(yearsKey(companyId));
+    const arr = raw ? JSON.parse(raw) : null;
+    if (Array.isArray(arr) && arr.length) {
+      return arr.map(String);
+    }
+  } catch {}
+  return [...DEFAULT_YEARS];
+}
+
+function saveYears(companyId, years) {
+  localStorage.setItem(yearsKey(companyId), JSON.stringify(years));
+}
+
+function fmtCHF(n) {
+  const num = Math.round(Number(n || 0));
+  const s = String(num).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+  return `${s} CHF`;
+}
+
+function loadJournal(companyId, year) {
+  try {
+    return JSON.parse(localStorage.getItem(journalKey(companyId, year)) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+/* =========================
+   SALDO BERECHNEN
+========================= */
+function computeBalancesFromJournal(rows) {
+  const bal = {};
+
+  for (const r of rows) {
+    const debit = String(r.debit || "").trim();
+    const credit = String(r.credit || "").trim();
+    const amt = Number(r.amount || 0);
+
+    if (!debit || !credit || !(amt > 0)) continue;
+
+    bal[debit] = (bal[debit] || 0) + amt;
+    bal[credit] = (bal[credit] || 0) - amt;
+  }
+
+  return bal;
+}
+
+/* =========================
+   JAHR TABS
+========================= */
+function renderYearTabs(companyId) {
+  const el = document.getElementById("yearTabs");
+  if (!el) return;
+
+  const years = getYears(companyId);
+
+  if (!years.includes(currentYear)) {
+    currentYear = years[0];
+  }
+
+  el.innerHTML =
+    years.map(y => `
+      <button class="yearBtn ${y === currentYear ? "active" : ""}" data-year="${y}" type="button">
+        ${y}
+      </button>
+    `).join("") +
+    `
+      <button class="addYearBtn" id="addYearBtn" type="button">+ Jahr hinzufügen</button>
+      <button class="addYearBtn" id="deleteYearBtn" type="button">🗑 Jahr löschen</button>
+    `;
+
+  el.onclick = (e) => {
+    const yearBtn = e.target.closest(".yearBtn");
+    if (yearBtn) {
+      currentYear = yearBtn.dataset.year;
+      renderYearTabs(companyId);
+      renderBalance(companyId, currentYear);
       return;
     }
 
-    const tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
-    const task = tasks.find(t => t.id === id);
+    const addBtn = e.target.closest("#addYearBtn");
+    if (addBtn) {
+      const y = prompt("Jahr eingeben (z.B. 2027)");
+      if (!y) return;
 
-    if (task) {
-      task.status = "done";
-      localStorage.setItem(storageKey(year), JSON.stringify(tasks));
-      renderTable(tasks);
+      const year = y.trim();
+
+      if (!/^\d{4}$/.test(year)) {
+        alert("Ungültiges Jahr");
+        return;
+      }
+
+      const list = getYears(companyId);
+      if (list.includes(year)) {
+        alert("Jahr existiert bereits");
+        return;
+      }
+
+      list.push(year);
+      list.sort();
+      saveYears(companyId, list);
+
+      currentYear = year;
+      renderYearTabs(companyId);
+      renderBalance(companyId, currentYear);
+      return;
     }
-  });
 
+    const deleteBtn = e.target.closest("#deleteYearBtn");
+    if (deleteBtn) {
+      const list = getYears(companyId);
+
+      if (list.length <= 1) {
+        alert("Mindestens ein Jahr muss bleiben.");
+        return;
+      }
+
+      if (!confirm(`Jahr ${currentYear} wirklich löschen?`)) {
+        return;
+      }
+
+      const next = list.filter(y => y !== currentYear);
+      saveYears(companyId, next);
+      localStorage.removeItem(journalKey(companyId, currentYear));
+
+      currentYear = next[0];
+      renderYearTabs(companyId);
+      renderBalance(companyId, currentYear);
+    }
+  };
+}
+
+/* =========================
+   HTML HILFSFUNKTIONEN
+========================= */
+function renderAccountRow(no, name, value) {
+  return `
+    <div class="balanceRow">
+      <span>${no} ${name}</span>
+      <input
+        class="balanceInput input-readonly"
+        type="number"
+        value="${value}"
+        readonly
+      >
+    </div>
+  `;
+}
+
+function renderGroup(group, saldo, isAssetSide) {
+  const rowsHtml = group.accounts.map(([no, name]) => {
+    const raw = Number(saldo[no] || 0);
+    const shown = isAssetSide ? Math.max(raw, 0) : Math.max(-raw, 0);
+    return renderAccountRow(no, name, shown);
+  }).join("");
+
+  return `
+    <div class="balanceBlockTitle">${group.title}</div>
+    ${rowsHtml}
+  `;
+}
+
+/* =========================
+   BILANZ RENDER
+========================= */
+function renderBalance(companyId, year) {
+  const root = document.getElementById("balanceRoot");
+  if (!root) return;
+
+  const rows = loadJournal(companyId, year);
+  const saldo = computeBalancesFromJournal(rows);
+
+  const user = localStorage.getItem(USER_KEY);
+  const company = getSelectedCompany(user);
+  if (!company) return;
+
+  const assetGroups = getAssetGroups(company.industry);
+  const liabilityGroups = getLiabilityGroups(company.legal);
+
+  const assetHtml = assetGroups.map(group =>
+    renderGroup(group, saldo, true)
+  ).join("");
+
+  const liabilityHtml = liabilityGroups.map(group =>
+    renderGroup(group, saldo, false)
+  ).join("");
+
+  const totalAssets = assetGroups.flatMap(g => g.accounts).reduce((sum, [no]) => {
+    return sum + Math.max(Number(saldo[no] || 0), 0);
+  }, 0);
+
+  const totalLiabilities = liabilityGroups.flatMap(g => g.accounts).reduce((sum, [no]) => {
+    return sum + Math.max(-Number(saldo[no] || 0), 0);
+  }, 0);
+
+  root.innerHTML = `
+    <div class="balanceHeaderBlue">
+      <div class="balanceTitle">Bilanz ${year}</div>
+      <div class="balanceSub">Beträge werden aus Buchungen berechnet (Start = 0)</div>
+    </div>
+
+    <div class="balanceSheet">
+      <div class="balanceCol">
+        <div class="balanceColTitle">Aktiven</div>
+        ${assetHtml}
+        <div class="balanceTotal">
+          <span>Total Aktiven</span>
+          <span>${fmtCHF(totalAssets)}</span>
+        </div>
+      </div>
+
+      <div class="balanceDivider"></div>
+
+      <div class="balanceCol">
+        <div class="balanceColTitle">Passiven</div>
+        ${liabilityHtml}
+        <div class="balanceTotal">
+          <span>Total Passiven</span>
+          <span>${fmtCHF(totalLiabilities)}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* =========================
+   START
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  const user = getUserOrRedirect();
+  if (!user) return;
+
+  const userDisplay = document.getElementById("userDisplay");
+  if (userDisplay) {
+    userDisplay.textContent = `Angemeldet: ${user}`;
+  }
+
+  const backBtn = document.getElementById("backBtn");
+  if (backBtn) {
+    backBtn.onclick = () => {
+      window.location.href = "company.html";
+    };
+  }
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.onclick = () => {
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(currentCompanyKey(user));
+      window.location.href = "index.html";
+    };
+  }
+
+  const company = getSelectedCompany(user);
+  if (!company) {
+    window.location.href = "overview.html";
+    return;
+  }
+
+  const years = getYears(company.id);
+  currentYear = years[0];
+
+  renderYearTabs(company.id);
+  renderBalance(company.id, currentYear);
 });
