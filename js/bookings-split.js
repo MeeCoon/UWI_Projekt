@@ -11,48 +11,75 @@ let currentYear = DEFAULT_YEARS[0];
 
 const KONTENPLAN = [
 
-{name:"Kasse"},
-{name:"Bank"},
-{name:"Wertschriften (Aktien)"},
-{name:"Forderungen"},
-{name:"Vorsteuer MWST"},
-{name:"Handelswaren"},
-{name:"Rohstoffe"},
-{name:"Aktive Rechnungsabgrenzung"},
+// Umlaufsvermögen
+{no:"1000", name:"Kasse"},
+{no:"1020", name:"Bank"},
+{no:"1060", name:"Wertschriften (Aktien)"},
+{no:"1100", name:"Forderungen"},
+{no:"1170", name:"Vorsteuer MWST"},
+{no:"1200", name:"Handelswaren"},
+{no:"1210", name:"Rohstoffe"},
+{no:"1300", name:"Aktive Rechnungsabgrenzung"},
 
-{name:"Wertschriften (Obligationen)"},
-{name:"Beteiligungen"},
-{name:"Maschinen & Apparate"},
-{name:"Mobiliar"},
-{name:"Fahrzeuge"},
-{name:"Geschäftsliegenschaften"},
+// Anlagevermögen
+{no:"1400", name:"Wertschriften (Obligationen)"},
+{no:"1480", name:"Beteiligungen"},
+{no:"1500", name:"Maschinen & Apparate"},
+{no:"1510", name:"Mobiliar"},
+{no:"1530", name:"Fahrzeuge"},
+{no:"1600", name:"Geschäftsliegenschaften"},
+  
+// Kurzfristiges Fremdkapital
+{no:"2000", name:"Verbindlichkeiten"},
+{no:"2100", name:"Bankverbindlichkeiten"},
+{no:"2200", name:"Geschuldete MWST"},
+{no:"2300", name:"Passive Rechnungsabgrenzung"},
 
-{name:"Verbindlichkeiten"},
-{name:"Bankverbindlichkeiten"},
-{name:"Geschuldete MWST"},
-{name:"Pasive Rechnungsabgrenzung"},
+// Langfristiges Fremdkapital
+{no:"2450", name:"Darlehen"},
+{no:"2451", name:"Hypotheken"},
+{no:"2600", name:"Rückstellungen"},
 
-{name:"Darlehen"},
-{name:"Hypotheken"},
-{name:"Rückstellungen"},
+// Eigenkapital (AG & Einzelunternehmen)
+{no:"2800", name:"Eigenkapital"},
+{no:"2979", name:"Jahresgewinn / Jahresverlust"},
+{no:"2850", name:"Privat"},
+{no:"2800", name:"Aktienkapital"},
+{no:"2950", name:"Reserven"},
+{no:"2970", name:"Gewinnvortrag"},
 
-{name:"Eigenkapital"},
-{name:"Jahresgewinn / Jahresverlust"},
-{name:"Privat"},
-{name:"Aktienkapital"},
-{name:"Reserven"},
-{name:"Gewinnvortrag"},
+// Aufwand
+{no:"4000", name:"Materialaufwand"},
+{no:"4200", name:"Handelswarenaufwand"},
+  
+{no:"5000", name:"Lohnaufwand"},
+{no:"5700", name:"Sozialversicherungsaufwand"},
+{no:"5800", name:"Übriger Personalaufwand"},
+  
+{no:"6000", name:"Raumaufwand"},
+{no:"6100", name:"Unterhalt, Reparaturen, Ersatz"},
+{no:"6200", name:"Fahrzeugaufwand"},
+{no:"6300", name:"Versicherungsaufwand"},
+{no:"6400", name:"Energie- und Entsorgungsaufwand"},
+{no:"6500", name:"Verwaltungsaufwand"},
+{no:"6600", name:"Werbeaufwand"},
+{no:"6700", name:"Sonstiger Betriebsaufwand"},
+{no:"6800", name:"Abschreibungen"},
+{no:"6900", name:"Finanzaufwand"},
 
-{name:"Produktionserlöse"},
-{name:"Handelserlöse"},
-{name:"Dienstleistungserlöse"},
-
-{name:"Materialaufwand"},
-{name:"Handelswarenaufwand"},
-{name:"Lohnaufwand"},
-{name:"Raumaufwand"},
-{name:"Verwaltungsaufwand"},
-{name:"Abschreibungen"}
+{no:"7510", name:"Aufwand betriebliche Liegenschaft"},
+{no:"8500", name:"Ausserordentlicher Aufwand"},
+  
+// Erlös
+{no:"3000", name:"Produktionserlöse"},
+{no:"3200", name:"Handelserlöse"},
+{no:"3400", name:"Dienstleistungserlöse"},
+  
+{no:"3805", name:"Verluste aus Forderungen"},
+{no:"6950", name:"Finanzertrag"},
+  
+{no:"7500", name:"Ertrag betriebliche Liegenschaft"},
+{no:"8510", name:"Ausserordentlicher Ertrag"}
 
 ];
 
