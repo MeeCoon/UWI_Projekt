@@ -20,7 +20,7 @@ const KONTENPLAN = [
 {name:"Rohstoffe"},
 {name:"Aktive Rechnungsabgrenzung"},
 {name:"Wertschriften (Obligationen)"},
-{name:"Beteiligungen"}
+{name:"Beteiligungen"},
 
 {name:"Maschinen"},
 {name:"Mobiliar"},
