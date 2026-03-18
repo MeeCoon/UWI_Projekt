@@ -288,7 +288,7 @@ function renderAccountRow(no, name, value) {
       <span>${no} ${name}</span>
       <input
         class="balanceInput input-readonly"
-        type="text"
+        type="number"
         value="${value}"
         readonly
       >
@@ -301,11 +301,7 @@ function renderGroup(group, saldo, isAssetSide) {
     const raw = Number(saldo[no] || 0);
     const shown = isAssetSide ? Math.max(raw, 0) : Math.max(-raw, 0);
 
-    return renderAccountRow(
-      no,
-      name,
-      shown.toLocaleString("de-CH")
-    );
+    return renderAccountRow(no, name, shown);
   }).join("");
 
   return `
