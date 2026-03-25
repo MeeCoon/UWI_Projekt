@@ -11,10 +11,11 @@ const yearsKey = (companyId) => `uwi_years_${companyId}_balance`;
 const DEFAULT_YEARS = ["2024", "2025", "2026"];
 let currentYear = "2024";
 
-function getSuccessGroups(legal, industry) {
+function getSuccessGroups(legal, industryRaw) {
+  const industry = (industryRaw || "").toLowerCase();
   const groups = [];
 
-  if (industry === "Handel") {
+  if (industry.includes("handel")) {
     groups.push(
       {
         title: "Betrieblicher Ertrag aus Lieferungen und Leistungen",
@@ -31,7 +32,7 @@ function getSuccessGroups(legal, industry) {
     );
   }
 
-  if (industry === "Produktion") {
+  if (industry.includes("produktion")) {
     groups.push(
       {
         title: "Betrieblicher Ertrag aus Lieferungen und Leistungen",
@@ -49,7 +50,7 @@ function getSuccessGroups(legal, industry) {
     );
   }
 
-  if (industry === "Dienstleistung") {
+  if (industry.includes("dienst")) {
     groups.push(
       {
         title: "Betrieblicher Ertrag aus Lieferungen und Leistungen",
@@ -169,7 +170,6 @@ function loadJournal(companyId, year) {
 
 function computeBalancesFromJournal(rows) {
   const bal = {};
-
   for (const r of rows) {
     const debit = String(r.debit || "").trim();
     const credit = String(r.credit || "").trim();
@@ -180,7 +180,6 @@ function computeBalancesFromJournal(rows) {
     bal[debit] = (bal[debit] || 0) + amt;
     bal[credit] = (bal[credit] || 0) - amt;
   }
-
   return bal;
 }
 
@@ -281,17 +280,18 @@ function renderAccountRow(no, name, value) {
         type="number"
         value="${value}"
         readonly
+        tabindex="-1"
       >
     </div>
   `;
 }
 
 function isRevenueAccount(no) {
-  return no.startsWith("3");
+  return no.startsWith("3") || no === "6950";
 }
 
 function isExpenseAccount(no) {
-  return no.startsWith("4") || no.startsWith("5") || no.startsWith("6");
+  return no.startsWith("4") || no.startsWith("5") || no.startsWith("6") || no === "3805";
 }
 
 function renderGroup(group, saldo) {
@@ -315,7 +315,11 @@ function renderGroup(group, saldo) {
    ERFOLGSRECHNUNG
 ========================= */
 function renderSuccess(companyId, year) {
-  const root = document.getElementById("successRoot") || document.getElementById("erRoot") || document.getElementById("balanceRoot");
+  const root =
+    document.getElementById("successRoot") ||
+    document.getElementById("erRoot") ||
+    document.getElementById("balanceRoot");
+
   if (!root) return;
 
   const rows = loadJournal(companyId, year);
@@ -327,7 +331,6 @@ function renderSuccess(companyId, year) {
 
   const groups = getSuccessGroups(company.legal, company.industry);
   const groupsHtml = groups.map(group => renderGroup(group, saldo)).join("");
-
   const allAccounts = groups.flatMap(g => g.accounts);
 
   const totalRevenue = allAccounts.reduce((sum, [no]) => {
@@ -370,6 +373,19 @@ function renderSuccess(companyId, year) {
       </div>
     </div>
   `;
+
+  root.querySelectorAll("input").forEach(input => {
+    input.readOnly = true;
+    input.setAttribute("readonly", "readonly");
+    input.tabIndex = -1;
+
+    input.addEventListener("keydown", (e) => e.preventDefault());
+    input.addEventListener("beforeinput", (e) => e.preventDefault());
+    input.addEventListener("input", () => {
+      input.value = input.defaultValue;
+    });
+    input.addEventListener("paste", (e) => e.preventDefault());
+  });
 }
 
 /* =========================
