@@ -191,6 +191,26 @@ function computeBalancesFromJournal(rows) {
   const bal = {};
 
   for (const r of rows) {
+
+    // 🔥 NEU: Split-Buchungen (dein System)
+    if (r.type === "split") {
+
+      // Soll
+      for (const d of r.debits || []) {
+        if (!d.accountNo || !d.amount) continue;
+        bal[d.accountNo] = (bal[d.accountNo] || 0) + Number(d.amount);
+      }
+
+      // Haben
+      for (const c of r.credits || []) {
+        if (!c.accountNo || !c.amount) continue;
+        bal[c.accountNo] = (bal[c.accountNo] || 0) - Number(c.amount);
+      }
+
+      continue;
+    }
+
+    // 🔁 Fallback (falls du später einfache Buchungen hast)
     const debit = String(r.debit || "").trim();
     const credit = String(r.credit || "").trim();
     const amt = Number(r.amount || 0);
@@ -203,6 +223,8 @@ function computeBalancesFromJournal(rows) {
 
   return bal;
 }
+
+
 
 /* =========================
    JAHR TABS
