@@ -491,3 +491,168 @@ input[type=number] {
   justify-content:space-between;
   align-items:center;
 }
+.orgTextarea {
+  width: 100%;
+  min-height: 150px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid #d7deea;
+  border-radius: 12px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.orgChartWrap {
+  padding: 28px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #f8fafc;
+  overflow-x: auto;
+}
+
+.orgTree {
+  min-width: 980px;
+}
+
+.orgTop {
+  display: flex;
+  justify-content: center;
+}
+
+.orgCard {
+  min-width: 180px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  text-align: center;
+  border: 2px solid #1e293b;
+  background: linear-gradient(135deg, #4f83d1, #3867b0);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.orgCardTop {
+  min-width: 220px;
+}
+
+.orgName {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.orgRole {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.orgConnectorVertical {
+  width: 4px;
+  height: 28px;
+  background: #111827;
+  margin: 0 auto;
+}
+
+.orgConnectorHorizontal {
+  width: 64%;
+  height: 4px;
+  background: #111827;
+  margin: 0 auto 0;
+}
+
+.orgDeptRow {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+.orgDept {
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.orgDeptTopLine {
+  width: 4px;
+  height: 26px;
+  background: #111827;
+}
+
+.orgDeptCard {
+  width: 100%;
+}
+
+.orgDeptVertical {
+  width: 4px;
+  height: 26px;
+  background: #111827;
+}
+
+.orgMiniGrid {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
+.orgMiniGrid::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #111827;
+}
+
+.orgMiniCard {
+  position: relative;
+  margin-left: 34px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  text-align: center;
+  border: 2px solid #1e293b;
+  background: #3d5f98;
+  color: #fff;
+  font-weight: 600;
+  min-height: 28px;
+}
+
+.orgMiniCard::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  width: 20px;
+  height: 4px;
+  background: #111827;
+  transform: translateY(-50%);
+}
+
+.orgEmpty {
+  padding: 18px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+}
+
+.orgName[contenteditable="true"],
+.orgRole[contenteditable="true"],
+.orgMiniCard[contenteditable="true"] {
+  outline: none;
+  cursor: text;
+}
+
+.orgName[contenteditable="true"]:focus,
+.orgRole[contenteditable="true"]:focus,
+.orgMiniCard[contenteditable="true"]:focus {
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.35);
+  border-radius: 6px;
+}
