@@ -191,25 +191,34 @@ renderJournal(cid);
 
 function createLine(side){
 
-const row = document.createElement("div");
-row.dataset.side = side;
-row.style.display="flex";
-row.style.gap="8px";
+  const row = document.createElement("div");
+  row.dataset.side = side;
 
-const select = document.createElement("select");
-select.innerHTML = buildAccountOptions();
+  // 🔥 FIX
+  row.style.display = "flex";
+  row.style.gap = "8px";
+  row.style.flexWrap = "wrap";   // ✅ WICHTIG
+  row.style.width = "100%";      // ✅ verhindert Overflow
 
-const amount = document.createElement("input");
-amount.type="number";
-amount.placeholder="Betrag";
+  const select = document.createElement("select");
+  select.innerHTML = buildAccountOptions();
+  select.style.flex = "2 1 200px";   // ✅ flexibel
+  select.style.minWidth = "0";
 
-const remove = document.createElement("button");
-remove.textContent="✕";
-remove.className="btn";
-remove.onclick = ()=>row.remove();
+  const amount = document.createElement("input");
+  amount.type = "number";
+  amount.placeholder = "Betrag";
+  amount.style.flex = "1 1 100px";   // ✅ flexibel
+  amount.style.minWidth = "0";
 
-row.append(select,amount,remove);
-return row;
+  const remove = document.createElement("button");
+  remove.textContent = "✕";
+  remove.className = "btn";
+  remove.style.flex = "0 0 auto";    // bleibt klein
+  remove.onclick = () => row.remove();
+
+  row.append(select, amount, remove);
+  return row;
 }
 
 function getLines(side){
