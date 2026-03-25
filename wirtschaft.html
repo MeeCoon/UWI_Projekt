@@ -1,1 +1,78 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UWI — Wirtschaft</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">UWI Unternehmenssimulation</div>
+  <nav class="nav-inline">
+    <span id="userDisplay" class="muted"></span>
+    <button id="backBtn" class="btn" type="button">Zur Firma</button>
+    <button id="logoutBtn" class="btn" type="button">Abmelden</button>
+  </nav>
+</header>
 
+<main class="container">
+  <section class="card">
+    <h1 class="h2">Wirtschaft</h1>
+
+    <div class="page-tabs">
+      <a href="bilanz.html" class="page-tab">Bilanz</a>
+      <a href="erfolgsrechnung.html" class="page-tab">Erfolgsrechnung</a>
+      <a href="bookings.html" class="page-tab">Buchungssätze</a>
+      <a href="wirtschaft.html" class="page-tab active">Wirtschaft</a>
+      <a href="recht.html" class="page-tab">Recht</a>
+    </div>
+
+    <div class="balanceHeaderBlue" style="margin-top:12px;">
+      <div class="balanceTitle">Wirtschaft KI</div>
+      <div class="balanceSub">Automatische Fragen und Antworten zu Wirtschaft</div>
+    </div>
+
+    <div class="form-grid" style="margin-top:16px;">
+      <label for="topic">Thema</label>
+      <select id="topic">
+        <option value="angebot-nachfrage">Angebot und Nachfrage</option>
+        <option value="inflation">Inflation</option>
+        <option value="bip">BIP</option>
+        <option value="arbeitslosigkeit">Arbeitslosigkeit</option>
+        <option value="konjunktur">Konjunktur</option>
+      </select>
+
+      <label for="difficulty">Schwierigkeit</label>
+      <select id="difficulty">
+        <option value="leicht">Leicht</option>
+        <option value="mittel">Mittel</option>
+        <option value="schwer">Schwer</option>
+      </select>
+
+      <div class="form-actions" style="grid-column:1 / -1;">
+        <button id="generateBtn" class="btn primary" type="button">KI-Aufgabe erstellen</button>
+        <button id="showAnswerBtn" class="btn" type="button">Antwort zeigen</button>
+        <button id="nextBtn" class="btn" type="button">Neue Aufgabe</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px; padding:16px;">
+      <div class="balanceColTitle">Aufgabe</div>
+      <p id="questionBox" style="margin-top:10px;">Noch keine Aufgabe erstellt.</p>
+    </div>
+
+    <div class="card" style="margin-top:12px; padding:16px;">
+      <div class="balanceColTitle">Antwort</div>
+      <p id="answerBox" style="margin-top:10px;">Noch ausgeblendet.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
+</footer>
+
+<script src="js/wirtschaft.js"></script>
+</body>
+</html>
