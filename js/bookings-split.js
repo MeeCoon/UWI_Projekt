@@ -28,6 +28,8 @@ const KONTENPLAN = [
 {no:"1510", name:"Mobiliar"},
 {no:"1530", name:"Fahrzeuge"},
 {no:"1600", name:"Geschäftsliegenschaften"},
+{no:"1520", name:"Büromaschinen"},
+{no:"1700", name:"Patente, Lizenzen"},
   
 // Kurzfristiges Fremdkapital
 {no:"2000", name:"Verbindlichkeiten aus Lieferungen und Leistungen"},
