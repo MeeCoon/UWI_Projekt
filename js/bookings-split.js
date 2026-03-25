@@ -155,7 +155,8 @@ years.map(y=>
 `<button class="yearBtn ${y===currentYear?"active":""}" data-year="${y}">${y}</button>`
 ).join("")
 +
-`<button id="addYearBtn" class="addYearBtn">+ Jahr hinzufügen</button>`;
+`<button id="addYearBtn" class="addYearBtn">+ Jahr hinzufügen</button>`:
+
 
 el.onclick = e=>{
 const btn = e.target.closest(".yearBtn");
