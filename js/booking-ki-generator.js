@@ -224,14 +224,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.initKICasesForYear();
 
-  // -------------------------
-  // Button: 100 Buchungstatsachen generieren
-  // -------------------------
-  generateBtn.addEventListener("click", () => {
-    const year = getSelectedYear();
-    const tasks = generateTasks(year); // erstellt 100 Fälle
-    renderTable(tasks); // direkt in Tabelle anzeigen
-  });
+// -------------------------
+// Button: 100 Buchungstatsachen generieren
+// -------------------------
+generateBtn.addEventListener("click", () => {
+  const year = getSelectedYear();
+  const tasks = generateTasks(year); // erstellt 100 Fälle
+  // **Speichern der neuen Tasks überschreibt alte Einträge**
+  localStorage.setItem(storageKey(year), JSON.stringify(tasks));
+  renderTable(tasks); // direkt in Tabelle anzeigen
+});
+
+// -------------------------
+// Initial laden
+// -------------------------
+window.initKICasesForYear = function () {
+  const year = getSelectedYear();
+  let tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
+
+  // **Optional:** wenn noch keine Tasks existieren, gleich generieren
+  if (tasks.length === 0) {
+    tasks = generateTasks(year);
+    localStorage.setItem(storageKey(year), JSON.stringify(tasks));
+  }
+
+  renderTable(tasks);
+}
 
   // -------------------------
   // Beim Buchen: Aufgabe erledigt
