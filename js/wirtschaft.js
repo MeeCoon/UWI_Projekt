@@ -1,7 +1,6 @@
 // js/wirtschaft.js
 const USER_KEY = "uwi_user";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
-
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
 
 let selectedBox = null;
@@ -64,17 +63,36 @@ function clearSelection() {
 
 function attachBoxEvents() {
   document.querySelectorAll(".orgEditable").forEach(box => {
-    box.addEventListener("click", (e) => {
+    box.onclick = (e) => {
       e.stopPropagation();
+
       clearSelection();
       box.classList.add("orgSelected");
       selectedBox = box;
-    });
+    };
   });
 
-  document.addEventListener("click", () => {
-    clearSelection();
+  document.querySelectorAll('[contenteditable="true"]').forEach(editable => {
+    editable.onclick = (e) => {
+      e.stopPropagation();
+
+      const box = editable.closest(".orgEditable");
+      if (!box) return;
+
+      clearSelection();
+      box.classList.add("orgSelected");
+      selectedBox = box;
+    };
   });
+
+  const root = document.getElementById("orgChart");
+  if (root) {
+    root.onclick = (e) => {
+      if (e.target === root) {
+        clearSelection();
+      }
+    };
+  }
 }
 
 function renderOrgChart() {
@@ -89,14 +107,9 @@ function renderOrgChart() {
     return;
   }
 
-  const departmentsHtml = data.departments.map((dep, deptIndex) => {
-    const employeesHtml = dep.employees.map((name, empIndex) => `
-      <div 
-        class="orgMiniCard orgEditable"
-        data-type="employee"
-        data-dept-index="${deptIndex}"
-        data-emp-index="${empIndex}"
-      >
+  const departmentsHtml = data.departments.map((dep) => {
+    const employeesHtml = dep.employees.map(name => `
+      <div class="orgMiniCard orgEditable" data-type="employee">
         <div class="orgMiniText" contenteditable="true">${escapeHtml(name)}</div>
       </div>
     `).join("");
@@ -105,11 +118,7 @@ function renderOrgChart() {
       <div class="orgDeptColumn">
         <div class="orgDeptTopLine"></div>
 
-        <div 
-          class="orgCard orgDeptCard orgEditable"
-          data-type="department"
-          data-dept-index="${deptIndex}"
-        >
+        <div class="orgCard orgDeptCard orgEditable" data-type="department">
           <div class="orgName" contenteditable="true">${escapeHtml(dep.title)}</div>
           <div class="orgRole" contenteditable="true">${escapeHtml(dep.lead)}</div>
         </div>
@@ -166,6 +175,7 @@ function addDepartment() {
     </div>
 
     <div class="orgDeptVertical"></div>
+
     <div class="orgMiniGrid">
       <div class="orgMiniCard orgEditable" data-type="employee">
         <div class="orgMiniText" contenteditable="true">Neuer Mitarbeiter</div>
@@ -179,17 +189,11 @@ function addDepartment() {
 
 function addEmployee() {
   if (!selectedBox) {
-    alert("Bitte zuerst eine Abteilungs- oder Mitarbeiter-Box auswählen.");
+    alert("Bitte zuerst eine Abteilung oder Mitarbeiter-Box auswählen.");
     return;
   }
 
-  let deptColumn = null;
-
-  if (selectedBox.classList.contains("orgDeptCard")) {
-    deptColumn = selectedBox.closest(".orgDeptColumn");
-  } else if (selectedBox.classList.contains("orgMiniCard")) {
-    deptColumn = selectedBox.closest(".orgDeptColumn");
-  }
+  let deptColumn = selectedBox.closest(".orgDeptColumn");
 
   if (!deptColumn) {
     alert("Bitte eine Abteilung oder einen Mitarbeiter auswählen.");
@@ -244,6 +248,7 @@ function deleteSelectedBox() {
     if (miniGrid && !miniGrid.querySelector(".orgMiniCard")) {
       const deptColumn = miniGrid.closest(".orgDeptColumn");
       miniGrid.remove();
+
       const line = deptColumn?.querySelector(".orgDeptVertical");
       if (line) line.remove();
     }
