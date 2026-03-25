@@ -236,6 +236,9 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTable(tasks); // direkt in Tabelle anzeigen
   });
 
+// -------------------------
+// Beim Buchen: Aufgabe erledigt
+// -------------------------
 addBookingBtn.addEventListener("click", () => {
   const year = getSelectedYear();
   const id = activeTaskId.value;
@@ -245,22 +248,14 @@ addBookingBtn.addEventListener("click", () => {
     return;
   }
 
-  // Lade alle Tasks für das Jahr
   const tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
   const task = tasks.find(t => t.id === id);
 
   if (task) {
-    // Task als erledigt markieren
     task.status = "done";
-
-    // Änderungen speichern
     localStorage.setItem(storageKey(year), JSON.stringify(tasks));
-
-    // Tabelle neu rendern
     renderTable(tasks);
-
-    // Aktive Auswahl und Fact-Feld zurücksetzen
-    activeTaskId.value = "";
-    factField.value = "";
   }
+});
+
 });
