@@ -380,6 +380,28 @@ document.getElementById("creditLines")
 .append(createLine("credit"));
 
 renderJournal(cid);
+
+  // 🔥 KI-Task als erledigt markieren
+  const taskId = document.getElementById("activeTaskId").value;
+
+  if (taskId) {
+    const year = currentYear;
+    const key = "uwi-ki-tasks-" + year;
+
+    const tasks = JSON.parse(localStorage.getItem(key) || "[]");
+    const task = tasks.find(t => t.id === taskId);
+
+    if (task) {
+      task.status = "done";
+      localStorage.setItem(key, JSON.stringify(tasks));
+    }
+
+    // Tabelle neu rendern (falls vorhanden)
+    if (window.initKICasesForYear) {
+      window.initKICasesForYear();
+    }
+  }
+  
 alert(`Gebucht in ${currentYear}`);
 };
 
