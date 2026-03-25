@@ -60,11 +60,24 @@ function getAssetGroups(industry) {
           ["1210", "Rohstoffe"]
         ]
       },
+      {
+        title: "Anlagevermögen",
+        accounts: [
+          ...commonFixedAssets
+        ]
+      }
     ];
   }
 
   if (industry === "Dienstleistung") {
     return [
+      {
+        title: "Umlaufvermögen",
+        accounts: [
+          ...commonCurrentAssets,
+          ["1210", "Rohstoffe"]
+        ]
+      },
       {
         title: "Anlagevermögen",
         accounts: [
