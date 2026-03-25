@@ -491,3 +491,36 @@ input[type=number] {
   justify-content:space-between;
   align-items:center;
 }
+
+/* 🔧 Fix für überlaufende Buchungsfelder */
+.booking-form > * {
+  min-width: 0;
+}
+
+#debitLines,
+#creditLines {
+  min-width: 0;
+}
+
+/* Falls deine einzelnen Buchungszeilen Flexbox nutzen */
+#debitLines > div,
+#creditLines > div {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap; /* verhindert Überlauf */
+}
+
+#debitLines select,
+#creditLines select,
+#debitLines input,
+#creditLines input {
+  min-width: 0;
+  flex: 1 1 120px;
+  max-width: 100%;
+}
+
+/* optional: X-Button nicht zu gross */
+#debitLines button,
+#creditLines button {
+  flex: 0 0 auto;
+}
