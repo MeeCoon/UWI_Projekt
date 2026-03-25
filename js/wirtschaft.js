@@ -1,3 +1,4 @@
+// js/wirtschaft.js
 const USER_KEY = "uwi_user";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 
@@ -29,14 +30,16 @@ function parseInput(raw) {
 
   if (!lines.length) return null;
 
-  const ceoParts = lines[0].split("|").map(x => x.trim());
+  const topParts = lines[0].split("|").map(x => x.trim());
+
   const ceo = {
-    name: ceoParts[0] || "Unbekannt",
-    role: ceoParts[1] || "Geschäftsführung"
+    name: topParts[0] || "Unbekannt",
+    role: topParts[1] || "Geschäftsführung"
   };
 
   const departments = lines.slice(1).map(line => {
     const parts = line.split("|").map(x => x.trim());
+
     const deptName = parts[0] || "Abteilung";
     const lead = parts[1] || "Leitung";
     const employees = (parts[2] || "")
@@ -68,7 +71,7 @@ function renderOrgChart() {
 
   const deptHtml = data.departments.map(dep => {
     const employeesHtml = dep.employees.map(name => `
-      <div class="orgMiniCard">${escapeHtml(name)}</div>
+      <div class="orgMiniCard" contenteditable="true">${escapeHtml(name)}</div>
     `).join("");
 
     return `
@@ -76,8 +79,8 @@ function renderOrgChart() {
         <div class="orgDeptTopLine"></div>
 
         <div class="orgCard orgDeptCard">
-          <div class="orgName">${escapeHtml(dep.deptName)}</div>
-          <div class="orgRole">${escapeHtml(dep.lead)}</div>
+          <div class="orgName" contenteditable="true">${escapeHtml(dep.deptName)}</div>
+          <div class="orgRole" contenteditable="true">${escapeHtml(dep.lead)}</div>
         </div>
 
         ${dep.employees.length ? `
@@ -94,8 +97,8 @@ function renderOrgChart() {
     <div class="orgTree">
       <div class="orgTop">
         <div class="orgCard orgCardTop">
-          <div class="orgName">${escapeHtml(data.ceo.role)}</div>
-          <div class="orgRole">${escapeHtml(data.ceo.name)}</div>
+          <div class="orgName" contenteditable="true">${escapeHtml(data.ceo.role)}</div>
+          <div class="orgRole" contenteditable="true">${escapeHtml(data.ceo.name)}</div>
         </div>
       </div>
 
@@ -135,7 +138,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  document.getElementById("generateBtn")?.addEventListener("click", renderOrgChart);
+  const generateBtn = document.getElementById("generateBtn");
+  if (generateBtn) {
+    generateBtn.addEventListener("click", renderOrgChart);
+  }
 
   renderOrgChart();
 });
