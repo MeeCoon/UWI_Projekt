@@ -13,7 +13,7 @@ const yearsKey = (companyId) => `uwi_years_${companyId}`;
 const DEFAULT_YEARS = ["2024", "2025", "2026"];
 let currentYear = DEFAULT_YEARS[0];
 
-// Kontonamen → Kontonummern (dein Mapping)
+// Kontonamen → Kontonummern
 const ACCOUNT_MAP = {
   "Bank": "1020",
   "Kasse": "1000",
@@ -25,8 +25,11 @@ const ACCOUNT_MAP = {
 };
 
 function loadCompanies(u) {
-  try { return JSON.parse(localStorage.getItem(companiesKey(u)) || "[]"); }
-  catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(companiesKey(u)) || "[]");
+  } catch {
+    return [];
+  }
 }
 
 function getYears(companyId) {
@@ -42,8 +45,11 @@ function saveYears(companyId, years) {
 }
 
 function loadJournal(companyId, year) {
-  try { return JSON.parse(localStorage.getItem(journalKey(companyId, year)) || "[]"); }
-  catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(journalKey(companyId, year)) || "[]");
+  } catch {
+    return [];
+  }
 }
 
 function saveJournal(companyId, year, rows) {
@@ -57,9 +63,10 @@ function loadTable(companyId) {
   const rows = loadJournal(companyId, currentYear);
   tableBody.innerHTML = "";
 
-  rows.forEach(r => {
+  rows.forEach((r, index) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
+      <td>${index + 1}</td>
       <td>${r.fact || ""}</td>
       <td>${r.sollName || ""}</td>
       <td>${r.habenName || ""}</td>
@@ -77,51 +84,88 @@ function renderYearTabs(companyId) {
   if (!years.includes(currentYear)) currentYear = years[0];
 
   el.innerHTML =
-    years.map(y => `<button type="button" class="yearBtn ${y===currentYear?"active":""}" data-year="${y}">${y}</button>`).join("") +
-    `<button type="button" class="addYearBtn" id="addYearBtn">+ Jahr hinzufügen</button>`;
+    years.map(y => `
+      <button type="button" class="yearBtn ${y === currentYear ? "active" : ""}" data-year="${y}">
+        ${y}
+      </button>
+    `).join("") +
+    `
+      <button type="button" class="addYearBtn" id="addYearBtn">+ Jahr hinzufügen</button>
+      <button type="button" class="addYearBtn" id="deleteYearBtn">🗑 Jahr löschen</button>
+    `;
 
   el.onclick = (e) => {
-    const b = e.target.closest(".yearBtn");
-    if (!b) return;
-    currentYear = b.dataset.year;
-    renderYearTabs(companyId);
-    loadTable(companyId);
-  };
+    const yearBtn = e.target.closest(".yearBtn");
+    if (yearBtn) {
+      currentYear = yearBtn.dataset.year;
+      renderYearTabs(companyId);
+      loadTable(companyId);
+      return;
+    }
 
-  document.getElementById("addYearBtn").onclick = () => {
-    const y = prompt("Jahr eingeben (z.B. 2027):")?.trim();
-    if (!y) return;
-    if (!/^\d{4}$/.test(y) || +y < 2000 || +y > 2100) return alert("Ungültiges Jahr (2000–2100).");
+    const addBtn = e.target.closest("#addYearBtn");
+    if (addBtn) {
+      const y = prompt("Jahr eingeben (z.B. 2027):")?.trim();
+      if (!y) return;
 
-    const next = getYears(companyId);
-    if (next.includes(y)) return alert("Dieses Jahr gibt es schon.");
+      if (!/^\d{4}$/.test(y) || +y < 2000 || +y > 2100) {
+        alert("Ungültiges Jahr (2000–2100).");
+        return;
+      }
 
-    next.push(y); next.sort();
-    saveYears(companyId, next);
+      const next = getYears(companyId);
+      if (next.includes(y)) {
+        alert("Dieses Jahr gibt es schon.");
+        return;
+      }
 
-    currentYear = y;
-    renderYearTabs(companyId);
-    loadTable(companyId);
+      next.push(y);
+      next.sort();
+      saveYears(companyId, next);
+
+      currentYear = y;
+      renderYearTabs(companyId);
+      loadTable(companyId);
+      return;
+    }
+
+    const deleteBtn = e.target.closest("#deleteYearBtn");
+    if (deleteBtn) {
+      const yearsNow = getYears(companyId);
+
+      if (yearsNow.length <= 1) {
+        alert("Mindestens ein Jahr muss bleiben.");
+        return;
+      }
+
+      if (!confirm(`Jahr ${currentYear} wirklich löschen?`)) {
+        return;
+      }
+
+      const next = yearsNow.filter(y => y !== currentYear);
+      saveYears(companyId, next);
+
+      // Buchungen dieses Jahres löschen
+      localStorage.removeItem(journalKey(companyId, currentYear));
+
+      currentYear = next[0];
+      renderYearTabs(companyId);
+      loadTable(companyId);
+    }
   };
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-
   document.getElementById("generateCaseBtn")?.addEventListener("click", () => {
+    const user = localStorage.getItem(USER_KEY);
+    const companyId = localStorage.getItem(currentCompanyKey(user));
+    const company = loadCompanies(user).find(c => c.id === companyId);
+    if (!company) return;
 
-const user = localStorage.getItem(USER_KEY);
-const companyId = localStorage.getItem(currentCompanyKey(user));
+    const fact = generateBookingCase(company.name, currentYear);
+    document.getElementById("fact").value = fact;
+  });
 
-const company = loadCompanies(user).find(c => c.id === companyId);
-if(!company) return;
-
-const fact = generateBookingCase(company.name,currentYear);
-
-document.getElementById("fact").value = fact;
-
-});
-  
-  // ✅ Buttons IMMER verbinden (kein doppeltes USER_KEY!)
   document.getElementById("backBtn")?.addEventListener("click", () => {
     window.location.href = "company.html";
   });
@@ -134,14 +178,27 @@ document.getElementById("fact").value = fact;
   });
 
   const user = localStorage.getItem(USER_KEY);
-  if (!user) { window.location.href = "index.html"; return; }
-  document.getElementById("userDisplay").textContent = `Angemeldet: ${user}`;
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  const userDisplay = document.getElementById("userDisplay");
+  if (userDisplay) {
+    userDisplay.textContent = `Angemeldet: ${user}`;
+  }
 
   const companyId = localStorage.getItem(currentCompanyKey(user));
-  if (!companyId) { window.location.href = "overview.html"; return; }
+  if (!companyId) {
+    window.location.href = "overview.html";
+    return;
+  }
 
   const company = loadCompanies(user).find(c => c.id === companyId);
-  if (!company) { window.location.href = "overview.html"; return; }
+  if (!company) {
+    window.location.href = "overview.html";
+    return;
+  }
 
   currentYear = getYears(companyId)[0];
   renderYearTabs(companyId);
@@ -160,6 +217,7 @@ document.getElementById("fact").value = fact;
 
     const debit = ACCOUNT_MAP[sollName];
     const credit = ACCOUNT_MAP[habenName];
+
     if (!debit || !credit) {
       alert("Konto-Mapping fehlt! Bitte ACCOUNT_MAP ergänzen.");
       return;
