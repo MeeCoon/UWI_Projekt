@@ -19,13 +19,16 @@ function getAssetGroups(industry) {
     ["1000", "Kasse"],
     ["1020", "Bankguthaben"],
     ["1170", "Vorsteuer MWST"],
-    ["1300", "Aktive Rechnungsabgrenzung"]
+    ["1300", "Aktive Rechnungsabgrenzung"],
+    ["1060", "Wertschriften (Aktien)"],
+    ["1100", "Forderungen aus Lieferungen und Leistungen"]
   ];
 
   const commonFixedAssets = [
     ["1400", "Wertschriften (Obligationen)"],
     ["1480", "Beteiligungen"],
     ["1510", "Mobiliar und Einrichtungen"],
+    ["1500", "Maschinen und Apparate"],
     ["1530", "Fahrzeuge"],
     ["1600", "Geschäftsliegenschaften"]
   ];
@@ -36,8 +39,6 @@ function getAssetGroups(industry) {
         title: "Umlaufvermögen",
         accounts: [
           ...commonCurrentAssets,
-          ["1060", "Wertschriften (Aktien)"],
-          ["1100", "Forderungen aus Lieferungen und Leistungen"],
           ["1200", "Handelswaren"]
         ]
       },
@@ -56,29 +57,14 @@ function getAssetGroups(industry) {
         title: "Umlaufvermögen",
         accounts: [
           ...commonCurrentAssets,
-          ["1100", "Forderungen aus Lieferungen und Leistungen"],
           ["1210", "Rohstoffe"]
         ]
       },
-      {
-        title: "Anlagevermögen",
-        accounts: [
-          ...commonFixedAssets,
-          ["1500", "Maschinen und Apparate"]
-        ]
-      }
     ];
   }
 
   if (industry === "Dienstleistung") {
     return [
-      {
-        title: "Umlaufvermögen",
-        accounts: [
-          ...commonCurrentAssets,
-          ["1100", "Forderungen aus Lieferungen und Leistungen"]
-        ]
-      },
       {
         title: "Anlagevermögen",
         accounts: [
