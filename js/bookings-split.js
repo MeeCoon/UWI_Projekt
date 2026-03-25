@@ -162,8 +162,13 @@ if(!btn) return;
 currentYear = btn.dataset.year;
 renderYearTabs(cid);
 renderJournal(cid);
-};
 
+// 🔥 NEU: KI-Tabelle neu laden
+ if (window.initKICasesForYear) {
+   window.initKICasesForYear();
+ }
+};
+  
 document.getElementById("addYearBtn").onclick = ()=>{
 const y = prompt("Neues Jahr (z.B. 2027)");
 if(!y) return;
