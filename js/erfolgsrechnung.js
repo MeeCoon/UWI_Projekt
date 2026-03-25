@@ -12,15 +12,39 @@ const DEFAULT_YEARS = ["2024", "2025", "2026"];
 let currentYear = "2024";
 
 /* =========================
-   GRUPPEN JE NACH BRANCHE / RECHTSFORM
+   NORMALISIERUNG
 ========================= */
-function getSuccessLayout(legal, industryRaw) {
-  const industry = (industryRaw || "").toLowerCase().trim();
+function normalizeIndustry(industryRaw) {
+  const industry = String(industryRaw || "").trim().toLowerCase();
+
+  if (industry.includes("handel")) return "Handel";
+  if (industry.includes("produktion")) return "Produktion";
+  if (industry.includes("dienst")) return "Dienstleistung";
+
+  return String(industryRaw || "").trim();
+}
+
+function normalizeLegal(legalRaw) {
+  const legal = String(legalRaw || "").trim().toLowerCase();
+
+  if (legal.includes("einzel")) return "Einzelunternehmen";
+  if (legal.includes("gmbh")) return "GmbH";
+  if (legal === "ag" || legal.includes("aktien")) return "AG";
+
+  return String(legalRaw || "").trim();
+}
+
+/* =========================
+   LAYOUT JE NACH BRANCHE / RECHTSFORM
+========================= */
+function getSuccessLayout(legalRaw, industryRaw) {
+  const legal = normalizeLegal(legalRaw);
+  const industry = normalizeIndustry(industryRaw);
 
   const expenseGroups = [];
   const revenueGroups = [];
 
-  if (industry.includes("handel")) {
+  if (industry === "Handel") {
     expenseGroups.push({
       title: "Material & Handelswarenaufwand",
       accounts: [
@@ -36,7 +60,7 @@ function getSuccessLayout(legal, industryRaw) {
     });
   }
 
-  if (industry.includes("produktion")) {
+  if (industry === "Produktion") {
     expenseGroups.push({
       title: "Materialaufwand",
       accounts: [
@@ -52,7 +76,14 @@ function getSuccessLayout(legal, industryRaw) {
     });
   }
 
-  if (industry.includes("dienst")) {
+  if (industry === "Dienstleistung") {
+    expenseGroups.push({
+      title: "Dienstleistungsaufwand",
+      accounts: [
+        ["4900", "Büroaufwand"]
+      ]
+    });
+
     revenueGroups.push({
       title: "Betriebsertrag",
       accounts: [
@@ -111,20 +142,20 @@ function getSuccessLayout(legal, industryRaw) {
     }
   );
 
-  if (legal === "AG") {
-    expenseGroups.push({
-      title: "Rechtsformbezogene Konten",
-      accounts: [
-        ["6960", "Kapitalaufwand AG"]
-      ]
-    });
-  }
-
   if (legal === "GmbH") {
     expenseGroups.push({
       title: "Rechtsformbezogene Konten",
       accounts: [
         ["6955", "Kapitalaufwand GmbH"]
+      ]
+    });
+  }
+
+  if (legal === "AG") {
+    expenseGroups.push({
+      title: "Rechtsformbezogene Konten",
+      accounts: [
+        ["6960", "Kapitalaufwand AG"]
       ]
     });
   }
@@ -191,26 +222,6 @@ function computeBalancesFromJournal(rows) {
   const bal = {};
 
   for (const r of rows) {
-
-    // 🔥 NEU: Split-Buchungen (dein System)
-    if (r.type === "split") {
-
-      // Soll
-      for (const d of r.debits || []) {
-        if (!d.accountNo || !d.amount) continue;
-        bal[d.accountNo] = (bal[d.accountNo] || 0) + Number(d.amount);
-      }
-
-      // Haben
-      for (const c of r.credits || []) {
-        if (!c.accountNo || !c.amount) continue;
-        bal[c.accountNo] = (bal[c.accountNo] || 0) - Number(c.amount);
-      }
-
-      continue;
-    }
-
-    // 🔁 Fallback (falls du später einfache Buchungen hast)
     const debit = String(r.debit || "").trim();
     const credit = String(r.credit || "").trim();
     const amt = Number(r.amount || 0);
@@ -223,8 +234,6 @@ function computeBalancesFromJournal(rows) {
 
   return bal;
 }
-
-
 
 /* =========================
    JAHR TABS
@@ -317,7 +326,14 @@ function renderAccountRow(no, name, value) {
   return `
     <div class="balanceRow">
       <span>${no} ${name}</span>
-      <span class="balanceValue">${value}</span>
+      <input
+        class="balanceInput input-readonly"
+        type="number"
+        value="${value}"
+        readonly
+        disabled
+        tabindex="-1"
+      >
     </div>
   `;
 }
@@ -325,13 +341,9 @@ function renderAccountRow(no, name, value) {
 function renderGroup(group, saldo, type) {
   const rowsHtml = group.accounts.map(([no, name]) => {
     const raw = Number(saldo[no] || 0);
-    let shown = 0;
-
-    if (type === "revenue") {
-      shown = Math.max(-raw, 0);
-    } else {
-      shown = Math.max(raw, 0);
-    }
+    const shown = type === "revenue"
+      ? Math.max(-raw, 0)
+      : Math.max(raw, 0);
 
     return renderAccountRow(no, name, shown);
   }).join("");
@@ -406,9 +418,14 @@ function renderSuccess(companyId, year) {
       </div>
     </div>
 
-    <div class="muted small" style="margin-top:12px; display:flex; justify-content:space-between;">
-      <span>Jahresergebnis: ${fmtCHF(profit)}</span>
-      <span>Buchungen im Jahr: ${rows.length}</span>
+    <div class="balanceActions">
+      <span class="muted">
+        <strong>Jahresergebnis:</strong>
+        <span>${fmtCHF(profit)}</span>
+      </span>
+      <span class="muted small" style="margin-left:auto;">
+        Buchungen im Jahr: <b>${rows.length}</b>
+      </span>
     </div>
   `;
 }
