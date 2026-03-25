@@ -31,22 +31,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Firmenliste
   // -------------------------
   const companyNames = [
-    "Nova AG",
-    "Helvetia GmbH",
-    "Alpenblick AG",
-    "Sonnenberg GmbH",
-    "BergTech AG",
-    "Seeland GmbH",
-    "ProTrade AG",
-    "Meyer & Co",
-    "Urban Systems AG"
+    "Nova AG","Helvetia GmbH","Alpenblick AG","Sonnenberg GmbH",
+    "BergTech AG","Seeland GmbH","ProTrade AG","Meyer & Co","Urban Systems AG"
   ];
 
   // -------------------------
   // Buchungsvorlagen
   // -------------------------
   const templates = [
-    // — Basis & Handelsbetrieb
     "Die {firma} kauft Mobiliar für {betrag} CHF gegen Bank.",
     "Die {firma} kauft ein Fahrzeug für {betrag} CHF und bezahlt per Bank.",
     "Die {firma} kauft Maschinen für {betrag} CHF gegen Bank.",
@@ -67,43 +59,35 @@ document.addEventListener("DOMContentLoaded", () => {
     "Die {firma} kauft Computer für {betrag} CHF bar.",
     "Die {firma} verkauft ein altes Fahrzeug für {betrag} CHF und erhält eine Bankgutschrift.",
     "Die {firma} tätigt eine Abschreibung auf Maschinen von {betrag} CHF.",
-    // — Forderungsverluste & Umsatzkorrekturen
     "Die {firma} verbucht Verluste aus Forderungen von {betrag} CHF.",
     "Die {firma} kassiert einen Abschreibungsbetrag auf Debitoren von {betrag} CHF.",
     "Die {firma} korrigiert eine Umsatzsteuerüberzahlung von {betrag} CHF.",
     "Die {firma} schreibt uneinbringliche Forderungen endgültig ab für {betrag} CHF.",
-    // — Rechnungsabgrenzungen
     "Die {firma} macht eine aktive Rechnungsabgrenzung für Aufwand von {betrag} CHF.",
     "Die {firma} löst eine passive Rechnungsabgrenzung für Ertrag über {betrag} CHF auf.",
     "Die {firma} bucht periodengerechten Aufwand (Rechnungsabgrenzung) von {betrag} CHF.",
     "Die {firma} bucht periodengerechten Ertrag (Rechnungsabgrenzung) von {betrag} CHF.",
-    // — Abschreibungen (direkt & indirekt)
     "Die {firma} bucht direkte Abschreibung auf Mobiliar von {betrag} CHF.",
     "Die {firma} bucht indirekte Abschreibung auf Fahrzeuge von {betrag} CHF.",
     "Die {firma} korrigiert indirekte Abschreibung auf Maschinen um {betrag} CHF.",
-    // — Personalaufwand & Nebenkosten
     "Die {firma} bezahlt Spesen für Mitarbeitende von {betrag} CHF per Bank.",
     "Die {firma} schreibt Familienzulagen als Personalaufwand von {betrag} CHF ab.",
     "Die {firma} zahlt Weihnachtsgratifikation von {betrag} CHF an Personal.",
     "Die {firma} überweist Sozialversicherungsbeiträge von {betrag} CHF per Bank.",
     "Die {firma} bucht Überstundenvergütungen von {betrag} CHF als Aufwand.",
-    // — Spezifisch Einzelunternehmen
     "Der Einzelunternehmer entnimmt Waren für private Nutzung im Wert von {betrag} CHF.",
     "Der Einzelunternehmer entnimmt Geld aus der Kasse zur privaten Nutzung von {betrag} CHF.",
     "Der Einzelunternehmer tätigt eine Privateinlage von {betrag} CHF auf das Bankkonto.",
-    // — Spezifisch Aktiengesellschaft (AG)
     "Die {firma} schreibt Dividenden an Aktionäre von {betrag} CHF aus.",
     "Die {firma} überweist Dividenden an Aktionäre von {betrag} CHF per Bank.",
     "Die {firma} zahlt gesetzliche Reserven an Gewinnvortrag von {betrag} CHF.",
     "Die {firma} bucht Agio aus Aktienkapitalerhöhung von {betrag} CHF.",
     "Die {firma} schreibt Rückstellungen für Pensionsverpflichtungen von {betrag} CHF ab.",
-    // — Wertschriften & Finanzen
     "Die {firma} realisiert einen Kursgewinn aus Wertschriften von {betrag} CHF.",
     "Die {firma} realisiert einen Kursverlust aus Wertschriften von {betrag} CHF.",
     "Die {firma} bucht Verrechnungssteuer auf Erträge von {betrag} CHF.",
     "Die {firma} erhält Dividenden aus Wertschriften von {betrag} CHF per Bank.",
     "Die {firma} verkauft Wertschriften und verbucht Depotgebühren von {betrag} CHF.",
-    // — Liegenschaften & Immobilien
     "Die {firma} kauft ein Gebäude für {betrag} CHF gegen Bank.",
     "Die {firma} verkauft eine Liegenschaft für {betrag} CHF und erhält Bankgutschrift.",
     "Die {firma} bezahlt Unterhaltskosten für Liegenschaft von {betrag} CHF per Bank.",
@@ -112,7 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
     "Die {firma} erhält Mietzinseinnahmen von {betrag} CHF auf Bank.",
     "Die {firma} bezahlt Mietzinsen für Geschäftsräume von {betrag} CHF per Bank.",
     "Die {firma} verbucht Handänderungssteuer auf Immobilienkauf von {betrag} CHF.",
-    // — Aufwand & Ertrag allgemein
     "Die {firma} bucht Werbeaufwand von {betrag} CHF.",
     "Die {firma} bucht Reisekosten als Aufwand von {betrag} CHF.",
     "Die {firma} erhält Beratungserlöse von {betrag} CHF per Bank.",
@@ -121,13 +104,11 @@ document.addEventListener("DOMContentLoaded", () => {
     "Die {firma} bezahlt Lizenzkosten von {betrag} CHF per Bank.",
     "Die {firma} schreibt Energiekosten von {betrag} CHF ab.",
     "Die {firma} bezahlt Telekommunikationskosten von {betrag} CHF per Bank.",
-    // — Bank & Kasse
     "Die {firma} hebt Bargeld von der Bank im Betrag von {betrag} CHF ab.",
     "Die {firma} zahlt Bargeld in die Kasse ein über {betrag} CHF.",
     "Die {firma} tätigt Bankspesen von {betrag} CHF.",
     "Die {firma} schreibt Kassenfehlbetrag von {betrag} CHF ab.",
     "Die {firma} bucht Bankgutschrift aus Zinszahlung von {betrag} CHF.",
-    // — Debitoren & Kreditoren
     "Die {firma} gewährt einem Kunden Skonto von {betrag} CHF auf Rechnung.",
     "Die {firma} erhält Gutschrift vom Lieferanten über {betrag} CHF.",
     "Die {firma} schreibt verzugszinsen von Debitoren von {betrag} CHF ab.",
@@ -205,15 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // -------------------------
   window.initKICasesForYear = function () {
     const year = getSelectedYear();
-
-    let tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
-
-    // Wenn keine Tasks vorhanden, erstelle neue
-    if (tasks.length === 0) {
-      tasks = generateTasks(year);
-      localStorage.setItem(storageKey(year), JSON.stringify(tasks));
-    }
-
+    const tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
     renderTable(tasks);
   }
 
@@ -224,13 +197,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // -------------------------
   generateBtn.addEventListener("click", () => {
     const year = getSelectedYear();
+    let tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
 
-    // Neue Tasks generieren
-    const tasks = generateTasks(year);
+    // Alte automatisch generierte Tasks entfernen
+    tasks = tasks.filter(t => !t.generated);
 
-    // Alte Tasks überschreiben
+    // Neue generieren
+    const newTasks = generateTasks(year).map(t => ({ ...t, generated: true }));
+
+    tasks.push(...newTasks);
+
     localStorage.setItem(storageKey(year), JSON.stringify(tasks));
-
     renderTable(tasks);
   });
 
