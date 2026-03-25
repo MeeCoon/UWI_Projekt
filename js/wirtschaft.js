@@ -12,18 +12,46 @@ function getUserOrRedirect() {
   return u;
 }
 
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function parseInput(raw) {
-  return raw
+  const lines = raw
     .split("\n")
     .map(line => line.trim())
-    .filter(Boolean)
-    .map(line => {
-      const parts = line.split(/\s+/);
-      const name = parts.shift() || "";
-      const role = parts.join(" ") || "Mitarbeiter/in";
-      return { name, role };
-    })
-    .filter(p => p.name);
+    .filter(Boolean);
+
+  if (!lines.length) return null;
+
+  const ceoParts = lines[0].split("|").map(x => x.trim());
+  const ceo = {
+    name: ceoParts[0] || "Unbekannt",
+    role: ceoParts[1] || "Geschäftsführung"
+  };
+
+  const departments = lines.slice(1).map(line => {
+    const parts = line.split("|").map(x => x.trim());
+    const deptName = parts[0] || "Abteilung";
+    const lead = parts[1] || "Leitung";
+    const employees = (parts[2] || "")
+      .split(",")
+      .map(x => x.trim())
+      .filter(Boolean);
+
+    return {
+      deptName,
+      lead,
+      employees
+    };
+  });
+
+  return { ceo, departments };
 }
 
 function renderOrgChart() {
@@ -31,40 +59,51 @@ function renderOrgChart() {
   if (!root) return;
 
   const raw = document.getElementById("inputData")?.value || "";
-  const people = parseInput(raw);
+  const data = parseInput(raw);
 
-  if (!people.length) {
-    root.innerHTML = `
-      <div class="orgEmpty">
-        Keine Daten vorhanden.
-      </div>
-    `;
+  if (!data) {
+    root.innerHTML = `<div class="orgEmpty">Keine Daten vorhanden.</div>`;
     return;
   }
 
-  const [boss, ...others] = people;
+  const deptHtml = data.departments.map(dep => {
+    const employeesHtml = dep.employees.map(name => `
+      <div class="orgMiniCard">${escapeHtml(name)}</div>
+    `).join("");
 
-  const cards = others.map(person => `
-    <div class="orgCard">
-      <div class="orgName">${person.name}</div>
-      <div class="orgRole">${person.role}</div>
-    </div>
-  `).join("");
+    return `
+      <div class="orgDept">
+        <div class="orgDeptTopLine"></div>
+
+        <div class="orgCard orgDeptCard">
+          <div class="orgName">${escapeHtml(dep.deptName)}</div>
+          <div class="orgRole">${escapeHtml(dep.lead)}</div>
+        </div>
+
+        ${dep.employees.length ? `
+          <div class="orgDeptVertical"></div>
+          <div class="orgMiniGrid">
+            ${employeesHtml}
+          </div>
+        ` : ""}
+      </div>
+    `;
+  }).join("");
 
   root.innerHTML = `
     <div class="orgTree">
       <div class="orgTop">
         <div class="orgCard orgCardTop">
-          <div class="orgName">${boss.name}</div>
-          <div class="orgRole">${boss.role}</div>
+          <div class="orgName">${escapeHtml(data.ceo.role)}</div>
+          <div class="orgRole">${escapeHtml(data.ceo.name)}</div>
         </div>
       </div>
 
-      ${others.length ? `
+      ${data.departments.length ? `
         <div class="orgConnectorVertical"></div>
         <div class="orgConnectorHorizontal"></div>
-        <div class="orgGrid">
-          ${cards}
+        <div class="orgDeptRow">
+          ${deptHtml}
         </div>
       ` : ""}
     </div>
