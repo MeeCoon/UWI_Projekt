@@ -11,89 +11,108 @@ const yearsKey = (companyId) => `uwi_years_${companyId}_balance`;
 const DEFAULT_YEARS = ["2024", "2025", "2026"];
 let currentYear = "2024";
 
-function getSuccessGroups(legal, industryRaw) {
-  const industry = (industryRaw || "").toLowerCase();
-  const groups = [];
+/* =========================
+   GRUPPEN JE NACH BRANCHE / RECHTSFORM
+========================= */
+function getSuccessLayout(legal, industryRaw) {
+  const industry = (industryRaw || "").toLowerCase().trim();
+
+  const expenseGroups = [];
+  const revenueGroups = [];
 
   if (industry.includes("handel")) {
-    groups.push(
-      {
-        title: "Betrieblicher Ertrag aus Lieferungen und Leistungen",
-        accounts: [
-          ["3200", "Warenertrag"]
-        ]
-      },
-      {
-        title: "Warenaufwand",
-        accounts: [
-          ["4200", "Warenaufwand"]
-        ]
-      }
-    );
+    expenseGroups.push({
+      title: "Material & Handelswarenaufwand",
+      accounts: [
+        ["4200", "Handelswarenaufwand (Warenaufwand)"]
+      ]
+    });
+
+    revenueGroups.push({
+      title: "Betriebsertrag",
+      accounts: [
+        ["3200", "Handelserlöse (Warenertrag)"]
+      ]
+    });
   }
 
   if (industry.includes("produktion")) {
-    groups.push(
-      {
-        title: "Betrieblicher Ertrag aus Lieferungen und Leistungen",
-        accounts: [
-          ["3400", "Produktionsertrag"]
-        ]
-      },
-      {
-        title: "Material- und Produktionsaufwand",
-        accounts: [
-          ["4000", "Materialaufwand"],
-          ["4100", "Fertigungsaufwand"]
-        ]
-      }
-    );
+    expenseGroups.push({
+      title: "Materialaufwand",
+      accounts: [
+        ["4000", "Materialaufwand"]
+      ]
+    });
+
+    revenueGroups.push({
+      title: "Betriebsertrag",
+      accounts: [
+        ["3000", "Produktionserlöse"]
+      ]
+    });
   }
 
   if (industry.includes("dienst")) {
-    groups.push(
-      {
-        title: "Betrieblicher Ertrag aus Lieferungen und Leistungen",
-        accounts: [
-          ["3600", "Dienstleistungsertrag"]
-        ]
-      },
-      {
-        title: "Dienstleistungsaufwand",
-        accounts: [
-          ["4900", "Büroaufwand"]
-        ]
-      }
-    );
+    revenueGroups.push({
+      title: "Betriebsertrag",
+      accounts: [
+        ["3400", "Dienstleistungserlöse"]
+      ]
+    });
   }
 
-  groups.push(
+  expenseGroups.push(
     {
       title: "Personalaufwand",
       accounts: [
-        ["5000", "Lohnaufwand"]
+        ["5000", "Lohnaufwand"],
+        ["5700", "Sozialversicherungsaufwand"],
+        ["5800", "Übriger Personalaufwand"]
       ]
     },
     {
-      title: "Übriger Betriebsaufwand",
+      title: "Übriger betrieblicher Aufwand",
       accounts: [
         ["6000", "Raumaufwand"],
+        ["6100", "Unterhalt, Reparaturen, Ersatz (URE)"],
+        ["6200", "Fahrzeugaufwand"],
         ["6300", "Versicherungsaufwand"],
+        ["6400", "Energie- & Entsorgungsaufwand"],
+        ["6500", "Verwaltungsaufwand"],
         ["6600", "Werbeaufwand"],
-        ["6800", "Abschreibungen"]
+        ["6700", "Sonstiger Betriebsaufwand"],
+        ["6800", "Abschreibungen"],
+        ["6900", "Finanzaufwand"]
       ]
     },
     {
-      title: "Finanzaufwand und Finanzertrag",
+      title: "Nebenaufwand",
       accounts: [
-        ["6950", "Finanzertrag"],
-        ["6900", "Finanzaufwand"]
+        ["7510", "Aufwand betriebliche Liegenschaft"],
+        ["8500", "Ausserordentlicher Aufwand"]
+      ]
+    }
+  );
+
+  revenueGroups.push(
+    {
+      title: "Andere Erträge",
+      accounts: [
+        ["3805", "Verluste aus Forderungen"],
+        ["6950", "Finanzertrag"]
+      ]
+    },
+    {
+      title: "Nebenertrag",
+      accounts: [
+        ["7500", "Ertrag betriebliche Liegenschaft"],
+        ["8510", "Ausserordentlicher Ertrag"]
       ]
     }
   );
 
   if (legal === "AG") {
-    groups.push({
+    expenseGroups.push({
       title: "Rechtsformbezogene Konten",
       accounts: [
         ["6960", "Kapitalaufwand AG"]
@@ -102,7 +121,7 @@ function getSuccessGroups(legal, industryRaw) {
   }
 
   if (legal === "GmbH") {
-    groups.push({
+    expenseGroups.push({
       title: "Rechtsformbezogene Konten",
       accounts: [
         ["6955", "Kapitalaufwand GmbH"]
@@ -110,7 +129,7 @@ function getSuccessGroups(legal, industryRaw) {
     });
   }
 
-  return groups;
+  return { expenseGroups, revenueGroups };
 }
 
 /* =========================
@@ -170,6 +189,7 @@ function loadJournal(companyId, year) {
 
 function computeBalancesFromJournal(rows) {
   const bal = {};
+
   for (const r of rows) {
     const debit = String(r.debit || "").trim();
     const credit = String(r.credit || "").trim();
@@ -180,6 +200,7 @@ function computeBalancesFromJournal(rows) {
     bal[debit] = (bal[debit] || 0) + amt;
     bal[credit] = (bal[credit] || 0) - amt;
   }
+
   return bal;
 }
 
@@ -222,7 +243,6 @@ function renderYearTabs(companyId) {
       if (!y) return;
 
       const year = y.trim();
-
       if (!/^\d{4}$/.test(year)) {
         alert("Ungültiges Jahr");
         return;
@@ -275,32 +295,21 @@ function renderAccountRow(no, name, value) {
   return `
     <div class="balanceRow">
       <span>${no} ${name}</span>
-      <input
-        class="balanceInput input-readonly"
-        type="number"
-        value="${value}"
-        readonly
-        tabindex="-1"
-      >
+      <span class="balanceValue">${value}</span>
     </div>
   `;
 }
 
-function isRevenueAccount(no) {
-  return no.startsWith("3") || no === "6950";
-}
-
-function isExpenseAccount(no) {
-  return no.startsWith("4") || no.startsWith("5") || no.startsWith("6") || no === "3805";
-}
-
-function renderGroup(group, saldo) {
+function renderGroup(group, saldo, type) {
   const rowsHtml = group.accounts.map(([no, name]) => {
     const raw = Number(saldo[no] || 0);
     let shown = 0;
 
-    if (isRevenueAccount(no)) shown = Math.max(-raw, 0);
-    else if (isExpenseAccount(no)) shown = Math.max(raw, 0);
+    if (type === "revenue") {
+      shown = Math.max(-raw, 0);
+    } else {
+      shown = Math.max(raw, 0);
+    }
 
     return renderAccountRow(no, name, shown);
   }).join("");
@@ -329,18 +338,20 @@ function renderSuccess(companyId, year) {
   const company = getSelectedCompany(user);
   if (!company) return;
 
-  const groups = getSuccessGroups(company.legal, company.industry);
-  const groupsHtml = groups.map(group => renderGroup(group, saldo)).join("");
-  const allAccounts = groups.flatMap(g => g.accounts);
+  const { expenseGroups, revenueGroups } = getSuccessLayout(company.legal, company.industry);
 
-  const totalRevenue = allAccounts.reduce((sum, [no]) => {
-    if (!isRevenueAccount(no)) return sum;
-    return sum + Math.max(-Number(saldo[no] || 0), 0);
+  const expenseHtml = expenseGroups.map(group => renderGroup(group, saldo, "expense")).join("");
+  const revenueHtml = revenueGroups.map(group => renderGroup(group, saldo, "revenue")).join("");
+
+  const allExpenseAccounts = expenseGroups.flatMap(g => g.accounts);
+  const allRevenueAccounts = revenueGroups.flatMap(g => g.accounts);
+
+  const totalExpense = allExpenseAccounts.reduce((sum, [no]) => {
+    return sum + Math.max(Number(saldo[no] || 0), 0);
   }, 0);
 
-  const totalExpense = allAccounts.reduce((sum, [no]) => {
-    if (!isExpenseAccount(no)) return sum;
-    return sum + Math.max(Number(saldo[no] || 0), 0);
+  const totalRevenue = allRevenueAccounts.reduce((sum, [no]) => {
+    return sum + Math.max(-Number(saldo[no] || 0), 0);
   }, 0);
 
   const profit = totalRevenue - totalExpense;
@@ -353,39 +364,31 @@ function renderSuccess(companyId, year) {
 
     <div class="balanceSheet">
       <div class="balanceCol">
-        <div class="balanceColTitle">Ertrag / Aufwand</div>
-        ${groupsHtml}
-
-        <div class="balanceTotal">
-          <span>Total Ertrag</span>
-          <span>${fmtCHF(totalRevenue)}</span>
-        </div>
-
+        <div class="balanceColTitle">Aufwand</div>
+        ${expenseHtml}
         <div class="balanceTotal">
           <span>Total Aufwand</span>
           <span>${fmtCHF(totalExpense)}</span>
         </div>
+      </div>
 
+      <div class="balanceDivider"></div>
+
+      <div class="balanceCol">
+        <div class="balanceColTitle">Ertrag</div>
+        ${revenueHtml}
         <div class="balanceTotal">
-          <span>Gewinn / Verlust</span>
-          <span>${fmtCHF(profit)}</span>
+          <span>Total Ertrag</span>
+          <span>${fmtCHF(totalRevenue)}</span>
         </div>
       </div>
     </div>
+
+    <div class="muted small" style="margin-top:12px; display:flex; justify-content:space-between;">
+      <span>Jahresergebnis: ${fmtCHF(profit)}</span>
+      <span>Buchungen im Jahr: ${rows.length}</span>
+    </div>
   `;
-
-  root.querySelectorAll("input").forEach(input => {
-    input.readOnly = true;
-    input.setAttribute("readonly", "readonly");
-    input.tabIndex = -1;
-
-    input.addEventListener("keydown", (e) => e.preventDefault());
-    input.addEventListener("beforeinput", (e) => e.preventDefault());
-    input.addEventListener("input", () => {
-      input.value = input.defaultValue;
-    });
-    input.addEventListener("paste", (e) => e.preventDefault());
-  });
 }
 
 /* =========================
