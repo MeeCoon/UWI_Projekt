@@ -239,23 +239,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // -------------------------
   // Beim Buchen: Aufgabe erledigt
   // -------------------------
-  addBookingBtn.addEventListener("click", () => {
-    const year = getSelectedYear();
-    const id = activeTaskId.value;
+if (task) {
+  // Task als erledigt markieren
+  task.status = "done";
 
-    if (!id) {
-      alert("Wähle zuerst eine Buchungstatsache.");
-      return;
-    }
+  // Änderungen speichern
+  localStorage.setItem(storageKey(year), JSON.stringify(tasks));
 
-    const tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
-    const task = tasks.find(t => t.id === id);
+  // Tabelle neu rendern
+  renderTable(tasks);
 
-    if (task) {
-      task.status = "done";
-      localStorage.setItem(storageKey(year), JSON.stringify(tasks));
-      renderTable(tasks);
-    }
-  });
-
-});
+  // → zusätzlich: aktive Auswahl zurücksetzen
+  activeTaskId.value = "";
+  factField.value = "";
+}
