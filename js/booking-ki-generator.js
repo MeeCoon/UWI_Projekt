@@ -218,14 +218,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // -------------------------
   // Initial laden
   // -------------------------
-  function initForYear() {
+  window.initKICasesForYear = function () {
     const year = getSelectedYear();
     let tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
 
     renderTable(tasks);
   }
 
-  initForYear();
+  window.initKICasesForYear();
 
   // -------------------------
   // Button: 100 Buchungstatsachen generieren
