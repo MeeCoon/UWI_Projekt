@@ -222,14 +222,30 @@ function computeBalancesFromJournal(rows) {
   const bal = {};
 
   for (const r of rows) {
-    const debit = String(r.debit || "").trim();
-    const credit = String(r.credit || "").trim();
-    const amt = Number(r.amount || 0);
 
-    if (!debit || !credit || !(amt > 0)) continue;
+    // ✅ DEIN SYSTEM (Split-Buchungen)
+    if (r.type === "split") {
 
-    bal[debit] = (bal[debit] || 0) + amt;
-    bal[credit] = (bal[credit] || 0) - amt;
+      // Soll
+      for (const d of r.debits || []) {
+        const acc = String(d.accountNo);
+        const amt = Number(d.amount || 0);
+        if (!acc || !(amt > 0)) continue;
+
+        bal[acc] = (bal[acc] || 0) + amt;
+      }
+
+      // Haben
+      for (const c of r.credits || []) {
+        const acc = String(c.accountNo);
+        const amt = Number(c.amount || 0);
+        if (!acc || !(amt > 0)) continue;
+
+        bal[acc] = (bal[acc] || 0) - amt;
+      }
+
+      continue;
+    }
   }
 
   return bal;
