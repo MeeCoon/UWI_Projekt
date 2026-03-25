@@ -567,10 +567,10 @@ input[type=number] {
 }
 
 .orgConnectorHorizontal {
-  width: 66%;
   height: 4px;
   background: #111;
   margin: 0 auto;
+  width: calc(100% - 120px);
 }
 
 .orgDeptRow {
