@@ -317,7 +317,7 @@ input[type=number] {
   padding:14px;
   background:#f8fafc;
   display:grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap:12px;
 }
 .full-row{ grid-column: 1 / span 2; }
@@ -490,37 +490,4 @@ input[type=number] {
   display:flex;
   justify-content:space-between;
   align-items:center;
-}
-
-/* 🔧 Fix für überlaufende Buchungsfelder */
-.booking-form > * {
-  min-width: 0;
-}
-
-#debitLines,
-#creditLines {
-  min-width: 0;
-}
-
-/* Falls deine einzelnen Buchungszeilen Flexbox nutzen */
-#debitLines > div,
-#creditLines > div {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap; /* verhindert Überlauf */
-}
-
-#debitLines select,
-#creditLines select,
-#debitLines input,
-#creditLines input {
-  min-width: 0;
-  flex: 1 1 120px;
-  max-width: 100%;
-}
-
-/* optional: X-Button nicht zu gross */
-#debitLines button,
-#creditLines button {
-  flex: 0 0 auto;
 }
