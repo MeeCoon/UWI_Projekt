@@ -244,23 +244,33 @@ function computeBalancesFromJournal(rows) {
 
   for (const r of rows) {
 
-    // 🔥 NEU: Split-Buchungen (dein System)
+    // ✅ DEIN SYSTEM (Split-Buchungen)
     if (r.type === "split") {
 
       // Soll
       for (const d of r.debits || []) {
-        if (!d.accountNo || !d.amount) continue;
-        bal[d.accountNo] = (bal[d.accountNo] || 0) + Number(d.amount);
+        const acc = String(d.accountNo);
+        const amt = Number(d.amount || 0);
+        if (!acc || !(amt > 0)) continue;
+
+        bal[acc] = (bal[acc] || 0) + amt;
       }
 
       // Haben
       for (const c of r.credits || []) {
-        if (!c.accountNo || !c.amount) continue;
-        bal[c.accountNo] = (bal[c.accountNo] || 0) - Number(c.amount);
+        const acc = String(c.accountNo);
+        const amt = Number(c.amount || 0);
+        if (!acc || !(amt > 0)) continue;
+
+        bal[acc] = (bal[acc] || 0) - amt;
       }
 
       continue;
     }
+  }
+
+  return bal;
+}
 
     // 🔁 Fallback (falls du später einfache Buchungen hast)
     const debit = String(r.debit || "").trim();
