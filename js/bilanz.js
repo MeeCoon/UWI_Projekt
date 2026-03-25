@@ -44,9 +44,7 @@ function getAssetGroups(industry) {
       },
       {
         title: "Anlagevermögen",
-        accounts: [
-          ...commonFixedAssets
-        ]
+        accounts: [...commonFixedAssets]
       }
     ];
   }
@@ -62,9 +60,7 @@ function getAssetGroups(industry) {
       },
       {
         title: "Anlagevermögen",
-        accounts: [
-          ...commonFixedAssets
-        ]
+        accounts: [...commonFixedAssets]
       }
     ];
   }
@@ -73,10 +69,7 @@ function getAssetGroups(industry) {
     return [
       {
         title: "Umlaufvermögen",
-        accounts: [
-          ...commonCurrentAssets,
-          ["1210", "Rohstoffe"]
-        ]
+        accounts: [...commonCurrentAssets]
       },
       {
         title: "Anlagevermögen",
@@ -92,16 +85,11 @@ function getAssetGroups(industry) {
   return [
     {
       title: "Umlaufvermögen",
-      accounts: [
-        ...commonCurrentAssets,
-        ["1100", "Forderungen aus Lieferungen und Leistungen"]
-      ]
+      accounts: [...commonCurrentAssets]
     },
     {
       title: "Anlagevermögen",
-      accounts: [
-        ...commonFixedAssets
-      ]
+      accounts: [...commonFixedAssets]
     }
   ];
 }
@@ -215,6 +203,7 @@ function getYears(companyId) {
       return arr.map(String);
     }
   } catch {}
+
   return [...DEFAULT_YEARS];
 }
 
@@ -243,36 +232,26 @@ function computeBalancesFromJournal(rows) {
   const bal = {};
 
   for (const r of rows) {
-
-    // ✅ DEIN SYSTEM (Split-Buchungen)
+    // Split-Buchungen
     if (r.type === "split") {
-
-      // Soll
       for (const d of r.debits || []) {
-        const acc = String(d.accountNo);
+        const acc = String(d.accountNo || "").trim();
         const amt = Number(d.amount || 0);
         if (!acc || !(amt > 0)) continue;
-
         bal[acc] = (bal[acc] || 0) + amt;
       }
 
-      // Haben
       for (const c of r.credits || []) {
-        const acc = String(c.accountNo);
+        const acc = String(c.accountNo || "").trim();
         const amt = Number(c.amount || 0);
         if (!acc || !(amt > 0)) continue;
-
         bal[acc] = (bal[acc] || 0) - amt;
       }
 
       continue;
     }
-  }
 
-  return bal;
-}
-
-    // 🔁 Fallback (falls du später einfache Buchungen hast)
+    // einfache Buchungen
     const debit = String(r.debit || "").trim();
     const credit = String(r.credit || "").trim();
     const amt = Number(r.amount || 0);
@@ -294,7 +273,6 @@ function renderYearTabs(companyId) {
   if (!el) return;
 
   const years = getYears(companyId);
-
   if (!years.includes(currentYear)) {
     currentYear = years[0];
   }
@@ -325,7 +303,6 @@ function renderYearTabs(companyId) {
       if (!y) return;
 
       const year = y.trim();
-
       if (!/^\d{4}$/.test(year)) {
         alert("Ungültiges Jahr");
         return;
