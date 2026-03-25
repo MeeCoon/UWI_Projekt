@@ -506,15 +506,24 @@ input[type=number] {
 }
 
 .orgChartWrap {
-  padding: 28px 20px;
+  padding: 24px;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
-  background: #f8fafc;
+  background: #f3f4f6;
   overflow-x: auto;
 }
 
+.orgDiagramTitle {
+  text-align: center;
+  font-size: 64px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  color: #111;
+  margin-bottom: 24px;
+}
+
 .orgTree {
-  min-width: 980px;
+  min-width: 1100px;
 }
 
 .orgTop {
@@ -524,13 +533,13 @@ input[type=number] {
 
 .orgCard {
   min-width: 180px;
-  padding: 14px 18px;
-  border-radius: 10px;
+  padding: 12px 16px;
+  border: 3px solid #111;
+  border-radius: 2px;
   text-align: center;
-  border: 2px solid #1e293b;
-  background: linear-gradient(135deg, #4f83d1, #3867b0);
+  background: linear-gradient(180deg, #5d8fdf, #4573bc);
   color: #fff;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
 }
 
 .orgCardTop {
@@ -545,33 +554,34 @@ input[type=number] {
 
 .orgRole {
   margin-top: 4px;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.2;
+  font-weight: 700;
 }
 
 .orgConnectorVertical {
   width: 4px;
   height: 28px;
-  background: #111827;
+  background: #111;
   margin: 0 auto;
 }
 
 .orgConnectorHorizontal {
-  width: 64%;
+  width: 66%;
   height: 4px;
-  background: #111827;
-  margin: 0 auto 0;
+  background: #111;
+  margin: 0 auto;
 }
 
 .orgDeptRow {
   display: flex;
   justify-content: center;
-  gap: 28px;
   align-items: flex-start;
+  gap: 28px;
 }
 
-.orgDept {
-  width: 220px;
+.orgDeptColumn {
+  width: 230px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -579,8 +589,8 @@ input[type=number] {
 
 .orgDeptTopLine {
   width: 4px;
-  height: 26px;
-  background: #111827;
+  height: 28px;
+  background: #111;
 }
 
 .orgDeptCard {
@@ -589,50 +599,55 @@ input[type=number] {
 
 .orgDeptVertical {
   width: 4px;
-  height: 26px;
-  background: #111827;
+  height: 28px;
+  background: #111;
 }
 
 .orgMiniGrid {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 26px;
   position: relative;
+  padding-left: 40px;
+  box-sizing: border-box;
 }
 
 .orgMiniGrid::before {
   content: "";
   position: absolute;
-  left: 18px;
+  left: 14px;
   top: 0;
   bottom: 0;
   width: 4px;
-  background: #111827;
+  background: #111;
 }
 
 .orgMiniCard {
   position: relative;
-  margin-left: 34px;
-  padding: 14px 16px;
-  border-radius: 10px;
-  text-align: center;
-  border: 2px solid #1e293b;
-  background: #3d5f98;
-  color: #fff;
-  font-weight: 600;
+  padding: 14px 12px;
   min-height: 28px;
+  border: 3px solid #111;
+  background: #355d98;
+  color: #fff;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .orgMiniCard::before {
   content: "";
   position: absolute;
-  left: -20px;
+  left: -29px;
   top: 50%;
-  width: 20px;
+  width: 29px;
   height: 4px;
-  background: #111827;
+  background: #111;
   transform: translateY(-50%);
+}
+
+.orgMiniText {
+  outline: none;
 }
 
 .orgEmpty {
@@ -645,14 +660,11 @@ input[type=number] {
 
 .orgName[contenteditable="true"],
 .orgRole[contenteditable="true"],
-.orgMiniCard[contenteditable="true"] {
+.orgMiniText[contenteditable="true"] {
   outline: none;
   cursor: text;
 }
 
-.orgName[contenteditable="true"]:focus,
-.orgRole[contenteditable="true"]:focus,
-.orgMiniCard[contenteditable="true"]:focus {
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.35);
-  border-radius: 6px;
+.orgSelected {
+  box-shadow: 0 0 0 4px #facc15;
 }
