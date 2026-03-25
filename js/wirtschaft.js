@@ -40,18 +40,14 @@ function parseInput(raw) {
   const departments = lines.slice(1).map(line => {
     const parts = line.split("|").map(x => x.trim());
 
-    const deptName = parts[0] || "Abteilung";
+    const title = parts[0] || "Bereich";
     const lead = parts[1] || "Leitung";
     const employees = (parts[2] || "")
       .split(",")
       .map(x => x.trim())
       .filter(Boolean);
 
-    return {
-      deptName,
-      lead,
-      employees
-    };
+    return { title, lead, employees };
   });
 
   return { ceo, departments };
@@ -69,17 +65,17 @@ function renderOrgChart() {
     return;
   }
 
-  const deptHtml = data.departments.map(dep => {
+  const departmentsHtml = data.departments.map(dep => {
     const employeesHtml = dep.employees.map(name => `
       <div class="orgMiniCard" contenteditable="true">${escapeHtml(name)}</div>
     `).join("");
 
     return `
-      <div class="orgDept">
+      <div class="orgDeptColumn">
         <div class="orgDeptTopLine"></div>
 
         <div class="orgCard orgDeptCard">
-          <div class="orgName" contenteditable="true">${escapeHtml(dep.deptName)}</div>
+          <div class="orgName" contenteditable="true">${escapeHtml(dep.title)}</div>
           <div class="orgRole" contenteditable="true">${escapeHtml(dep.lead)}</div>
         </div>
 
@@ -94,6 +90,8 @@ function renderOrgChart() {
   }).join("");
 
   root.innerHTML = `
+    <div class="orgDiagramTitle">ORGANIGRAMM</div>
+
     <div class="orgTree">
       <div class="orgTop">
         <div class="orgCard orgCardTop">
@@ -106,7 +104,7 @@ function renderOrgChart() {
         <div class="orgConnectorVertical"></div>
         <div class="orgConnectorHorizontal"></div>
         <div class="orgDeptRow">
-          ${deptHtml}
+          ${departmentsHtml}
         </div>
       ` : ""}
     </div>
@@ -138,10 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  const generateBtn = document.getElementById("generateBtn");
-  if (generateBtn) {
-    generateBtn.addEventListener("click", renderOrgChart);
-  }
+  document.getElementById("generateBtn")?.addEventListener("click", renderOrgChart);
 
   renderOrgChart();
 });
