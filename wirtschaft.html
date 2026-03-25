@@ -30,19 +30,19 @@
 
     <div class="balanceHeaderBlue" style="margin-top:12px;">
       <div class="balanceTitle">Organigramm erstellen</div>
-      <div class="balanceSub">Eine Zeile pro Person: Name Rolle</div>
+      <div class="balanceSub">
+        Format:
+        1. Zeile = Chef/in<br>
+        Weitere Zeilen = Abteilung | Leitung | Mitarbeitende durch Komma getrennt
+      </div>
     </div>
 
-    <textarea
-      id="inputData"
-      class="orgTextarea"
-      placeholder="Fritz CEO
-Hans CFO
-Barbara Marketing-Leiterin
-Luca HR-Leiter"
-    >Fritz CEO
-Hans CFO
-Barbara Marketing-Leiterin</textarea>
+    <textarea id="inputData" class="orgTextarea">
+Petra Müller | Geschäftsführung
+Entwicklung | Fritz Teufel | Vera Kluge, Martin Kurz
+Sales | Klaus Mai | Mario Enge, Michael Vries
+Marketing | Barbara Frei | Tina Schinkel, Egon Meyer
+    </textarea>
 
     <div class="form-actions" style="margin-top:12px;">
       <button id="generateBtn" class="btn primary" type="button">Organigramm erstellen</button>
