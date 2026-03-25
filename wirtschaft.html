@@ -1,43 +1,60 @@
 <!doctype html>
 <html lang="de">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>UWI — Wirtschaft</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UWI — Wirtschaft</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <header class="topbar">
   <div class="brand">UWI Unternehmenssimulation</div>
   <nav class="nav-inline">
     <span id="userDisplay" class="muted"></span>
-    <button id="backBtn" class="btn">Zur Firma</button>
-    <button id="logoutBtn" class="btn">Abmelden</button>
+    <button id="backBtn" class="btn" type="button">Zur Firma</button>
+    <button id="logoutBtn" class="btn" type="button">Abmelden</button>
   </nav>
 </header>
 
 <main class="container">
   <section class="card">
-
     <h1 class="h2">Wirtschaft — Organigramm</h1>
 
-    <!-- INPUT -->
-    <textarea id="inputData" class="input" style="width:100%; height:120px;">
-Fritz CEO
-Hans CFO
-Barbara Marketing-Leiterin
-    </textarea>
-
-    <div style="margin-top:10px;">
-      <button id="generateBtn" class="btn primary">Organigramm erstellen</button>
+    <div class="page-tabs">
+      <a href="bilanz.html" class="page-tab">Bilanz</a>
+      <a href="erfolgsrechnung.html" class="page-tab">Erfolgsrechnung</a>
+      <a href="bookings.html" class="page-tab">Buchungssätze</a>
+      <a href="wirtschaft.html" class="page-tab active">Wirtschaft</a>
+      <a href="recht.html" class="page-tab">Recht</a>
     </div>
 
-    <!-- OUTPUT -->
-    <div id="orgChart" style="margin-top:20px;"></div>
+    <div class="balanceHeaderBlue" style="margin-top:12px;">
+      <div class="balanceTitle">Organigramm erstellen</div>
+      <div class="balanceSub">Eine Zeile pro Person: Name Rolle</div>
+    </div>
 
+    <textarea
+      id="inputData"
+      class="orgTextarea"
+      placeholder="Fritz CEO
+Hans CFO
+Barbara Marketing-Leiterin
+Luca HR-Leiter"
+    >Fritz CEO
+Hans CFO
+Barbara Marketing-Leiterin</textarea>
+
+    <div class="form-actions" style="margin-top:12px;">
+      <button id="generateBtn" class="btn primary" type="button">Organigramm erstellen</button>
+    </div>
+
+    <div id="orgChart" class="orgChartWrap" style="margin-top:20px;"></div>
   </section>
 </main>
+
+<footer class="footer">
+  <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
+</footer>
 
 <script src="js/wirtschaft.js"></script>
 </body>
