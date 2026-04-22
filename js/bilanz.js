@@ -404,11 +404,11 @@ function renderBalance(companyId, year) {
   ).join("");
 
   const totalAssets = assetGroups.flatMap(g => g.accounts).reduce((sum, [no]) => {
-    return sum + Math.max(Number(saldo[no] || 0), 0);
+    return sum + Number(saldo[no] || 0);
   }, 0);
 
   const totalLiabilities = liabilityGroups.flatMap(g => g.accounts).reduce((sum, [no]) => {
-    return sum + Math.max(-Number(saldo[no] || 0), 0);
+    return sum + Number(saldo[no] || 0);
   }, 0);
 
   root.innerHTML = `
