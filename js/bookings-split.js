@@ -338,12 +338,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderJournal(cid);
 });
-
-// Wenn Jahr gewechselt wird → Tabelle neu laden
-document.addEventListener("click", (e) => {
-  if (e.target.classList.contains("yearBtn")) {
-    setTimeout(() => {
-      window.initKICasesForYear();
-    }, 0);
-  }
-});
