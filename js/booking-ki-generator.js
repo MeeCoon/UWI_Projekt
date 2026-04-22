@@ -115,6 +115,29 @@ document.addEventListener("DOMContentLoaded", () => {
     "Die {firma} bucht Lieferantenskonto von {betrag} CHF als Aufwand."
   ];
 
+  const industryTemplates = {
+  Handel: [
+    "Die {firma} verkauft Handelswaren gegen Rechnung für {betrag} CHF.",
+    "Die {firma} kauft Handelswaren auf Rechnung für {betrag} CHF ein.",
+    "Die {firma} gewährt einem Kunden einen Rabatt von {betrag} CHF auf einen Warenverkauf.",
+    "Die {firma} erhält eine Zahlung von einem Kunden für früher gelieferte Handelswaren über {betrag} CHF."
+  ],
+
+  Produktion: [
+    "Die {firma} produziert Waren und verbucht Materialaufwand von {betrag} CHF.",
+    "Die {firma} verkauft selbst hergestellte Produkte gegen Rechnung für {betrag} CHF.",
+    "Die {firma} kauft Rohstoffe für die Produktion im Wert von {betrag} CHF auf Rechnung.",
+    "Die {firma} bezahlt Löhne in der Produktion von {betrag} CHF per Bank."
+  ],
+
+  Dienstleistung: [
+    "Die {firma} erbringt eine Dienstleistung und stellt {betrag} CHF in Rechnung.",
+    "Die {firma} erhält eine Zahlung für erbrachte Dienstleistungen über {betrag} CHF per Bank.",
+    "Die {firma} bezahlt Büromiete von {betrag} CHF per Bank.",
+    "Die {firma} kauft Softwarelizenzen für {betrag} CHF zur Leistungserbringung."
+  ]
+};
+
   // -------------------------
   // Zufallsbetrag
   // -------------------------
@@ -136,7 +159,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const tasks = [];
 
     for (let i = 1; i <= 100; i++) {
-      const template = templates[Math.floor(Math.random() * templates.length)];
+      const industry = company.industry;
+
+      // Basis + branchenspezifisch kombinieren
+      let pool = [...templates];
+      
+      if (industryTemplates[industry]) {
+        pool = pool.concat(industryTemplates[industry]);
+      }
+      
+      const template = pool[Math.floor(Math.random() * pool.length)];
       const amount = randomAmount();
       const company = randomCompany();
 
@@ -245,3 +277,4 @@ document.addEventListener("click", (e) => {
     }, 0);
   }
 });
+
