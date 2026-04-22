@@ -225,6 +225,39 @@ function loadJournal(companyId, year) {
   }
 }
 
+const ACCOUNT_TYPES = {
+  // Aktiv
+  "1000":"asset","1020":"asset","1060":"asset","1100":"asset","1170":"asset","1200":"asset","1210":"asset","1300":"asset",
+  "1400":"asset","1480":"asset","1500":"asset","1510":"asset","1520":"asset","1530":"asset","1600":"asset","1700":"asset",
+
+  // Passiv
+  "2000":"liability","2100":"liability","2200":"liability","2300":"liability",
+  "2450":"liability","2451":"liability","2600":"liability",
+
+  // Eigenkapital
+  "2800":"equity","2850":"equity","2950":"equity","2970":"equity","2979":"equity",
+
+  // Aufwand
+  "4000":"expense","4200":"expense","5000":"expense","5700":"expense","5800":"expense",
+  "6000":"expense","6100":"expense","6200":"expense","6300":"expense","6400":"expense",
+  "6500":"expense","6600":"expense","6700":"expense","6800":"expense","6900":"expense",
+  "7510":"expense","8500":"expense",
+
+  // Ertrag
+  "3000":"revenue","3200":"revenue","3400":"revenue","3805":"revenue",
+  "6950":"revenue","7500":"revenue","8510":"revenue"
+};
+
+function applyBooking(balance, account, amount, isDebit) {
+  const type = ACCOUNT_TYPES[account] || "asset";
+
+  if (type === "asset" || type === "expense") {
+    balance[account] = (balance[account] || 0) + (isDebit ? amount : -amount);
+  } else {
+    balance[account] = (balance[account] || 0) + (isDebit ? -amount : amount);
+  }
+}
+
 /* =========================
    SALDO BERECHNEN
 ========================= */
@@ -232,34 +265,37 @@ function computeBalancesFromJournal(rows) {
   const bal = {};
 
   for (const r of rows) {
-    // Split-Buchungen
+
     if (r.type === "split") {
+
+      // Soll
       for (const d of r.debits || []) {
-        const acc = String(d.accountNo || "").trim();
+        const acc = String(d.accountNo);
         const amt = Number(d.amount || 0);
         if (!acc || !(amt > 0)) continue;
-        bal[acc] = (bal[acc] || 0) + amt;
+
+        applyBooking(bal, acc, amt, true);
       }
 
+      // Haben
       for (const c of r.credits || []) {
-        const acc = String(c.accountNo || "").trim();
+        const acc = String(c.accountNo);
         const amt = Number(c.amount || 0);
         if (!acc || !(amt > 0)) continue;
-        bal[acc] = (bal[acc] || 0) - amt;
+
+        applyBooking(bal, acc, amt, false);
       }
 
       continue;
     }
 
-    // einfache Buchungen
-    const debit = String(r.debit || "").trim();
-    const credit = String(r.credit || "").trim();
+    // (optional: einfache Buchungen, falls du sie nutzt)
+    const debit = String(r.debit || "");
+    const credit = String(r.credit || "");
     const amt = Number(r.amount || 0);
 
-    if (!debit || !credit || !(amt > 0)) continue;
-
-    bal[debit] = (bal[debit] || 0) + amt;
-    bal[credit] = (bal[credit] || 0) - amt;
+    if (debit && amt > 0) applyBooking(bal, debit, amt, true);
+    if (credit && amt > 0) applyBooking(bal, credit, amt, false);
   }
 
   return bal;
