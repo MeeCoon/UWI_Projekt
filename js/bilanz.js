@@ -368,7 +368,7 @@ function renderAccountRow(no, name, value) {
 function renderGroup(group, saldo, isAssetSide) {
   const rowsHtml = group.accounts.map(([no, name]) => {
     const raw = Number(saldo[no] || 0);
-    const shown = isAssetSide ? Math.max(raw, 0) : Math.max(-raw, 0);
+    const shown = raw;
     return renderAccountRow(no, name, shown);
   }).join("");
 
