@@ -76,6 +76,37 @@ function createStartCapitalBooking(company) {
   saveJournal(company.id, DEFAULT_YEAR, rows);
 }
 
+/* =========================
+   BRANCHEN-REGELN (NEU)
+========================= */
+function getIndustryDefaults(industry) {
+  if (industry === "Handel") {
+    return {
+      revenueAccount: "3200",
+      openingStockAccount: "1200"
+    };
+  }
+
+  if (industry === "Produktion") {
+    return {
+      revenueAccount: "3000",
+      openingStockAccount: "1210"
+    };
+  }
+
+  if (industry === "Dienstleistung") {
+    return {
+      revenueAccount: "3400",
+      openingStockAccount: null
+    };
+  }
+
+  return {
+    revenueAccount: "3000",
+    openingStockAccount: null
+  };
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const user = localStorage.getItem(USER_KEY);
   if (!user) {
