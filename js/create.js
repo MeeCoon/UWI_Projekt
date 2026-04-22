@@ -60,18 +60,21 @@ function createStartCapitalBooking(company) {
   const alreadyExists = rows.some(r => r && r.system === "startkapital");
   if (alreadyExists) return;
 
-  rows.push({
-    id: `start_${company.id}_${Date.now()}`,
-    fact: `Startkapital für ${company.name}`,
-    sollName: "Bank",
-    habenName: getEquityName(company.legal),
-    debit: "1020",
-    credit: "2800",
-    amount: capital,
-    year: DEFAULT_YEAR,
-    date: new Date().toISOString(),
-    system: "startkapital"
-  });
+const defaults = getIndustryDefaults(company.industry);
+
+rows.push({
+  id: `start_${company.id}_${Date.now()}`,
+  fact: `Startkapital für ${company.name}`,
+  sollName: "Bank",
+  habenName: getEquityName(company.legal),
+  debit: "1020",
+  credit: "2800",
+  amount: capital,
+  year: DEFAULT_YEAR,
+  date: new Date().toISOString(),
+  system: "startkapital",
+  industry: company.industry
+});
 
   saveJournal(company.id, DEFAULT_YEAR, rows);
 }
