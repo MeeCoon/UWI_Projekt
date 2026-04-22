@@ -122,6 +122,26 @@ function renderYearTabs(cid) {
     `<button id="addYearBtn" class="addYearBtn">+ Jahr hinzufügen</button>` +
     `<button class="addYearBtn" id="deleteYearBtn" type="button">🗑 Jahr löschen</button>`;
 
+  document.getElementById("deleteYearBtn").onclick = () => {
+  const list = getYears(cid);
+
+  if (list.length <= 1) {
+    alert("Mindestens ein Jahr muss bleiben.");
+    return;
+  }
+
+  if (!confirm(`Jahr ${currentYear} wirklich löschen?`)) return;
+
+  const next = list.filter(y => y !== currentYear);
+  saveYears(cid, next);
+
+  localStorage.removeItem(journalKey(cid, currentYear));
+
+  currentYear = next[0];
+  renderYearTabs(cid);
+  renderJournal(cid);
+};
+
   el.onclick = e => {
     const btn = e.target.closest(".yearBtn");
     if (!btn) return;
