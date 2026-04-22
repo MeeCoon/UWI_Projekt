@@ -8,7 +8,9 @@ const COMPANIES_PREFIX = "uwi_companies_";
 const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
 const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
-const yearsKey = (companyId) => `uwi_years_${companyId}`;
+
+// WICHTIG: gleich wie bei Bilanz / Erfolgsrechnung
+const yearsKey = (companyId) => `uwi_years_${companyId}_balance`;
 
 const DEFAULT_YEARS = ["2024", "2025", "2026"];
 let currentYear = DEFAULT_YEARS[0];
@@ -81,7 +83,10 @@ function renderYearTabs(companyId) {
   if (!el) return;
 
   const years = getYears(companyId);
-  if (!years.includes(currentYear)) currentYear = years[0];
+
+  if (!years.includes(currentYear)) {
+    currentYear = years[0];
+  }
 
   el.innerHTML =
     years.map(y => `
@@ -145,7 +150,6 @@ function renderYearTabs(companyId) {
       const next = yearsNow.filter(y => y !== currentYear);
       saveYears(companyId, next);
 
-      // Buchungen dieses Jahres löschen
       localStorage.removeItem(journalKey(companyId, currentYear));
 
       currentYear = next[0];
