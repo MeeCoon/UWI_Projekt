@@ -4,6 +4,47 @@ const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
 
 let selectedBox = null;
+let currentQuiz = null;
+let quizScore = 0;
+let quizAnswered = false;
+
+const QUIZ_QUESTIONS = [
+  {
+    question: "Was passiert meistens, wenn die Nachfrage steigt und das Angebot gleich bleibt?",
+    answers: ["Der Preis sinkt", "Der Preis steigt", "Nichts passiert", "Die Produktion stoppt"],
+    correct: 1
+  },
+  {
+    question: "Was ist Inflation?",
+    answers: ["Sinkende Löhne", "Steigende Preise", "Weniger Firmen", "Mehr Aktien"],
+    correct: 1
+  },
+  {
+    question: "Was bedeutet BIP?",
+    answers: ["Bankinterner Preis", "Bruttoinlandprodukt", "Bilanzierter Investitionsplan", "Betriebliche Inventarplanung"],
+    correct: 1
+  },
+  {
+    question: "Welche Rechtsform braucht mindestens 20'000 CHF Kapital?",
+    answers: ["Einzelunternehmen", "GmbH", "Kollektivgesellschaft", "Verein"],
+    correct: 1
+  },
+  {
+    question: "Wer steht in einem Organigramm meistens ganz oben?",
+    answers: ["Lager", "Marketing", "Geschäftsführung", "Verkauf"],
+    correct: 2
+  },
+  {
+    question: "Was ist ein typischer Aufwand?",
+    answers: ["Miete", "Umsatz", "Aktienkapital", "Darlehen"],
+    correct: 0
+  },
+  {
+    question: "Was ist ein typischer Ertrag?",
+    answers: ["Lohnaufwand", "Versicherungsaufwand", "Warenertrag", "Abschreibung"],
+    correct: 2
+  }
+];
 
 function getUserOrRedirect() {
   const u = localStorage.getItem(USER_KEY);
@@ -248,6 +289,91 @@ function deleteSelectedBox() {
   }
 }
 
+function ensureQuizUI() {
+  const card = document.querySelector("main .card");
+  if (!card) return;
+
+  if (document.getElementById("quizWrap")) return;
+
+  const quizWrap = document.createElement("div");
+  quizWrap.id = "quizWrap";
+  quizWrap.innerHTML = `
+    <div class="balanceHeaderBlue" style="margin-top:28px;">
+      <div class="balanceTitle">Wirtschaft Quiz</div>
+      <div class="balanceSub">Locker üben mit kurzen Fragen</div>
+    </div>
+
+    <div class="quizCard">
+      <div id="quizScore" class="quizScore">Punkte: 0</div>
+      <div id="quizQuestion" class="quizQuestion">Frage wird geladen...</div>
+      <div id="quizAnswers" class="quizAnswers"></div>
+      <div id="quizResult" class="quizResult"></div>
+      <div class="form-actions" style="margin-top:14px;">
+        <button id="checkQuizBtn" class="btn primary" type="button">Antwort prüfen</button>
+        <button id="nextQuizBtn" class="btn" type="button">Nächste Frage</button>
+      </div>
+    </div>
+  `;
+
+  card.appendChild(quizWrap);
+
+  document.getElementById("checkQuizBtn")?.addEventListener("click", checkQuizAnswer);
+  document.getElementById("nextQuizBtn")?.addEventListener("click", nextQuizQuestion);
+}
+
+function nextQuizQuestion() {
+  currentQuiz = QUIZ_QUESTIONS[Math.floor(Math.random() * QUIZ_QUESTIONS.length)];
+  quizAnswered = false;
+
+  const q = document.getElementById("quizQuestion");
+  const a = document.getElementById("quizAnswers");
+  const r = document.getElementById("quizResult");
+  const s = document.getElementById("quizScore");
+
+  if (!q || !a || !r || !s) return;
+
+  q.textContent = currentQuiz.question;
+  r.textContent = "";
+  s.textContent = `Punkte: ${quizScore}`;
+
+  a.innerHTML = currentQuiz.answers.map((answer, index) => `
+    <label class="quizAnswer">
+      <input type="radio" name="quizAnswer" value="${index}">
+      <span>${escapeHtml(answer)}</span>
+    </label>
+  `).join("");
+}
+
+function checkQuizAnswer() {
+  if (!currentQuiz || quizAnswered) return;
+
+  const checked = document.querySelector('input[name="quizAnswer"]:checked');
+  const result = document.getElementById("quizResult");
+  const score = document.getElementById("quizScore");
+
+  if (!checked) {
+    result.textContent = "Bitte zuerst eine Antwort auswählen.";
+    result.className = "quizResult";
+    return;
+  }
+
+  const value = Number(checked.value);
+  quizAnswered = true;
+
+  if (value === currentQuiz.correct) {
+    quizScore += 1;
+    result.textContent = "Richtig ✅";
+    result.className = "quizResult quizRight";
+  } else {
+    result.textContent = `Falsch ❌ Richtige Antwort: ${currentQuiz.answers[currentQuiz.correct]}`;
+    result.className = "quizResult quizWrong";
+  }
+
+  if (score) {
+    score.textContent = `Punkte: ${quizScore}`;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const user = getUserOrRedirect();
   if (!user) return;
@@ -278,4 +404,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("deleteSelectedBtn")?.addEventListener("click", deleteSelectedBox);
 
   renderOrgChart();
+  ensureQuizUI();
+  nextQuizQuestion();
 });
