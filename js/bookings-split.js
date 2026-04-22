@@ -119,7 +119,7 @@ function renderYearTabs(cid) {
     years.map(y =>
       `<button class="yearBtn ${y===currentYear?"active":""}" data-year="${y}">${y}</button>`
     ).join("") +
-    `<button id="addYearBtn" class="addYearBtn">+ Jahr hinzufügen</button>`,
+    `<button id="addYearBtn" class="addYearBtn">+ Jahr hinzufügen</button>` +
     `<button class="addYearBtn" id="deleteYearBtn" type="button">🗑 Jahr löschen</button>`;
 
   el.onclick = e => {
