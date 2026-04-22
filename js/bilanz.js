@@ -401,12 +401,27 @@ function renderAccountRow(no, name, value) {
   `;
 }
 
-function renderGroup(group, saldo, isAssetSide) {
+function renderGroup(group, saldo) {
   const rowsHtml = group.accounts.map(([no, name]) => {
     const raw = Number(saldo[no] || 0);
-    const shown = raw;
+
+    const type = ACCOUNT_TYPES[no] || "asset";
+
+    let shown = raw;
+
+    // Anzeige-Regel (wichtig!)
+    if (type === "revenue" || type === "liability" || type === "equity") {
+      shown = -raw;
+    }
+
     return renderAccountRow(no, name, shown);
   }).join("");
+
+  return `
+    <div class="balanceBlockTitle">${group.title}</div>
+    ${rowsHtml}
+  `;
+}
 
   return `
     <div class="balanceBlockTitle">${group.title}</div>
@@ -432,11 +447,11 @@ function renderBalance(companyId, year) {
   const liabilityGroups = getLiabilityGroups(company.legal);
 
   const assetHtml = assetGroups.map(group =>
-    renderGroup(group, saldo, true)
+  renderGroup(group, saldo)
   ).join("");
 
   const liabilityHtml = liabilityGroups.map(group =>
-    renderGroup(group, saldo, false)
+  renderGroup(group, saldo)
   ).join("");
 
   const totalAssets = assetGroups.flatMap(g => g.accounts).reduce((sum, [no]) => {
