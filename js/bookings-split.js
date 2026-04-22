@@ -270,51 +270,7 @@ document.addEventListener("click", e => {
   renderJournal(cid);
 });
 
-// =======================
-// GENERATE 100 CASES
-// =======================
-function generate100Cases(companyId, year, companyType) {
-  const journal = loadJournal(companyId, year) || [];
 
-  // Alte automatisch generierte Einträge für dieses Jahr entfernen
-  const filteredJournal = journal.filter(j => !j.generatedByKI);
-
-  const newEntries = [];
-  for (let i = 0; i < 100; i++) {
-    const amount = Math.floor(Math.random() * 1000 + 100);
-    const debits = [{accountNo:"1000", amount}];
-    const credits = [{accountNo:"3000", amount}];
-
-    newEntries.push({
-      type: "split",
-      fact: `KI Buchung ${i+1}`,
-      debits,
-      credits,
-      total: amount,
-      date: new Date().toISOString(),
-      year,
-      generatedByKI: true
-    });
-  }
-
-  saveJournal(companyId, year, [...filteredJournal, ...newEntries]);
-  return newEntries.length;
-}
-
-document.getElementById("generateCasesBtn")?.addEventListener("click", () => {
-  const user = localStorage.getItem(USER_KEY);
-  const companyId = localStorage.getItem(`${CURRENT_COMPANY_PREFIX}${user}`);
-
-  const companies = JSON.parse(
-    localStorage.getItem(`uwi_companies_${user}`) || "[]"
-  );
-  const company = companies.find(c => c.id === companyId);
-  if(!company) return alert("Firma nicht gefunden.");
-
-  const count = generate100Cases(companyId, currentYear, company.type);
-  renderJournal(companyId);
-  alert(count + " Buchungen im Journal gespeichert.");
-});
 
 // =======================
 // INIT
@@ -381,4 +337,13 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   renderJournal(cid);
+});
+
+// Wenn Jahr gewechselt wird → Tabelle neu laden
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("yearBtn")) {
+    setTimeout(() => {
+      window.initKICasesForYear();
+    }, 0);
+  }
 });
