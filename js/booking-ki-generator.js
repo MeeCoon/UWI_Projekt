@@ -190,7 +190,9 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTable(tasks);
   }
 
+  setTimeout(() => {
   window.initKICasesForYear();
+  }, 0);
 
   // -------------------------
   // Button: 100 Buchungstatsachen generieren
