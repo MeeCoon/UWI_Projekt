@@ -5,40 +5,77 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
+  const USER_KEY = "uwi_user";
+  const COMPANIES_PREFIX = "uwi_companies_";
+
   const generateBtn = document.getElementById("generateCasesBtn");
   const tableBody = document.getElementById("bookingTableBody");
   const factField = document.getElementById("fact");
   const activeTaskId = document.getElementById("activeTaskId");
   const addBookingBtn = document.getElementById("addBookingBtn");
 
-  // -------------------------
-  // Aktuelles Jahr
-  // -------------------------
+  /* =========================
+     USER + FIRMA LADEN
+  ========================= */
+  function getUser() {
+    return localStorage.getItem(USER_KEY);
+  }
+
+  function loadCompanies(user) {
+    try {
+      return JSON.parse(localStorage.getItem(`${COMPANIES_PREFIX}${user}`) || "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  function getSelectedCompany() {
+    const user = getUser();
+    const companies = loadCompanies(user);
+    const currentId = localStorage.getItem(`uwi_currentCompany_${user}`);
+    return companies.find(c => c.id === currentId);
+  }
+
+  const company = getSelectedCompany();
+
+  if (!company) {
+    console.error("Keine Firma gefunden");
+    return;
+  }
+
+  /* =========================
+     JAHR
+  ========================= */
   function getSelectedYear() {
     const active = document.querySelector(".yearBtn.active");
     if (active) return active.textContent.trim();
     return new Date().getFullYear().toString();
   }
 
-  // -------------------------
-  // Storage-Key für Jahr
-  // -------------------------
   function storageKey(year) {
     return "uwi-ki-tasks-" + year;
   }
 
-  // -------------------------
-  // Firmenliste
-  // -------------------------
+  /* =========================
+     BASISDATEN
+  ========================= */
   const companyNames = [
     "Nova AG","Helvetia GmbH","Alpenblick AG","Sonnenberg GmbH",
     "BergTech AG","Seeland GmbH","ProTrade AG","Meyer & Co","Urban Systems AG"
   ];
 
-  // -------------------------
-  // Buchungsvorlagen
-  // -------------------------
-  const templates = [
+  function randomCompanyName() {
+    return companyNames[Math.floor(Math.random() * companyNames.length)];
+  }
+
+  function randomAmount() {
+    return (Math.floor(Math.random() * 90) + 10) * 100;
+  }
+
+  /* =========================
+     GENERELLE TEMPLATES
+  ========================= */
+   const templates = [
     "Die {firma} kauft Mobiliar für {betrag} CHF gegen Bank.",
     "Die {firma} kauft ein Fahrzeug für {betrag} CHF und bezahlt per Bank.",
     "Die {firma} kauft Maschinen für {betrag} CHF gegen Bank.",
@@ -115,80 +152,70 @@ document.addEventListener("DOMContentLoaded", () => {
     "Die {firma} bucht Lieferantenskonto von {betrag} CHF als Aufwand."
   ];
 
+  /* =========================
+     BRANCHEN-TEMPLATES
+  ========================= */
   const industryTemplates = {
-  Handel: [
-    "Die {firma} verkauft Handelswaren gegen Rechnung für {betrag} CHF.",
-    "Die {firma} kauft Handelswaren auf Rechnung für {betrag} CHF ein.",
-    "Die {firma} gewährt einem Kunden einen Rabatt von {betrag} CHF auf einen Warenverkauf.",
-    "Die {firma} erhält eine Zahlung von einem Kunden für früher gelieferte Handelswaren über {betrag} CHF."
-  ],
+    Handel: [
+      "Die {firma} verkauft Handelswaren gegen Rechnung für {betrag} CHF.",
+      "Die {firma} kauft Handelswaren auf Rechnung für {betrag} CHF.",
+      "Die {firma} erhält Zahlung für Warenverkäufe über {betrag} CHF per Bank.",
+      "Die {firma} gewährt Kunden Rabatt von {betrag} CHF auf Warenverkauf."
+    ],
 
-  Produktion: [
-    "Die {firma} produziert Waren und verbucht Materialaufwand von {betrag} CHF.",
-    "Die {firma} verkauft selbst hergestellte Produkte gegen Rechnung für {betrag} CHF.",
-    "Die {firma} kauft Rohstoffe für die Produktion im Wert von {betrag} CHF auf Rechnung.",
-    "Die {firma} bezahlt Löhne in der Produktion von {betrag} CHF per Bank."
-  ],
+    Produktion: [
+      "Die {firma} kauft Rohstoffe für {betrag} CHF auf Rechnung.",
+      "Die {firma} produziert und verkauft eigene Produkte für {betrag} CHF.",
+      "Die {firma} bezahlt Produktionslöhne von {betrag} CHF per Bank.",
+      "Die {firma} verbraucht Material im Wert von {betrag} CHF."
+    ],
 
-  Dienstleistung: [
-    "Die {firma} erbringt eine Dienstleistung und stellt {betrag} CHF in Rechnung.",
-    "Die {firma} erhält eine Zahlung für erbrachte Dienstleistungen über {betrag} CHF per Bank.",
-    "Die {firma} bezahlt Büromiete von {betrag} CHF per Bank.",
-    "Die {firma} kauft Softwarelizenzen für {betrag} CHF zur Leistungserbringung."
-  ]
-};
+    Dienstleistung: [
+      "Die {firma} erbringt eine Dienstleistung und stellt {betrag} CHF in Rechnung.",
+      "Die {firma} erhält Zahlung für Dienstleistungen über {betrag} CHF.",
+      "Die {firma} kauft Software für {betrag} CHF zur Leistungserbringung.",
+      "Die {firma} bezahlt Büromiete von {betrag} CHF per Bank."
+    ]
+  };
 
-  // -------------------------
-  // Zufallsbetrag
-  // -------------------------
-  function randomAmount() {
-    return (Math.floor(Math.random() * 90) + 10) * 100;
-  }
-
-  // -------------------------
-  // Zufallsfirma
-  // -------------------------
-  function randomCompany() {
-    return companyNames[Math.floor(Math.random() * companyNames.length)];
-  }
-
-  // -------------------------
-  // Buchungstatsachen generieren
-  // -------------------------
+  /* =========================
+     GENERATOR
+  ========================= */
   function generateTasks(year) {
     const tasks = [];
 
-    for (let i = 1; i <= 100; i++) {
-      const industry = company.industry;
+    const industry = company.industry;
 
-      // Basis + branchenspezifisch kombinieren
+    for (let i = 1; i <= 100; i++) {
+
       let pool = [...templates];
-      
+
       if (industryTemplates[industry]) {
         pool = pool.concat(industryTemplates[industry]);
       }
-      
+
       const template = pool[Math.floor(Math.random() * pool.length)];
       const amount = randomAmount();
-      const company = randomCompany();
+      const firm = randomCompanyName();
 
       const fact = template
-        .replace("{firma}", company)
+        .replace("{firma}", firm)
         .replace("{betrag}", amount.toLocaleString("de-CH"));
 
       tasks.push({
-        id: year + "-" + Date.now() + "-" + i,
-        fact: fact,
-        status: "open"
+        id: `${year}-${Date.now()}-${i}`,
+        fact,
+        status: "open",
+        generated: true
       });
     }
 
     return tasks;
   }
 
-  // -------------------------
-  // Tabelle rendern
-  // -------------------------
+  /* =========================
+     TABLE RENDER
+  ========================= */
   function renderTable(tasks) {
     tableBody.innerHTML = "";
 
@@ -213,31 +240,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // -------------------------
-  // Initial laden
-  // -------------------------
+  /* =========================
+     INIT
+  ========================= */
   window.initKICasesForYear = function () {
     const year = getSelectedYear();
     const tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
     renderTable(tasks);
-  }
+  };
 
-  setTimeout(() => {
-  window.initKICasesForYear();
-  }, 0);
+  setTimeout(() => window.initKICasesForYear(), 0);
 
-  // -------------------------
-  // Button: 100 Buchungstatsachen generieren
-  // -------------------------
+  /* =========================
+     GENERIEREN BUTTON
+  ========================= */
   generateBtn.addEventListener("click", () => {
     const year = getSelectedYear();
+
     let tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
 
-    // Alte automatisch generierte Tasks entfernen
+    // alte generierte entfernen
     tasks = tasks.filter(t => !t.generated);
 
-    // Neue generieren
-    const newTasks = generateTasks(year).map(t => ({ ...t, generated: true }));
+    const newTasks = generateTasks(year);
 
     tasks.push(...newTasks);
 
@@ -245,19 +270,20 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTable(tasks);
   });
 
-  // -------------------------
-  // Beim Buchen: Aufgabe erledigt
-  // -------------------------
+  /* =========================
+     BUCHUNG ERLEDIGEN
+  ========================= */
   addBookingBtn.addEventListener("click", () => {
     const year = getSelectedYear();
     const id = activeTaskId.value;
 
     if (!id) {
-      alert("Wähle zuerst eine Buchungstatsache.");
+      alert("Wähle zuerst eine Buchung.");
       return;
     }
 
     const tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
+
     const task = tasks.find(t => t.id === id);
 
     if (task) {
@@ -269,7 +295,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-// Wenn Jahr gewechselt wird → Tabelle neu laden
+/* =========================
+   YEAR CHANGE
+========================= */
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("yearBtn")) {
     setTimeout(() => {
@@ -277,4 +305,3 @@ document.addEventListener("click", (e) => {
     }, 0);
   }
 });
-
