@@ -5,9 +5,10 @@ const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 
 const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
-const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
 const yearsKey = (companyId) => `uwi_years_${companyId}_balance`;
+const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
 
+const DEFAULT_YEARS = ["2024", "2025", "2026"];
 const DEFAULT_YEAR = "2024";
 
 function loadCompanies(user) {
@@ -34,15 +35,8 @@ function saveJournal(companyId, year, rows) {
   localStorage.setItem(journalKey(companyId, year), JSON.stringify(rows));
 }
 
-function ensureYears(companyId) {
-  try {
-    const raw = localStorage.getItem(yearsKey(companyId));
-    const arr = raw ? JSON.parse(raw) : null;
-
-    if (Array.isArray(arr) && arr.length) return;
-  } catch {}
-
-  localStorage.setItem(yearsKey(companyId), JSON.stringify(["2024", "2025", "2026"]));
+function saveYears(companyId, years) {
+  localStorage.setItem(yearsKey(companyId), JSON.stringify(years.map(String)));
 }
 
 function minCapital(legal) {
@@ -51,7 +45,7 @@ function minCapital(legal) {
   return 0;
 }
 
-function getEquityLabel(legal) {
+function getEquityName(legal) {
   if (legal === "AG") return "Aktienkapital";
   if (legal === "GmbH") return "Stammkapital";
   return "Eigenkapital";
@@ -59,30 +53,27 @@ function getEquityLabel(legal) {
 
 function createStartCapitalBooking(company) {
   const capital = Number(company.capital || 0);
-
   if (!(capital > 0)) return;
 
-  const year = DEFAULT_YEAR;
-  const rows = loadJournal(company.id, year);
+  const rows = loadJournal(company.id, DEFAULT_YEAR);
 
-  const alreadyExists = rows.some(r => r && r.isStartCapital === true);
+  const alreadyExists = rows.some(r => r && r.system === "startkapital");
   if (alreadyExists) return;
 
-  const entry = {
-    id: `start_${company.id}`,
+  rows.push({
+    id: `start_${company.id}_${Date.now()}`,
     fact: `Startkapital für ${company.name}`,
     sollName: "Bank",
-    habenName: getEquityLabel(company.legal),
+    habenName: getEquityName(company.legal),
     debit: "1020",
     credit: "2800",
     amount: capital,
-    year,
+    year: DEFAULT_YEAR,
     date: new Date().toISOString(),
-    isStartCapital: true
-  };
+    system: "startkapital"
+  });
 
-  rows.push(entry);
-  saveJournal(company.id, year, rows);
+  saveJournal(company.id, DEFAULT_YEAR, rows);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -92,17 +83,26 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  document.getElementById("userDisplay").textContent = `Angemeldet: ${user}`;
+  const userDisplay = document.getElementById("userDisplay");
+  if (userDisplay) {
+    userDisplay.textContent = `Angemeldet: ${user}`;
+  }
 
-  document.getElementById("backOverviewBtn").onclick = () => {
-    window.location.href = "overview.html";
-  };
+  const backOverviewBtn = document.getElementById("backOverviewBtn");
+  if (backOverviewBtn) {
+    backOverviewBtn.onclick = () => {
+      window.location.href = "overview.html";
+    };
+  }
 
-  document.getElementById("logoutBtn").onclick = () => {
-    localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(currentCompanyKey(user));
-    window.location.href = "index.html";
-  };
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.onclick = () => {
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(currentCompanyKey(user));
+      window.location.href = "index.html";
+    };
+  }
 
   const cancelBtn = document.getElementById("cancelBtn");
   if (cancelBtn) {
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     capitalEl.min = min;
 
-    if (Number(capitalEl.value) < min) {
+    if (Number(capitalEl.value || 0) < min) {
       capitalEl.value = min;
     }
   }
@@ -174,10 +174,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     companies.unshift(company);
     saveCompanies(user, companies);
-
     localStorage.setItem(currentCompanyKey(user), company.id);
 
-    ensureYears(company.id);
+    saveYears(company.id, DEFAULT_YEARS);
     createStartCapitalBooking(company);
 
     alert("Firma erstellt");
