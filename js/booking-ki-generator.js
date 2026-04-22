@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .replace("{betrag}", amount.toLocaleString("de-CH"));
 
       tasks.push({
-        id: year + "-" + i,
+        id: year + "-" + Date.now() + "-" + i,
         fact: fact,
         status: "open"
       });
@@ -233,4 +233,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+});
+
+// Wenn Jahr gewechselt wird → Tabelle neu laden
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("yearBtn")) {
+    setTimeout(() => {
+      window.initKICasesForYear();
+    }, 0);
+  }
 });
