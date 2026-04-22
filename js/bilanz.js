@@ -224,6 +224,10 @@ function loadJournal(companyId, year) {
   }
 }
 
+function saveJournal(companyId, year, rows) {
+  localStorage.setItem(journalKey(companyId, year), JSON.stringify(rows));
+}
+
 const ACCOUNT_TYPES = {
   "1000": "asset", "1020": "asset", "1060": "asset", "1100": "asset", "1170": "asset", "1200": "asset", "1210": "asset", "1300": "asset",
   "1400": "asset", "1480": "asset", "1500": "asset", "1510": "asset", "1520": "asset", "1530": "asset", "1600": "asset", "1700": "asset",
@@ -288,6 +292,73 @@ function computeBalancesFromJournal(rows) {
 }
 
 /* =========================
+   JAHRESABSCHLUSS
+========================= */
+function closeYear(companyId, year) {
+  const currentRows = loadJournal(companyId, year);
+  const saldo = computeBalancesFromJournal(currentRows);
+  const nextYear = String(Number(year) + 1);
+
+  const years = getYears(companyId);
+  if (!years.includes(nextYear)) {
+    years.push(nextYear);
+    years.sort();
+    saveYears(companyId, years);
+  }
+
+  const nextRows = loadJournal(companyId, nextYear);
+  const alreadyClosed = nextRows.some(r => r && r.system === `abschluss_${year}`);
+
+  if (alreadyClosed) {
+    alert(`Jahresabschluss für ${year} wurde schon gemacht.`);
+    return;
+  }
+
+  const carryRows = [];
+
+  Object.keys(saldo).forEach((acc) => {
+    const type = ACCOUNT_TYPES[acc];
+    const amount = Number(saldo[acc] || 0);
+
+    if (!amount) return;
+    if (!(type === "asset" || type === "liability" || type === "equity")) return;
+
+    if (type === "asset") {
+      if (amount > 0) {
+        carryRows.push({
+          debit: acc,
+          credit: "2800",
+          amount: Math.abs(amount),
+          fact: `Vortrag ${year} → ${nextYear}`,
+          year: nextYear,
+          date: new Date().toISOString(),
+          system: `abschluss_${year}`
+        });
+      }
+    } else {
+      carryRows.push({
+        debit: "1020",
+        credit: acc,
+        amount: Math.abs(amount),
+        fact: `Vortrag ${year} → ${nextYear}`,
+        year: nextYear,
+        date: new Date().toISOString(),
+        system: `abschluss_${year}`
+      });
+    }
+  });
+
+  const cleanedNextRows = nextRows.filter(r => r.system !== `abschluss_${year}`);
+  saveJournal(companyId, nextYear, [...cleanedNextRows, ...carryRows]);
+
+  currentYear = nextYear;
+  renderYearTabs(companyId);
+  renderBalance(companyId, currentYear);
+
+  alert(`Jahresabschluss von ${year} nach ${nextYear} erstellt.`);
+}
+
+/* =========================
    JAHR TABS
 ========================= */
 function renderYearTabs(companyId) {
@@ -295,7 +366,6 @@ function renderYearTabs(companyId) {
   if (!el) return;
 
   const years = getYears(companyId);
-
   if (!years.includes(currentYear)) {
     currentYear = years[0];
   }
@@ -308,6 +378,7 @@ function renderYearTabs(companyId) {
     `).join("") +
     `
       <button class="addYearBtn" id="addYearBtn" type="button">+ Jahr hinzufügen</button>
+      <button class="addYearBtn" id="closeYearBtn" type="button">Jahresabschluss</button>
       <button class="addYearBtn" id="deleteYearBtn" type="button">🗑 Jahr löschen</button>
     `;
 
@@ -347,10 +418,18 @@ function renderYearTabs(companyId) {
       return;
     }
 
+    const closeBtn = e.target.closest("#closeYearBtn");
+    if (closeBtn) {
+      if (!confirm(`Jahr ${currentYear} abschliessen und Bilanzwerte ins nächste Jahr übernehmen?`)) {
+        return;
+      }
+      closeYear(companyId, currentYear);
+      return;
+    }
+
     const deleteBtn = e.target.closest("#deleteYearBtn");
     if (deleteBtn) {
       const list = getYears(companyId);
-
       if (list.length <= 1) {
         alert("Mindestens ein Jahr muss bleiben.");
         return;
@@ -442,7 +521,7 @@ function renderBalance(companyId, year) {
   root.innerHTML = `
     <div class="balanceHeaderBlue">
       <div class="balanceTitle">Bilanz ${year}</div>
-      <div class="balanceSub">Beträge werden aus Buchungen berechnet (Start = 0)</div>
+      <div class="balanceSub">Beträge werden aus Buchungen berechnet</div>
     </div>
 
     <div class="balanceSheet">
@@ -483,9 +562,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const backBtn = document.getElementById("backBtn");
   if (backBtn) {
-backBtn.onclick = () => {
-  window.location.href = "overview.html";
-};
+    backBtn.onclick = () => {
+      window.location.href = "overview.html";
+    };
   }
 
   const logoutBtn = document.getElementById("logoutBtn");
