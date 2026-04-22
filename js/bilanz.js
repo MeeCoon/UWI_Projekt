@@ -403,16 +403,18 @@ function renderAccountRow(no, name, value) {
 
 function renderGroup(group, saldo) {
   const rowsHtml = group.accounts.map(([no, name]) => {
-    const value = Number(saldo[no] || 0);
+    const type = ACCOUNT_TYPES[no] || "asset";
+const raw = Number(saldo[no] || 0);
+
+let value = raw;
+
+// Bilanzdarstellung korrekt drehen
+if (type === "liability" || type === "equity") {
+  value = -raw;
+}
 
     return renderAccountRow(no, name, value);
   }).join("");
-
-  return `
-    <div class="balanceBlockTitle">${group.title}</div>
-    ${rowsHtml}
-  `;
-}
 
 /* =========================
    BILANZ RENDER
