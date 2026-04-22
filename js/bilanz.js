@@ -403,25 +403,10 @@ function renderAccountRow(no, name, value) {
 
 function renderGroup(group, saldo) {
   const rowsHtml = group.accounts.map(([no, name]) => {
-    const raw = Number(saldo[no] || 0);
+    const value = Number(saldo[no] || 0);
 
-    const type = ACCOUNT_TYPES[no] || "asset";
-
-    let shown = raw;
-
-    // Anzeige-Regel (wichtig!)
-    if (type === "revenue" || type === "liability" || type === "equity") {
-      shown = -raw;
-    }
-
-    return renderAccountRow(no, name, shown);
+    return renderAccountRow(no, name, value);
   }).join("");
-
-  return `
-    <div class="balanceBlockTitle">${group.title}</div>
-    ${rowsHtml}
-  `;
-}
 
   return `
     <div class="balanceBlockTitle">${group.title}</div>
@@ -459,8 +444,8 @@ function renderBalance(companyId, year) {
   }, 0);
 
   const totalLiabilities = liabilityGroups.flatMap(g => g.accounts).reduce((sum, [no]) => {
-    return sum + Math.max(-Number(saldo[no] || 0), 0);
-  }, 0);
+  return sum + Number(saldo[no] || 0);
+}, 0);
 
   root.innerHTML = `
     <div class="balanceHeaderBlue">
