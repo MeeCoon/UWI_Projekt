@@ -43,6 +43,46 @@ const QUIZ_QUESTIONS = [
     question: "Was ist ein typischer Ertrag?",
     answers: ["Lohnaufwand", "Versicherungsaufwand", "Warenertrag", "Abschreibung"],
     correct: 2
+  },
+  {
+    question: "Was ist Fremdkapital?",
+    answers: ["Schulden", "Gewinn", "Umsatz", "Vorräte"],
+    correct: 0
+  },
+  {
+    question: "Was gehört in der Bilanz zu den Aktiven?",
+    answers: ["Bank", "Darlehen", "Eigenkapital", "Umsatz"],
+    correct: 0
+  },
+  {
+    question: "Was gehört in der Bilanz zu den Passiven?",
+    answers: ["Kasse", "Maschinen", "Verbindlichkeiten", "Waren"],
+    correct: 2
+  },
+  {
+    question: "Was ist ein Beispiel für Umlaufvermögen?",
+    answers: ["Bankguthaben", "Aktienkapital", "Darlehen", "Lohnaufwand"],
+    correct: 0
+  },
+  {
+    question: "Was ist ein Beispiel für Anlagevermögen?",
+    answers: ["Kasse", "Maschinen", "Debitoren", "Warenertrag"],
+    correct: 1
+  },
+  {
+    question: "Was passiert bei einem Gewinn normalerweise?",
+    answers: ["Eigenkapital steigt", "Eigenkapital sinkt", "Bank verschwindet", "Umsatz wird null"],
+    correct: 0
+  },
+  {
+    question: "Welche Phase gehört zum Konjunkturzyklus?",
+    answers: ["Rezession", "Inventur", "Fusion", "Import"],
+    correct: 0
+  },
+  {
+    question: "Was ist ein typischer Personalaufwand?",
+    answers: ["Löhne", "Warenertrag", "Aktienkapital", "Bank"],
+    correct: 0
   }
 ];
 
@@ -150,12 +190,10 @@ function renderOrgChart() {
     return `
       <div class="orgDeptColumn">
         <div class="orgDeptTopLine"></div>
-
         <div class="orgCard orgDeptCard orgEditable" data-type="department">
           <div class="orgName" contenteditable="true">${escapeHtml(dep.title)}</div>
           <div class="orgRole" contenteditable="true">${escapeHtml(dep.lead)}</div>
         </div>
-
         ${dep.employees.length ? `
           <div class="orgDeptVertical"></div>
           <div class="orgMiniGrid">
@@ -168,7 +206,6 @@ function renderOrgChart() {
 
   root.innerHTML = `
     <div class="orgDiagramTitle">ORGANIGRAMM</div>
-
     <div class="orgTree">
       <div class="orgTop">
         <div class="orgCard orgCardTop orgEditable" data-type="ceo">
@@ -176,7 +213,6 @@ function renderOrgChart() {
           <div class="orgRole" contenteditable="true">${escapeHtml(data.ceo.name)}</div>
         </div>
       </div>
-
       ${data.departments.length ? `
         <div class="orgConnectorVertical"></div>
         <div class="orgConnectorHorizontal"></div>
@@ -201,14 +237,11 @@ function addDepartment() {
   wrapper.className = "orgDeptColumn";
   wrapper.innerHTML = `
     <div class="orgDeptTopLine"></div>
-
     <div class="orgCard orgDeptCard orgEditable" data-type="department">
       <div class="orgName" contenteditable="true">Neuer Bereich</div>
       <div class="orgRole" contenteditable="true">Neue Leitung</div>
     </div>
-
     <div class="orgDeptVertical"></div>
-
     <div class="orgMiniGrid">
       <div class="orgMiniCard orgEditable" data-type="employee">
         <div class="orgMiniText" contenteditable="true">Neuer Mitarbeiter</div>
@@ -280,7 +313,6 @@ function deleteSelectedBox() {
     if (miniGrid && !miniGrid.querySelector(".orgMiniCard")) {
       const deptColumn = miniGrid.closest(".orgDeptColumn");
       miniGrid.remove();
-
       const line = deptColumn?.querySelector(".orgDeptVertical");
       if (line) line.remove();
     }
@@ -292,17 +324,16 @@ function deleteSelectedBox() {
 function ensureQuizUI() {
   const card = document.querySelector("main .card");
   if (!card) return;
-
   if (document.getElementById("quizWrap")) return;
 
   const quizWrap = document.createElement("div");
   quizWrap.id = "quizWrap";
+  quizWrap.style.display = "none";
   quizWrap.innerHTML = `
     <div class="balanceHeaderBlue" style="margin-top:28px;">
       <div class="balanceTitle">Wirtschaft Quiz</div>
       <div class="balanceSub">Locker üben mit kurzen Fragen</div>
     </div>
-
     <div class="quizCard">
       <div id="quizScore" class="quizScore">Punkte: 0</div>
       <div id="quizQuestion" class="quizQuestion">Frage wird geladen...</div>
@@ -334,6 +365,7 @@ function nextQuizQuestion() {
 
   q.textContent = currentQuiz.question;
   r.textContent = "";
+  r.className = "quizResult";
   s.textContent = `Punkte: ${quizScore}`;
 
   a.innerHTML = currentQuiz.answers.map((answer, index) => `
@@ -374,6 +406,25 @@ function checkQuizAnswer() {
   }
 }
 
+function setupQuizToggle() {
+  const toggleBtn = document.getElementById("toggleQuizBtn");
+  if (!toggleBtn) return;
+
+  toggleBtn.onclick = () => {
+    const quizWrap = document.getElementById("quizWrap");
+    if (!quizWrap) return;
+
+    if (quizWrap.style.display === "none") {
+      quizWrap.style.display = "block";
+      toggleBtn.textContent = "❌ Quiz schliessen";
+      nextQuizQuestion();
+    } else {
+      quizWrap.style.display = "none";
+      toggleBtn.textContent = "🧠 Quiz starten";
+    }
+  };
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const user = getUserOrRedirect();
   if (!user) return;
@@ -405,5 +456,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderOrgChart();
   ensureQuizUI();
-  nextQuizQuestion();
+  setupQuizToggle();
 });
