@@ -218,30 +218,55 @@ function loadJournal(companyId, year) {
   }
 }
 
+const ACCOUNT_TYPES = {
+  "1000":"asset","1020":"asset","1060":"asset","1100":"asset","1170":"asset","1200":"asset","1210":"asset","1300":"asset",
+  "1400":"asset","1480":"asset","1500":"asset","1510":"asset","1520":"asset","1530":"asset","1600":"asset","1700":"asset",
+
+  "2000":"liability","2100":"liability","2200":"liability","2300":"liability",
+  "2450":"liability","2451":"liability","2600":"liability",
+
+  "2800":"equity","2850":"equity","2950":"equity","2970":"equity","2979":"equity",
+
+  "4000":"expense","4200":"expense","5000":"expense","5700":"expense","5800":"expense",
+  "6000":"expense","6100":"expense","6200":"expense","6300":"expense","6400":"expense",
+  "6500":"expense","6600":"expense","6700":"expense","6800":"expense","6900":"expense",
+  "7510":"expense","8500":"expense",
+
+  "3000":"revenue","3200":"revenue","3400":"revenue","3805":"revenue",
+  "6950":"revenue","7500":"revenue","8510":"revenue"
+};
+
+function applyBooking(balance, account, amount, isDebit) {
+  const type = ACCOUNT_TYPES[account] || "asset";
+
+  if (type === "asset" || type === "expense") {
+    balance[account] = (balance[account] || 0) + (isDebit ? amount : -amount);
+  } else {
+    balance[account] = (balance[account] || 0) + (isDebit ? -amount : amount);
+  }
+}
+
 function computeBalancesFromJournal(rows) {
   const bal = {};
 
   for (const r of rows) {
 
-    // ✅ DEIN SYSTEM (Split-Buchungen)
     if (r.type === "split") {
 
-      // Soll
       for (const d of r.debits || []) {
         const acc = String(d.accountNo);
         const amt = Number(d.amount || 0);
         if (!acc || !(amt > 0)) continue;
 
-        bal[acc] = (bal[acc] || 0) + amt;
+        applyBooking(bal, acc, amt, true);
       }
 
-      // Haben
       for (const c of r.credits || []) {
         const acc = String(c.accountNo);
         const amt = Number(c.amount || 0);
         if (!acc || !(amt > 0)) continue;
 
-        bal[acc] = (bal[acc] || 0) - amt;
+        applyBooking(bal, acc, amt, false);
       }
 
       continue;
