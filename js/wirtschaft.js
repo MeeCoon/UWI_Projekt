@@ -23,35 +23,35 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-function parseInput(raw) {
-  const lines = raw
-    .split("\n")
-    .map(line => line.trim())
-    .filter(Boolean);
-
-  if (!lines.length) return null;
-
-  const topParts = lines[0].split("|").map(x => x.trim());
-
-  const ceo = {
-    name: topParts[0] || "Unbekannt",
-    role: topParts[1] || "Geschäftsführung"
+function getDefaultOrgData() {
+  return {
+    ceo: {
+      name: "Petra Müller",
+      role: "Geschäftsführung"
+    },
+    departments: [
+      {
+        title: "Entwicklung",
+        lead: "Fritz Teufel",
+        employees: ["Vera Kluge", "Tina Schinkel", "Stefan Böhme"]
+      },
+      {
+        title: "Software",
+        lead: "Martin Kurz",
+        employees: ["Egon Meyer", "Volker Sockel"]
+      },
+      {
+        title: "Vertrieb",
+        lead: "Mario Enge",
+        employees: ["Manuel Ochs", "Holger Baum"]
+      },
+      {
+        title: "Marketing",
+        lead: "Michael Vries",
+        employees: ["Fritz Glanz", "Uwe Jung"]
+      }
+    ]
   };
-
-  const departments = lines.slice(1).map(line => {
-    const parts = line.split("|").map(x => x.trim());
-
-    const title = parts[0] || "Bereich";
-    const lead = parts[1] || "Leitung";
-    const employees = (parts[2] || "")
-      .split(",")
-      .map(x => x.trim())
-      .filter(Boolean);
-
-    return { title, lead, employees };
-  });
-
-  return { ceo, departments };
 }
 
 function clearSelection() {
@@ -65,7 +65,6 @@ function attachBoxEvents() {
   document.querySelectorAll(".orgEditable").forEach(box => {
     box.onclick = (e) => {
       e.stopPropagation();
-
       clearSelection();
       box.classList.add("orgSelected");
       selectedBox = box;
@@ -75,7 +74,6 @@ function attachBoxEvents() {
   document.querySelectorAll('[contenteditable="true"]').forEach(editable => {
     editable.onclick = (e) => {
       e.stopPropagation();
-
       const box = editable.closest(".orgEditable");
       if (!box) return;
 
@@ -99,13 +97,7 @@ function renderOrgChart() {
   const root = document.getElementById("orgChart");
   if (!root) return;
 
-  const raw = document.getElementById("inputData")?.value || "";
-  const data = parseInput(raw);
-
-  if (!data) {
-    root.innerHTML = `<div class="orgEmpty">Keine Daten vorhanden.</div>`;
-    return;
-  }
+  const data = getDefaultOrgData();
 
   const departmentsHtml = data.departments.map((dep) => {
     const employeesHtml = dep.employees.map(name => `
@@ -160,7 +152,7 @@ function renderOrgChart() {
 function addDepartment() {
   const row = document.querySelector(".orgDeptRow");
   if (!row) {
-    alert("Erstelle zuerst das Organigramm.");
+    alert("Organigramm konnte nicht geladen werden.");
     return;
   }
 
@@ -193,8 +185,7 @@ function addEmployee() {
     return;
   }
 
-  let deptColumn = selectedBox.closest(".orgDeptColumn");
-
+  const deptColumn = selectedBox.closest(".orgDeptColumn");
   if (!deptColumn) {
     alert("Bitte eine Abteilung oder einen Mitarbeiter auswählen.");
     return;
@@ -282,7 +273,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  document.getElementById("generateBtn")?.addEventListener("click", renderOrgChart);
   document.getElementById("addDeptBtn")?.addEventListener("click", addDepartment);
   document.getElementById("addEmployeeBtn")?.addEventListener("click", addEmployee);
   document.getElementById("deleteSelectedBtn")?.addEventListener("click", deleteSelectedBox);
