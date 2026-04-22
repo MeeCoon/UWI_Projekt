@@ -483,9 +483,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const backBtn = document.getElementById("backBtn");
   if (backBtn) {
-    backBtn.onclick = () => {
-      window.location.href = "company.html";
-    };
+backBtn.onclick = () => {
+  window.location.href = "overview.html";
+};
   }
 
   const logoutBtn = document.getElementById("logoutBtn");
