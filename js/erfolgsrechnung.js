@@ -357,9 +357,7 @@ function renderAccountRow(no, name, value) {
 function renderGroup(group, saldo, type) {
   const rowsHtml = group.accounts.map(([no, name]) => {
     const raw = Number(saldo[no] || 0);
-    const shown = type === "revenue"
-      ? Math.max(-raw, 0)
-      : Math.max(raw, 0);
+    const shown = raw;
 
     return renderAccountRow(no, name, shown);
   }).join("");
@@ -397,11 +395,11 @@ function renderSuccess(companyId, year) {
   const allRevenueAccounts = revenueGroups.flatMap(g => g.accounts);
 
   const totalExpense = allExpenseAccounts.reduce((sum, [no]) => {
-    return sum + Math.max(Number(saldo[no] || 0), 0);
+    return sum + Number(saldo[no] || 0);
   }, 0);
 
   const totalRevenue = allRevenueAccounts.reduce((sum, [no]) => {
-    return sum + Math.max(-Number(saldo[no] || 0), 0);
+    return sum + Number(saldo[no] || 0);
   }, 0);
 
   const profit = totalRevenue - totalExpense;
