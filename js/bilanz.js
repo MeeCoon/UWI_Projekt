@@ -102,6 +102,7 @@ function getLiabilityGroups(legal) {
     title: "Kurzfristiges Fremdkapital",
     accounts: [
       ["2000", "Verbindlichkeiten aus Lieferungen und Leistungen"],
+      ["2270", "Verbindlichkeiten Sozialversicherungen"],
       ["2100", "Bankverbindlichkeiten"],
       ["2200", "Geschuldete MWST"],
       ["2300", "Passive Rechnungsabgrenzungen"]
