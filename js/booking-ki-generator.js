@@ -118,8 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "Die Firma bucht Werbeaufwand von {betrag} CHF.",
     "Die Firma hebt Bargeld von der Bank im Betrag von {betrag} CHF ab.",
     "Die Firma zahlt Bargeld in die Kasse ein über {betrag} CHF.",
-    "Die Firma tätigt Bankspesen von {betrag} CHF.",
-    "
+    "Die Firma tätigt Bankspesen von {betrag} CHF."
   ];
 
   /* =========================
