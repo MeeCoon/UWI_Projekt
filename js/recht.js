@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "index.html";
   };
 
+  // 🔥 KI BUTTON
   document.getElementById("askBtn").onclick = async () => {
     const question = document.getElementById("rechtQuestion").value.trim();
     const answerBox = document.getElementById("answerBox");
@@ -47,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     answerBox.textContent = "KI denkt...";
 
     try {
-      const res = await fetch(fetch("https://cautious-memory-jj657wwvpw4p2qvjx-3000.app.github.dev/api/recht-ki", {, {
+      const res = await fetch("https://cautious-memory-jj657wwvpw4p2qvjx-3000.app.github.dev/api/recht-ki", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -60,11 +61,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await res.json();
       answerBox.textContent = data.answer || "Keine Antwort erhalten.";
+
     } catch (err) {
       answerBox.textContent = "Fehler: Server läuft nicht oder Verbindung klappt nicht.";
+      console.error(err);
     }
   };
 
+  // 🎯 QUIZ BUTTON
   document.getElementById("quizBtn").onclick = () => {
     const random = quizQuestions[Math.floor(Math.random() * quizQuestions.length)];
     document.getElementById("rechtQuestion").value = random;
