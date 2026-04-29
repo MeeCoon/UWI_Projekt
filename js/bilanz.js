@@ -133,41 +133,59 @@ function getLiabilityGroups(legal) {
     ];
   }
 
-  if (legal === "GmbH") {
-    return [
-      baseShort,
-      baseLong,
-      {
-        title: "Eigenkapital GmbH",
-        accounts: [
-          ["2261", "Beschlossene Ausschüttungen"],
-          ["2800", "Stammkapital"],
-          ["2950", "Gesetzliche Gewinnreserve"],
-          ["2960", "Freiwillige Gewinnreserven"],
-          ["2970", "Gewinnvortrag / Verlustvortrag"],
-          ["2979", "Jahresgewinn oder Jahresverlust"]
-        ]
-      }
-    ];
-  }
-
-  if (legal === "AG") {
-    return [
-      baseShort,
-      baseLong,
-      {
-        title: "Eigenkapital Aktiengesellschaft",
-        accounts: [
-          ["2261", "Beschlossene Ausschüttungen"],
-          ["2800", "Aktienkapital"],
-          ["2950", "Gesetzliche Gewinnreserve"],
-          ["2960", "Freiwillige Gewinnreserven"],
-          ["2970", "Gewinnvortrag / Verlustvortrag"],
-          ["2979", "Jahresgewinn oder Jahresverlust"]
-        ]
-      }
-    ];
-  }
+   if (legal === "GmbH") {
+     return [
+       {
+         title: "Kurzfristiges Fremdkapital",
+         accounts: [
+           ["2000", "Verbindlichkeiten aus Lieferungen und Leistungen"],
+           ["2270", "Verbindlichkeiten Sozialversicherungen"],
+           ["2100", "Bankverbindlichkeiten"],
+           ["2200", "Geschuldete MWST"],
+           ["2300", "Passive Rechnungsabgrenzungen"],
+           ["2261", "Beschlossene Ausschüttungen"] // ✅ hierhin verschieben
+         ]
+       },
+       baseLong,
+       {
+         title: "Eigenkapital GmbH",
+         accounts: [
+           ["2800", "Stammkapital"],
+           ["2950", "Gesetzliche Gewinnreserve"],
+           ["2960", "Freiwillige Gewinnreserven"],
+           ["2970", "Gewinnvortrag / Verlustvortrag"],
+           ["2979", "Jahresgewinn oder Jahresverlust"]
+         ]
+       }
+     ];
+   }
+   
+   if (legal === "AG") {
+     return [
+       {
+         title: "Kurzfristiges Fremdkapital",
+         accounts: [
+           ["2000", "Verbindlichkeiten aus Lieferungen und Leistungen"],
+           ["2270", "Verbindlichkeiten Sozialversicherungen"],
+           ["2100", "Bankverbindlichkeiten"],
+           ["2200", "Geschuldete MWST"],
+           ["2300", "Passive Rechnungsabgrenzungen"],
+           ["2261", "Beschlossene Ausschüttungen"] // ✅ korrekt hier
+         ]
+       },
+       baseLong,
+       {
+         title: "Eigenkapital Aktiengesellschaft",
+         accounts: [
+           ["2800", "Aktienkapital"],
+           ["2950", "Gesetzliche Gewinnreserve"],
+           ["2960", "Freiwillige Gewinnreserven"],
+           ["2970", "Gewinnvortrag / Verlustvortrag"],
+           ["2979", "Jahresgewinn oder Jahresverlust"]
+         ]
+       }
+     ];
+   }
 
   return [baseShort, baseLong];
 }
