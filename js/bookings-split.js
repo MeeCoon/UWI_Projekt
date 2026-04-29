@@ -30,6 +30,8 @@ const KONTENPLAN = [
   {no:"2000", name:"Verbindlichkeiten aus Lieferungen und Leistungen"},
   {no:"2100", name:"Bankverbindlichkeiten"},
   {no:"2200", name:"Geschuldete MWST"},
+  {no:"2261", name:"Beschlossene Ausschüttungen"},
+  {no:"2270", name:"Verbindlichkeiten Sozialversicherungen"},
   {no:"2300", name:"Passive Rechnungsabgrenzung"},
   // Langfristiges Fremdkapital
   {no:"2450", name:"Darlehen"},
