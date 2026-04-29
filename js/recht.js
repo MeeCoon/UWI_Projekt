@@ -42,8 +42,10 @@ function addMessage(text, type) {
 
   msg.innerText = text;
   box.appendChild(msg);
-  box.scrollTop = box.scrollHeight;
-}
+box.scrollTo({
+  top: box.scrollHeight,
+  behavior: "smooth"
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   const user = getUserOrRedirect();
