@@ -270,8 +270,11 @@ function applyBooking(balance, account, amount, isDebit) {
   const type = ACCOUNT_TYPES[account] || "asset";
 
   if (type === "asset" || type === "expense") {
+    // Soll = + / Haben = -
     balance[account] = (balance[account] || 0) + (isDebit ? amount : -amount);
   } else {
+    // PASSIV + EIGENKAPITAL:
+    // Haben = + / Soll = -
     balance[account] = (balance[account] || 0) + (isDebit ? -amount : amount);
   }
 }
@@ -497,7 +500,7 @@ function renderGroup(group, saldo) {
       if (type === "liability" || type === "equity") {
         value = raw < 0 ? -raw : raw;
       } else {
-        value = raw;
+        value = Math.abs(raw);
       }
 
     return renderAccountRow(no, name, value);
