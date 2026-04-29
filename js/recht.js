@@ -9,14 +9,6 @@ const API_URL = "https://cautious-memory-jj657wwvpw4p2qvjx-3000.app.github.dev/a
 
 let chatHistory = [];
 
-const quizQuestions = [
-  "Welche Rechtsform passt zu meiner Firma?",
-  "Was bedeutet Haftung?",
-  "Was ist besser: GmbH oder AG?",
-  "Welche Pflichten hat eine Firma?",
-  "Was muss man bei der Gründung beachten?"
-];
-
 function getUserOrRedirect() {
   const user = localStorage.getItem(USER_KEY);
   if (!user) {
@@ -32,26 +24,23 @@ function getCompany(user) {
   return companies.find(c => c.id === id) || null;
 }
 
-function addMessage(text, sender) {
+function addMessage(text, type) {
   const box = document.getElementById("answerBox");
 
   const msg = document.createElement("div");
   msg.style.margin = "10px 0";
   msg.style.padding = "12px";
   msg.style.borderRadius = "12px";
-  msg.style.whiteSpace = "pre-wrap";
-  msg.style.maxWidth = "85%";
+  msg.style.maxWidth = "80%";
 
-  if (sender === "user") {
-    msg.style.marginLeft = "auto";
+  if (type === "user") {
     msg.style.background = "#dbeafe";
-    msg.innerText = "Du:\n" + text;
+    msg.style.alignSelf = "flex-end";
   } else {
-    msg.style.marginRight = "auto";
-    msg.style.background = "#f3f4f6";
-    msg.innerText = "KI:\n" + text;
+    msg.style.background = "#f1f5f9";
   }
 
+  msg.innerText = text;
   box.appendChild(msg);
   box.scrollTop = box.scrollHeight;
 }
@@ -74,21 +63,22 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "index.html";
   };
 
-  document.getElementById("answerBox").innerHTML = "";
-  addMessage("Hallo! Ich bin deine Recht-KI. Stelle mir eine Frage zu Rechtsform, Haftung oder Gründung.", "ki");
+  const box = document.getElementById("answerBox");
+  box.innerHTML = "";
+  box.style.display = "flex";
+  box.style.flexDirection = "column";
 
   document.getElementById("askBtn").onclick = async () => {
     const input = document.getElementById("rechtQuestion");
     const question = input.value.trim();
-
     if (!question) return;
 
     addMessage(question, "user");
-    chatHistory.push({ role: "user", content: question });
     input.value = "";
 
-    const loadingText = "KI denkt...";
-    addMessage(loadingText, "ki");
+    const loading = document.createElement("div");
+    loading.innerText = "KI denkt...";
+    box.appendChild(loading);
 
     try {
       const res = await fetch(API_URL, {
@@ -98,30 +88,23 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         body: JSON.stringify({
           question,
-          company: company || "UWI Firma",
+          company,
           history: chatHistory
         })
       });
 
       const data = await res.json();
+      loading.remove();
 
-      const box = document.getElementById("answerBox");
-      box.lastChild.remove();
+      addMessage(data.answer, "ki");
 
-      const answer = data.answer || "Keine Antwort erhalten.";
-      addMessage(answer, "ki");
-      chatHistory.push({ role: "assistant", content: answer });
+      // Verlauf speichern
+      chatHistory.push({ role: "user", content: question });
+      chatHistory.push({ role: "assistant", content: data.answer });
 
     } catch (err) {
-      const box = document.getElementById("answerBox");
-      box.lastChild.remove();
-      addMessage("Fehler: Server läuft nicht oder Verbindung klappt nicht.", "ki");
-      console.error(err);
+      loading.remove();
+      addMessage("Fehler bei Verbindung.", "ki");
     }
-  };
-
-  document.getElementById("quizBtn").onclick = () => {
-    const random = quizQuestions[Math.floor(Math.random() * quizQuestions.length)];
-    document.getElementById("rechtQuestion").value = random;
   };
 });
