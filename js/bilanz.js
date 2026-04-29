@@ -140,6 +140,7 @@ function getLiabilityGroups(legal) {
       {
         title: "Eigenkapital GmbH",
         accounts: [
+          ["2261", "Beschlossene Ausschüttungen"]
           ["2800", "Stammkapital"],
           ["2950", "Gesetzliche Gewinnreserve"],
           ["2960", "Freiwillige Gewinnreserven"],
@@ -157,6 +158,7 @@ function getLiabilityGroups(legal) {
       {
         title: "Eigenkapital Aktiengesellschaft",
         accounts: [
+          ["2261", "Beschlossene Ausschüttungen"]
           ["2800", "Aktienkapital"],
           ["2950", "Gesetzliche Gewinnreserve"],
           ["2960", "Freiwillige Gewinnreserven"],
@@ -233,7 +235,7 @@ const ACCOUNT_TYPES = {
   "1000": "asset", "1020": "asset", "1060": "asset", "1100": "asset", "1170": "asset", "1200": "asset", "1210": "asset", "1300": "asset",
   "1400": "asset", "1480": "asset", "1500": "asset", "1510": "asset", "1520": "asset", "1530": "asset", "1600": "asset", "1700": "asset",
 
-  "2000": "liability", "2100": "liability", "2200": "liability", "2300": "liability",
+  "2000": "liability", "2100": "liability", "2200": "liability", "2261": "liability", "2270": "liability", "2300": "liability",
   "2450": "liability", "2451": "liability", "2600": "liability",
 
   "2800": "equity", "2850": "equity", "2950": "equity", "2960": "equity", "2970": "equity", "2979": "equity", "2891": "equity",
