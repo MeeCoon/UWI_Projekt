@@ -186,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const industry = company.industry;
 
-    for (let i = 1; i <= 100; i++) {
+    for (let i = 1; i <= 20; i++) {
 
       let pool = [...templates];
 
