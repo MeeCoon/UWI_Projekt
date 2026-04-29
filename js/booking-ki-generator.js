@@ -129,21 +129,22 @@ document.addEventListener("DOMContentLoaded", () => {
       "Die Firma verkauft Handelswaren gegen Rechnung für {betrag} CHF.",
       "Die Firma kauft Handelswaren auf Rechnung für {betrag} CHF.",
       "Die Firma erhält Zahlung für Warenverkäufe über {betrag} CHF per Bank.",
-      "Die Firma gewährt Kunden Rabatt von {betrag} CHF auf Warenverkauf."
+      "Ein Kunde zahlt eine offene Rechnung von {betrag} CHF für bereits gebuchte Handelswarenerträge.",
+      "Die Firma gewährt Kunden Rabatt im Wert von {betrag} CHF auf Warenverkauf.",
+      "Die Firma erhält 10 % Rabatt auf den Betrag von {betrag} CHF für gekaufte Waren (bereits als Rechnung verbucht).",
+      "Die Firma erhält 2 % Skonto auf den BEtrag von {betrag} CHF für gekaufte Waren (bereits als Rechnung verbucht)."
     ],
 
     Produktion: [
       "Die Firma kauft Rohstoffe für {betrag} CHF auf Rechnung.",
-      "Die Firma produziert und verkauft eigene Produkte für {betrag} CHF.",
-      "Die Firma bezahlt Produktionslöhne von {betrag} CHF per Bank.",
-      "Die Firma verbraucht Material im Wert von {betrag} CHF."
+      "Die Firma stell Rechnungen an Kunden für verkaufte, eigene Produkte von {betrag} CHF.",
+      "Die Firma gewährt Kunden Rabatt im Wert von {betrag} CHF für Produktionserlöse (bereits als Rechnung verbucht).",
+      "Die Firma zahlt eine offene Rechnung von {betrag} CHF für den bereits gebuchten Aufwand für gekaufte Rohstoffe."
     ],
 
     Dienstleistung: [
       "Die Firma erbringt eine Dienstleistung und stellt {betrag} CHF in Rechnung.",
       "Die Firma erhält Zahlung für Dienstleistungen über {betrag} CHF.",
-      "Die Firma kauft Software für {betrag} CHF zur Leistungserbringung.",
-      "Die Firma bezahlt Büromiete von {betrag} CHF per Bank."
     ]
   };
 
