@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     answerBox.textContent = "KI denkt...";
 
     try {
-      const res = await fetch(https://cautious-memory-jj657wvwpw4p2qvjx-3000.app.github.dev/, {
+      const res = await fetch("https://cautious-memory-jj657wvwpw4p2qvjx-3000.app.github.dev/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
