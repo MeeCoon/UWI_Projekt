@@ -497,11 +497,6 @@ function renderGroup(group, saldo) {
     const raw = Number(saldo[no] || 0);
 
     let value = raw;
-      if (type === "liability" || type === "equity") {
-        value = raw < 0 ? -raw : raw;
-      } else {
-        value = Math.abs(raw);
-      }
 
     return renderAccountRow(no, name, value);
   }).join("");
@@ -537,10 +532,12 @@ function renderBalance(companyId, year) {
     return sum + Math.max(raw, 0);
   }, 0);
 
-   const totalLiabilities = liabilityGroups.flatMap(g => g.accounts).reduce((sum, [no]) => {
-     const raw = Number(saldo[no] || 0);
-     return sum + (raw < 0 ? -raw : raw);
-   }, 0);
+   const totalLiabilities = liabilityGroups
+     .flatMap(g => g.accounts)
+     .reduce((sum, [no]) => {
+       const raw = Number(saldo[no] || 0);
+       return sum + raw;
+     }, 0);
 
   root.innerHTML = `
     <div class="balanceHeaderBlue">
