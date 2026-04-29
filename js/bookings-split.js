@@ -165,16 +165,25 @@ function createLine(side, company) {
 
   row.style.display = "flex";
   row.style.gap = "8px";
+  row.style.flexWrap = "wrap";
+  row.style.width = "100%";
 
   const select = document.createElement("select");
   select.innerHTML = buildAccountOptions(company);
+  select.style.flex = "2 1 200px";
+  select.style.minWidth = "0";
 
   const amount = document.createElement("input");
   amount.type = "number";
   amount.placeholder = "Betrag";
+  amount.style.flex = "1 1 100px";
+  amount.style.minWidth = "0";
 
   const remove = document.createElement("button");
   remove.textContent = "✕";
+  remove.className = "btn";
+  remove.style.flex = "0 0 auto";
+
   remove.onclick = () => row.remove();
 
   row.append(select, amount, remove);
