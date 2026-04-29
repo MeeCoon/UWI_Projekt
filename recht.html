@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UWI — Recht</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">UWI Unternehmenssimulation</div>
+  <nav class="nav-inline">
+    <span id="userDisplay" class="muted"></span>
+    <button id="backBtn" class="btn" type="button">Zur Übersicht</button>
+    <button id="logoutBtn" class="btn" type="button">Abmelden</button>
+  </nav>
+</header>
+
+<main class="container">
+  <section class="card">
+    <h1 class="h2">Recht</h1>
+
+    <div class="page-tabs">
+      <a href="bilanz.html" class="page-tab">Bilanz</a>
+      <a href="erfolgsrechnung.html" class="page-tab">Erfolgsrechnung</a>
+      <a href="bookings.html" class="page-tab">Buchungssätze</a>
+      <a href="wirtschaft.html" class="page-tab">Wirtschaft</a>
+      <a href="recht.html" class="page-tab active">Recht</a>
+    </div>
+
+    <div class="balanceHeaderBlue" style="margin-top:14px;">
+      <div class="balanceTitle">Recht-KI</div>
+      <div class="balanceSub">Fragen zu Rechtsform, Haftung und Gründung</div>
+    </div>
+
+    <div class="form-grid" style="margin-top:16px;">
+      <label for="rechtQuestion">Deine Frage</label>
+      <textarea id="rechtQuestion" class="orgTextarea" placeholder="z.B. Was bedeutet Haftung bei einer GmbH?"></textarea>
+
+      <div class="form-actions" style="grid-column:1 / -1;">
+        <button id="askBtn" class="btn primary" type="button">KI fragen</button>
+        <button id="quizBtn" class="btn" type="button">Quiz-Frage</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px; padding:16px;">
+      <div class="balanceColTitle">Antwort</div>
+      <p id="answerBox">Noch keine Frage gestellt.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="muted">UWI Unternehmenssimulation — Schulprojekt</div>
+</footer>
+
+<script src="js/recht.js"></script>
+</body>
+</html>
