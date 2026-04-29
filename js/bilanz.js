@@ -140,7 +140,7 @@ function getLiabilityGroups(legal) {
       {
         title: "Eigenkapital GmbH",
         accounts: [
-          ["2261", "Beschlossene Ausschüttungen"]
+          ["2261", "Beschlossene Ausschüttungen"],
           ["2800", "Stammkapital"],
           ["2950", "Gesetzliche Gewinnreserve"],
           ["2960", "Freiwillige Gewinnreserven"],
@@ -158,7 +158,7 @@ function getLiabilityGroups(legal) {
       {
         title: "Eigenkapital Aktiengesellschaft",
         accounts: [
-          ["2261", "Beschlossene Ausschüttungen"]
+          ["2261", "Beschlossene Ausschüttungen"],
           ["2800", "Aktienkapital"],
           ["2950", "Gesetzliche Gewinnreserve"],
           ["2960", "Freiwillige Gewinnreserven"],
