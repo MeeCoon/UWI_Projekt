@@ -6,7 +6,7 @@ const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
 const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
-const yearsKey = (companyId) => `uwi_years_${companyID}_balance`;
+const yearsKey = (companyId) => `uwi_years_${companyID}`;
 
 const DEFAULT_YEARS = ["2024", "2025", "2026"];
 let currentYear = "2024";
@@ -497,7 +497,7 @@ function renderGroup(group, saldo) {
     if (type === "liability" || type === "equity") {
       value = Math.abs(raw);
     } else {
-      value = Math.max(raw, 0);
+      value = raw;
     }
 
     return renderAccountRow(no, name, value);
