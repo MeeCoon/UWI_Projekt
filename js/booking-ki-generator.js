@@ -122,6 +122,37 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   /* =========================
+     RECHTSFORM-TEMPLATES
+  ========================= */
+  const legalTemplates = {
+  
+    AG: [
+      "Die Firma beschliesst eine Dividendenausschüttung von {betrag} CHF.",
+      "Die Firma überweist Dividenden von {betrag} CHF an Aktionäre per Bank.",
+      "Die Firma weist den Jahresgewinn von {betrag} CHF dem Gewinnvortrag zu.",
+      "Die Firma bildet gesetzliche Reserven von {betrag} CHF aus dem Gewinn.",
+      "Die Firma verbucht freiwillige Reserven von {betrag} CHF.",
+      "Die Firma erhöht das Aktienkapital um {betrag} CHF."
+    ],
+  
+    GmbH: [
+      "Die Firma erhöht das Stammkapital um {betrag} CHF.",
+      "Die Firma weist den Jahresgewinn von {betrag} CHF dem Gewinnvortrag zu.",
+      "Die Firma bildet gesetzliche Reserven von {betrag} CHF."
+    ],
+  
+    Einzelunternehmen: [
+      "Der Eigentümer erhöht das Kapital per Bank im Wert von {betrag} CHF.",
+      "Der Eigentümer macht einen Kapitalrückzug von {betrag} CHF.",
+      "Der Eigentümer bezieht Bargeld aus der Kasse im Wert von {betrag} CHF.",
+      "Der Eigentümer bezieht Waren im Wert von {betrag} CHF.",
+      "Der Eigentümer schreibt sich den Eigenlohn von {betrag} CHF gut.",
+      "Der Eigentümer schreibt sich den Eigenzins von {betrag} CHF gut.",
+      "Der Eigentümer verbucht den Habenüberschuss im Konto Privat von {betrag} CHF."
+    ]
+  };
+  
+  /* =========================
      BRANCHEN-TEMPLATES
   ========================= */
   const industryTemplates = {
