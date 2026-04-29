@@ -7,7 +7,7 @@ const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
 const balanceKey = (u) => `${BALANCE_PREFIX}${u}`;
 
-const API_URL = "https://cautious-memory-jj657wwvpw4p2qvjx-3000.app.github.dev/api/recht-ki";
+const API_URL = "const API_URL = "NEUE-URL/api/recht-ki";
 
 let chatHistory = [];
 
