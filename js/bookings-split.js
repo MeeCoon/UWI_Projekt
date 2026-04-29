@@ -1,165 +1,178 @@
 const USER_KEY = "uwi_user";
 const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
-const COMPANIES_PREFIX = "uwi_companies_";
-
 const journalKey = (cid, year) => `uwi_journal_${cid}_${year}`;
 const yearsKey = (cid) => `uwi_years_${cid}`;
 
 const DEFAULT_YEARS = ["2024","2025","2026"];
 let currentYear = DEFAULT_YEARS[0];
 
-/* =========================
-   USER / FIRMA
-========================= */
-function getUser() {
-  return localStorage.getItem(USER_KEY);
-}
+// ===== KMU KONTENPLAN =====
+const KONTENPLAN = [
+  // Umlaufsvermögen
+  {no:"1000", name:"Kasse"},
+  {no:"1020", name:"Bankguthaben"},
+  {no:"1060", name:"Wertschriften (Aktien)"},
+  {no:"1100", name:"Forderungen aus Lieferungen und Leistungen"},
+  {no:"1170", name:"Vorsteuer MWST"},
+  {no:"1200", name:"Handelswaren"},
+  {no:"1210", name:"Rohstoffe"},
+  {no:"1300", name:"Aktive Rechnungsabgrenzung"},
+  // Anlagevermögen
+  {no:"1400", name:"Wertschriften (Obligationen)"},
+  {no:"1480", name:"Beteiligungen"},
+  {no:"1500", name:"Maschinen & Apparate"},
+  {no:"1510", name:"Mobiliar"},
+  {no:"1530", name:"Fahrzeuge"},
+  {no:"1600", name:"Geschäftsliegenschaften"},
+  {no:"1520", name:"Büromaschinen"},
+  {no:"1700", name:"Patente, Lizenzen"},
+  // Kurzfristiges Fremdkapital
+  {no:"2000", name:"Verbindlichkeiten aus Lieferungen und Leistungen"},
+  {no:"2100", name:"Bankverbindlichkeiten"},
+  {no:"2200", name:"Geschuldete MWST"},
+  {no:"2300", name:"Passive Rechnungsabgrenzung"},
+  // Langfristiges Fremdkapital
+  {no:"2450", name:"Darlehen"},
+  {no:"2451", name:"Hypotheken"},
+  {no:"2600", name:"Rückstellungen"},
+  // Eigenkapital
+  {no:"2800", name:"Eigenkapital"},
+  {no:"2979", name:"Jahresgewinn / Jahresverlust"},
+  {no:"2850", name:"Privat"},
+  {no:"2800", name:"Aktienkapital"},
+  {no:"2950", name:"Reserven"},
+  {no:"2970", name:"Gewinnvortrag"},
+  // Aufwand
+  {no:"4000", name:"Materialaufwand"},
+  {no:"4200", name:"Handelswarenaufwand"},
+  {no:"5000", name:"Lohnaufwand"},
+  {no:"5700", name:"Sozialversicherungsaufwand"},
+  {no:"5800", name:"Übriger Personalaufwand"},
+  {no:"6000", name:"Raumaufwand"},
+  {no:"6100", name:"Unterhalt, Reparaturen, Ersatz"},
+  {no:"6200", name:"Fahrzeugaufwand"},
+  {no:"6300", name:"Versicherungsaufwand"},
+  {no:"6400", name:"Energie- und Entsorgungsaufwand"},
+  {no:"6500", name:"Verwaltungsaufwand"},
+  {no:"6600", name:"Werbeaufwand"},
+  {no:"6700", name:"Sonstiger Betriebsaufwand"},
+  {no:"6800", name:"Abschreibungen"},
+  {no:"6900", name:"Finanzaufwand"},
+  {no:"7510", name:"Aufwand betriebliche Liegenschaft"},
+  {no:"8500", name:"Ausserordentlicher Aufwand"},
+  // Erlös
+  {no:"3000", name:"Produktionserlöse"},
+  {no:"3200", name:"Handelserlöse"},
+  {no:"3400", name:"Dienstleistungserlöse"},
+  {no:"3805", name:"Verluste aus Forderungen"},
+  {no:"6950", name:"Finanzertrag"},
+  {no:"7500", name:"Ertrag betriebliche Liegenschaft"},
+  {no:"8510", name:"Ausserordentlicher Ertrag"}
+];
 
-function loadCompanies(user) {
-  return JSON.parse(localStorage.getItem(`${COMPANIES_PREFIX}${user}`) || "[]");
-}
-
-function getSelectedCompany() {
-  const user = getUser();
-  const companies = loadCompanies(user);
-  const cid = localStorage.getItem(`${CURRENT_COMPANY_PREFIX}${user}`);
-  return companies.find(c => c.id === cid);
-}
-
-/* =========================
-   DYNAMISCHER KONTENPLAN
-========================= */
-function getDynamicKontenplan(company) {
-
-  const list = [];
-
-  // ===== AKTIVEN =====
-  list.push(
-    {no:"1000", name:"Kasse"},
-    {no:"1020", name:"Bankguthaben"},
-    {no:"1060", name:"Wertschriften (Aktien)"},
-    {no:"1100", name:"Forderungen aus Lieferungen und Leistungen"},
-    {no:"1170", name:"Vorsteuer MWST"},
-    {no:"1300", name:"Aktive Rechnungsabgrenzung"}
-  );
-
-  if (company.industry === "Handel") {
-    list.push({no:"1200", name:"Handelswaren"});
-  }
-
-  if (company.industry === "Produktion") {
-    list.push({no:"1210", name:"Rohstoffe"});
-  }
-
-  list.push(
-    {no:"1400", name:"Wertschriften (Obligationen)"},
-    {no:"1480", name:"Beteiligungen"},
-    {no:"1500", name:"Maschinen & Apparate"},
-    {no:"1510", name:"Mobiliar"},
-    {no:"1530", name:"Fahrzeuge"},
-    {no:"1600", name:"Geschäftsliegenschaften"}
-  );
-
-  if (company.industry === "Dienstleistung") {
-    list.push(
-      {no:"1520", name:"Büromaschinen"},
-      {no:"1700", name:"Patente, Lizenzen"}
-    );
-  }
-
-  // ===== FK =====
-  list.push(
-    {no:"2000", name:"Verbindlichkeiten aus Lieferungen und Leistungen"},
-    {no:"2100", name:"Bankverbindlichkeiten"},
-    {no:"2200", name:"Geschuldete MWST"},
-    {no:"2300", name:"Passive Rechnungsabgrenzung"},
-    {no:"2450", name:"Darlehen"},
-    {no:"2451", name:"Hypotheken"},
-    {no:"2600", name:"Rückstellungen"}
-  );
-
-  // 👉 Nur AG / GmbH
-  if (company.legal === "AG" || company.legal === "GmbH") {
-    list.push({no:"2261", name:"Beschlossene Ausschüttungen"});
-  }
-
-  // ===== EK =====
-  if (company.legal === "Einzelunternehmen") {
-    list.push(
-      {no:"2800", name:"Eigenkapital"},
-      {no:"2850", name:"Privat"},
-      {no:"2891", name:"Jahresgewinn / Jahresverlust"}
-    );
-  }
-
-  if (company.legal === "GmbH") {
-    list.push(
-      {no:"2800", name:"Stammkapital"},
-      {no:"2950", name:"Gesetzliche Gewinnreserve"},
-      {no:"2960", name:"Freiwillige Gewinnreserven"},
-      {no:"2970", name:"Gewinnvortrag"},
-      {no:"2979", name:"Jahresgewinn / Jahresverlust"}
-    );
-  }
-
-  if (company.legal === "AG") {
-    list.push(
-      {no:"2800", name:"Aktienkapital"},
-      {no:"2950", name:"Gesetzliche Gewinnreserve"},
-      {no:"2960", name:"Freiwillige Gewinnreserven"},
-      {no:"2970", name:"Gewinnvortrag"},
-      {no:"2979", name:"Jahresgewinn / Jahresverlust"}
-    );
-  }
-
-  // ===== AUFWAND =====
-  list.push(
-    {no:"4000", name:"Materialaufwand"},
-    {no:"4200", name:"Handelswarenaufwand"},
-    {no:"5000", name:"Lohnaufwand"},
-    {no:"5700", name:"Sozialversicherungsaufwand"},
-    {no:"6000", name:"Raumaufwand"},
-    {no:"6300", name:"Versicherungsaufwand"},
-    {no:"6500", name:"Verwaltungsaufwand"},
-    {no:"6600", name:"Werbeaufwand"},
-    {no:"6800", name:"Abschreibungen"},
-    {no:"6900", name:"Finanzaufwand"}
-  );
-
-  // ===== ERTRAG =====
-  if (company.industry === "Handel") {
-    list.push({no:"3200", name:"Handelserlöse"});
-  }
-  if (company.industry === "Produktion") {
-    list.push({no:"3000", name:"Produktionserlöse"});
-  }
-  if (company.industry === "Dienstleistung") {
-    list.push({no:"3400", name:"Dienstleistungserlöse"});
-  }
-
-  list.push({no:"6950", name:"Finanzertrag"});
-
-  return list;
-}
-
-/* =======================
-   ACCOUNT OPTIONS
-======================= */
-function buildAccountOptions(company) {
-  const konten = getDynamicKontenplan(company);
-
+// =======================
+// ACCOUNT OPTIONS
+// =======================
+function buildAccountOptions() {
   return [
     `<option value="">— Konto wählen —</option>`,
-    ...konten.map(a =>
+    ...KONTENPLAN.map(a =>
       `<option value="${a.no}">${a.no} ${a.name}</option>`
     )
   ].join("");
 }
 
-/* =======================
-   SPLIT LINES
-======================= */
-function createLine(side, company) {
+// =======================
+// STORAGE
+// =======================
+function loadJournal(cid, year) {
+  return JSON.parse(localStorage.getItem(journalKey(cid, year)) || "[]");
+}
+
+function saveJournal(cid, year, data) {
+  localStorage.setItem(journalKey(cid, year), JSON.stringify(data));
+}
+
+function getYears(cid) {
+  try {
+    const y = JSON.parse(localStorage.getItem(yearsKey(cid)));
+    if (Array.isArray(y) && y.length) return y;
+  } catch {}
+  return [...DEFAULT_YEARS];
+}
+
+function saveYears(cid, years) {
+  localStorage.setItem(yearsKey(cid), JSON.stringify(years));
+}
+
+// =======================
+// YEAR TABS
+// =======================
+function renderYearTabs(cid) {
+  const el = document.getElementById("yearTabs");
+  if (!el) return;
+
+  const years = getYears(cid);
+  if (!years.includes(currentYear)) currentYear = years[0];
+
+  el.innerHTML =
+    years.map(y =>
+      `<button class="yearBtn ${y===currentYear?"active":""}" data-year="${y}">${y}</button>`
+    ).join("") +
+    `<button id="addYearBtn" class="addYearBtn">+ Jahr hinzufügen</button>` +
+    `<button class="addYearBtn" id="deleteYearBtn" type="button">🗑 Jahr löschen</button>`;
+
+  document.getElementById("deleteYearBtn").onclick = () => {
+  const list = getYears(cid);
+
+  if (list.length <= 1) {
+    alert("Mindestens ein Jahr muss bleiben.");
+    return;
+  }
+
+  if (!confirm(`Jahr ${currentYear} wirklich löschen?`)) return;
+
+  const next = list.filter(y => y !== currentYear);
+  saveYears(cid, next);
+
+  localStorage.removeItem(journalKey(cid, currentYear));
+
+  currentYear = next[0];
+  renderYearTabs(cid);
+  renderJournal(cid);
+};
+
+  el.onclick = e => {
+    const btn = e.target.closest(".yearBtn");
+    if (!btn) return;
+
+    currentYear = btn.dataset.year;
+    renderYearTabs(cid);
+    renderJournal(cid);
+  };
+
+  document.getElementById("addYearBtn").onclick = () => {
+    const y = prompt("Neues Jahr (z.B. 2027)");
+    if (!y) return;
+    if (!/^\d{4}$/.test(y)) return alert("Ungültiges Jahr");
+
+    const list = getYears(cid);
+    if (list.includes(y)) return alert("Jahr existiert");
+
+    list.push(y);
+    list.sort();
+    saveYears(cid, list);
+
+    currentYear = y;
+    renderYearTabs(cid);
+    renderJournal(cid);
+  };
+}
+
+// =======================
+// SPLIT LINES
+// =======================
+function createLine(side) {
   const row = document.createElement("div");
   row.dataset.side = side;
 
@@ -169,7 +182,7 @@ function createLine(side, company) {
   row.style.width = "100%";
 
   const select = document.createElement("select");
-  select.innerHTML = buildAccountOptions(company);
+  select.innerHTML = buildAccountOptions();
   select.style.flex = "2 1 200px";
   select.style.minWidth = "0";
 
@@ -183,40 +196,145 @@ function createLine(side, company) {
   remove.textContent = "✕";
   remove.className = "btn";
   remove.style.flex = "0 0 auto";
-
   remove.onclick = () => row.remove();
 
   row.append(select, amount, remove);
   return row;
 }
 
-/* =======================
-   INIT
-======================= */
+function getLines(side) {
+  const root = document.getElementById(
+    side==="debit" ? "debitLines" : "creditLines"
+  );
+
+  return Array.from(root.querySelectorAll("div[data-side]"))
+    .map(line => {
+      const sel = line.querySelector("select");
+      const inp = line.querySelector("input");
+
+      return {
+        accountNo: sel.value,
+        amount: Number(inp.value || 0)
+      };
+    })
+    .filter(x => x.accountNo && x.amount > 0);
+}
+
+function sum(arr) {
+  return arr.reduce((a, b) => a + b.amount, 0);
+}
+
+// =======================
+// JOURNAL RENDER
+// =======================
+function renderJournal(cid) {
+  const rows = loadJournal(cid, currentYear)
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const body = document.getElementById("journalBody");
+  if (!body) return;
+  body.innerHTML = "";
+
+  rows.forEach((r, i) => {
+    const debit = r.debits.map(d => d.accountNo).join(",");
+    const credit = r.credits.map(c => c.accountNo).join(",");
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${new Date(r.date).toLocaleDateString()}</td>
+      <td>${r.fact}</td>
+      <td>${debit}</td>
+      <td>${credit}</td>
+      <td>${r.total} CHF</td>
+      <td>
+        <button class="btn deleteBooking" data-i="${i}">🗑</button>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+// =======================
+// DELETE BOOKING
+// =======================
+document.addEventListener("click", e => {
+  if (!e.target.classList.contains("deleteBooking")) return;
+
+  const index = e.target.dataset.i;
+  const user = localStorage.getItem(USER_KEY);
+  const cid = localStorage.getItem(`${CURRENT_COMPANY_PREFIX}${user}`);
+
+  const list = loadJournal(cid, currentYear);
+  list.splice(index, 1);
+  saveJournal(cid, currentYear, list);
+  renderJournal(cid);
+});
+
+
+
+// =======================
+// INIT
+// =======================
 document.addEventListener("DOMContentLoaded", () => {
+  const user = localStorage.getItem(USER_KEY);
+  if (!user) { location.href = "index.html"; return; }
 
-  const user = getUser();
-  if (!user) return;
+  const cid = localStorage.getItem(`${CURRENT_COMPANY_PREFIX}${user}`);
+  if (!cid) return;
 
-  const company = getSelectedCompany();
-  if (!company) return;
+  renderYearTabs(cid);
 
-  const cid = company.id;
-
-  document.getElementById("debitLines")
-    .append(createLine("debit", company));
-
-  document.getElementById("creditLines")
-    .append(createLine("credit", company));
+  document.getElementById("debitLines").append(createLine("debit"));
+  document.getElementById("creditLines").append(createLine("credit"));
 
   document.getElementById("addDebitLineBtn").onclick = () => {
-    document.getElementById("debitLines")
-      .append(createLine("debit", company));
+    document.getElementById("debitLines").append(createLine("debit"));
   };
 
   document.getElementById("addCreditLineBtn").onclick = () => {
-    document.getElementById("creditLines")
-      .append(createLine("credit", company));
+    document.getElementById("creditLines").append(createLine("credit"));
   };
 
+  document.getElementById("addBookingBtn").onclick = () => {
+    const fact = document.getElementById("fact").value.trim();
+    const debits = getLines("debit");
+    const credits = getLines("credit");
+
+    if (!fact) return alert("Buchungstatsache fehlt");
+    if (sum(debits) !== sum(credits)) return alert("Soll ≠ Haben");
+
+    const entry = {
+      type: "split",
+      fact,
+      debits,
+      credits,
+      year: currentYear,
+      total: sum(debits),
+      date: new Date().toISOString()
+    };
+
+    const list = loadJournal(cid, currentYear);
+    list.push(entry);
+    saveJournal(cid, currentYear, list);
+
+    document.getElementById("fact").value = "";
+    document.getElementById("debitLines").innerHTML = "";
+    document.getElementById("creditLines").innerHTML = "";
+    document.getElementById("debitLines").append(createLine("debit"));
+    document.getElementById("creditLines").append(createLine("credit"));
+
+    renderJournal(cid);
+    alert(`Gebucht in ${currentYear}`);
+  };
+
+  document.getElementById("backBtn").onclick = () => {
+    location.href = "company.html";
+  };
+
+  document.getElementById("logoutBtn").onclick = () => {
+    localStorage.removeItem(USER_KEY);
+    location.href = "index.html";
+  };
+
+  renderJournal(cid);
 });
