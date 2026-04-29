@@ -11,7 +11,7 @@ app.use(express.json());
 
 app.post("/api/recht-ki", async (req, res) => {
   try {
-    const { question, company, history = [] } = req.body;
+    const { question, company, balance, history = [] } = req.body;
 
     const response = await client.responses.create({
       model: "gpt-5.5",
@@ -19,7 +19,7 @@ app.post("/api/recht-ki", async (req, res) => {
         {
           role: "system",
           content:
-            "Du bist ein einfacher Schweizer Rechts-Lehrer für ein UWI-Schulprojekt. Antworte kurz, klar und verständlich. Keine echte Rechtsberatung."
+            "Du bist ein einfacher Schweizer UWI-Lehrer. Erkläre Recht und Bilanz kurz, verständlich und schulisch. Keine verbindliche Rechtsberatung."
         },
         ...history,
         {
@@ -27,6 +27,9 @@ app.post("/api/recht-ki", async (req, res) => {
           content: `
 Firma:
 ${JSON.stringify(company)}
+
+Bilanz:
+${JSON.stringify(balance)}
 
 Frage:
 ${question}
@@ -36,10 +39,9 @@ ${question}
     });
 
     res.json({ answer: response.output_text });
-
   } catch (err) {
     console.error(err);
-    res.status(500).json({ answer: "Fehler bei KI." });
+    res.status(500).json({ answer: "Fehler bei der KI-Verbindung." });
   }
 });
 
