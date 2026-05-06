@@ -325,21 +325,6 @@ function closeYear(companyId, year) {
   let totalExpense = 0;
   let totalRevenue = 0;
 
-  Object.keys(saldo).forEach((acc) => {
-    if (acc === "2979" || acc === "2891") {
-    if (amount !== 0) {
-      carryRows.push({
-        debit: amount > 0 ? "2970" : "1020",
-        credit: amount > 0 ? "2979" : "2979",
-        amount: Math.abs(amount),
-        fact: `Jahresgewinn ${year} → ${nextYear}`,
-        year: nextYear,
-        date: new Date().toISOString(),
-        system: `abschluss_${year}`
-      });
-    }
-    return;
-  }
     const type = ACCOUNT_TYPES[acc];
     const value = Number(saldo[acc] || 0);
 
@@ -366,6 +351,19 @@ function closeYear(companyId, year) {
   }
    
 const carryRows = [];
+
+// Jahresgewinn / -verlust ins nächste Jahr übertragen
+if (profit !== 0) {
+  carryRows.push({
+    debit: profit > 0 ? "2979" : "1020",
+    credit: profit > 0 ? "2970" : "2979",
+    amount: Math.abs(profit),
+    fact: `Jahresgewinn ${year} → ${nextYear}`,
+    year: nextYear,
+    date: new Date().toISOString(),
+    system: `abschluss_${year}`
+  });
+}
 
 Object.keys(saldo).forEach((acc) => {
   const type = ACCOUNT_TYPES[acc];
