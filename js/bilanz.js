@@ -19,6 +19,7 @@ function getAssetGroups(industry) {
     ["1000", "Kasse"],
     ["1020", "Bankguthaben"],
     ["1170", "Vorsteuer MWST"],
+    ["1176", "Guthaben Verrechnungssteuer"],
     ["1300", "Aktive Rechnungsabgrenzung"],
     ["1060", "Wertschriften (Aktien)"],
     ["1100", "Forderungen aus Lieferungen und Leistungen"]
@@ -105,6 +106,7 @@ function getLiabilityGroups(legal) {
       ["2270", "Verbindlichkeiten Sozialversicherungen"],
       ["2100", "Bankverbindlichkeiten"],
       ["2200", "Geschuldete MWST"],
+      ["2206", "Geschuldete Verrechnungssteuer"],
       ["2300", "Passive Rechnungsabgrenzungen"]
     ]
   };
@@ -142,6 +144,7 @@ function getLiabilityGroups(legal) {
           ["2270", "Verbindlichkeiten Sozialversicherungen"],
           ["2100", "Bankverbindlichkeiten"],
           ["2200", "Geschuldete MWST"],
+          ["2206", "Geschuldete Verrechnungssteuer"],
           ["2300", "Passive Rechnungsabgrenzungen"],
           ["2261", "Beschlossene Ausschüttungen"]
         ]
@@ -169,6 +172,7 @@ function getLiabilityGroups(legal) {
           ["2270", "Verbindlichkeiten Sozialversicherungen"],
           ["2100", "Bankverbindlichkeiten"],
           ["2200", "Geschuldete MWST"],
+          ["2206", "Geschuldete Verrechnungssteuer"],
           ["2300", "Passive Rechnungsabgrenzungen"],
           ["2261", "Beschlossene Ausschüttungen"]
         ]
@@ -250,10 +254,10 @@ function saveJournal(companyId, year, rows) {
 }
 
 const ACCOUNT_TYPES = {
-  "1000": "asset","1020": "asset","1060": "asset","1100": "asset","1170": "asset","1200": "asset","1210": "asset","1300": "asset",
+  "1000": "asset","1020": "asset","1060": "asset","1100": "asset","1170": "asset","1176": "asset","1200": "asset","1210": "asset","1300": "asset",
   "1400": "asset","1480": "asset","1500": "asset","1510": "asset","1520": "asset","1530": "asset","1600": "asset","1700": "asset",
 
-  "2000": "liability","2100": "liability","2200": "liability","2261": "liability","2270": "liability","2300": "liability",
+  "2000": "liability","2100": "liability","2200": "liability","2206": "liability","2261": "liability","2270": "liability","2300": "liability",
   "2450": "liability","2451": "liability","2600": "liability",
 
   "2800": "equity","2850": "equity","2950": "equity","2960": "equity","2970": "equity","2979": "equity","2891": "equity",
