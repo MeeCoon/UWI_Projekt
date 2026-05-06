@@ -345,8 +345,7 @@ function closeYear(companyId, year) {
     saveYears(companyId, years);
   }
 
-  const nextRows = loadJournal(companyId, nextYear);
-  const alreadyClosed = currentRows.some(r => r.system === `abschluss_${year}`);
+  const alreadyClosed = nextRows.some(r => r.system === `abschluss_${year}`);
 
   if (alreadyClosed) {
     alert(`Jahresabschluss für ${year} wurde schon gemacht.`);
@@ -377,17 +376,25 @@ Object.keys(saldo).forEach((acc) => {
   // Nur Bilanzkonten übernehmen (keine Erfolgsrechnung!)
   if (type !== "asset" && type !== "liability" && type !== "equity") return;
 
-  if (amount > 0) {
-    carryRows.push({
-      debit: type === "asset" ? acc : "1020",
-      credit: type === "asset" ? "1020" : acc,
-      amount: Math.abs(amount),
-      fact: `Vortrag ${year} → ${nextYear}`,
-      year: nextYear,
-      date: new Date().toISOString(),
-      system: `abschluss_${year}`
-    });
-  }
+   if (amount !== 0) {
+  const isAsset = type === "asset";
+
+  carryRows.push({
+    debit: amount > 0
+      ? (isAsset ? acc : "1020")
+      : (isAsset ? "1020" : acc),
+
+    credit: amount > 0
+      ? (isAsset ? "1020" : acc)
+      : (isAsset ? acc : "1020"),
+
+    amount: Math.abs(amount),
+    fact: `Vortrag ${year} → ${nextYear}`,
+    year: nextYear,
+    date: new Date().toISOString(),
+    system: `abschluss_${year}`
+  });
+}
 });
 
   const cleanedNextRows = nextRows.filter(r => r.system !== `abschluss_${year}`);
