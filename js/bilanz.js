@@ -338,30 +338,57 @@ function closeYear(companyId, year) {
     alert(`Jahresabschluss für ${year} wurde schon gemacht.`);
     return;
   }
-   
-const carryRows = [];
 
-Object.keys(saldo).forEach((acc) => {
-  const type = ACCOUNT_TYPES[acc];
-  const amount = Number(saldo[acc] || 0);
+  // ===== JAHRESERGEBNIS BERECHNEN =====
+  let totalExpense = 0;
+  let totalRevenue = 0;
 
-  if (!amount) return;
+  Object.keys(saldo).forEach(acc => {
+    const type = ACCOUNT_TYPES[acc];
+    const value = Number(saldo[acc] || 0);
 
-  // Nur Bilanzkonten übernehmen (keine Erfolgsrechnung!)
-  if (type !== "asset" && type !== "liability" && type !== "equity") return;
+    if (type === "expense") totalExpense += value;
+    if (type === "revenue") totalRevenue += value;
+  });
 
-  if (amount > 0) {
+  const profit = totalRevenue - totalExpense;
+
+  const carryRows = [];
+
+  Object.keys(saldo).forEach((acc) => {
+    const type = ACCOUNT_TYPES[acc];
+    const amount = Number(saldo[acc] || 0);
+
+    if (!amount) return;
+
+    // Nur Bilanzkonten übernehmen (keine Erfolgsrechnung!)
+    if (type !== "asset" && type !== "liability" && type !== "equity") return;
+
+    if (amount > 0) {
+      carryRows.push({
+        debit: type === "asset" ? acc : "1020",
+        credit: type === "asset" ? "1020" : acc,
+        amount: Math.abs(amount),
+        fact: `Vortrag ${year} → ${nextYear}`,
+        year: nextYear,
+        date: new Date().toISOString(),
+        system: `abschluss_${year}`
+      });
+    }
+  });
+
+  // ===== JAHRESGEWINN/-VERLUST ÜBERTRAGEN =====
+  if (profit !== 0) {
     carryRows.push({
-      debit: type === "asset" ? acc : "1020",
-      credit: type === "asset" ? "1020" : acc,
-      amount: Math.abs(amount),
-      fact: `Vortrag ${year} → ${nextYear}`,
+      debit: profit > 0 ? "1020" : "2800", // Bei Gewinn: Bankguthaben belasten, Eigenkapital gutschreiben
+      credit: profit > 0 ? "2800" : "1020",
+      amount: Math.abs(profit),
+      fact: `Jahresgewinn ${year}: ${fmtCHF(profit)}`,
       year: nextYear,
       date: new Date().toISOString(),
-      system: `abschluss_${year}`
+      system: `abschluss_${year}_profit`
     });
   }
-});
 
   const cleanedNextRows = nextRows.filter(r => r.system !== `abschluss_${year}`);
   saveJournal(companyId, nextYear, [...cleanedNextRows, ...carryRows]);
@@ -370,9 +397,8 @@ Object.keys(saldo).forEach((acc) => {
   renderYearTabs(companyId);
   renderBalance(companyId, currentYear);
 
-  alert(`Jahresabschluss von ${year} nach ${nextYear} erstellt.`);
+  alert(`Jahresabschluss von ${year} nach ${nextYear} erstellt.\nJahresergebnis: ${fmtCHF(profit)}`);
 }
-
 /* =========================
    JAHR TABS
 ========================= */
