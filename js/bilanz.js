@@ -334,9 +334,7 @@ function closeYear(companyId, year) {
     alert(`Jahresabschluss für ${year} wurde schon gemacht.`);
     return;
   }
-
-  const carryRows = [];
-
+   
 const carryRows = [];
 
 Object.keys(saldo).forEach((acc) => {
