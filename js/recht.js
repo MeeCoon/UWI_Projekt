@@ -42,9 +42,11 @@ function addMessage(text, type) {
   if (type === "user") {
     msg.style.background = "#dbeafe";
     msg.style.alignSelf = "flex-end";
+    msg.style.marginLeft = "auto";
   } else {
     msg.style.background = "#f1f5f9";
     msg.style.alignSelf = "flex-start";
+    msg.style.marginRight = "auto";
   }
 
   msg.innerText = text;
@@ -63,6 +65,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const company = getCompany(user);
   const balance = getBalance(user);
 
+  console.log("🔍 Debug Info:");
+  console.log("Company:", company);
+  console.log("Balance:", balance);
+  console.log("API URL:", API_URL);
+
   document.getElementById("userDisplay").textContent = `Angemeldet: ${user}`;
 
   document.getElementById("backBtn").onclick = () => {
@@ -80,6 +87,11 @@ document.addEventListener("DOMContentLoaded", () => {
   box.style.display = "flex";
   box.style.flexDirection = "column";
 
+  if (!company) {
+    addMessage("⚠️ Keine Firma ausgewählt. Bitte wähle eine Firma aus.", "ki");
+    return;
+  }
+
   addMessage("Hallo! Ich kann jetzt auch deine Bilanz berücksichtigen.", "ki");
 
   document.getElementById("askBtn").onclick = async () => {
@@ -91,35 +103,54 @@ document.addEventListener("DOMContentLoaded", () => {
     input.value = "";
 
     const loading = document.createElement("div");
-    loading.innerText = "KI denkt...";
+    loading.innerText = "⏳ KI denkt...";
+    loading.style.margin = "10px 0";
+    loading.style.color = "#666";
     box.appendChild(loading);
 
     try {
+      const payload = {
+        question,
+        company,
+        balance,
+        history: chatHistory
+      };
+
+      console.log("📤 Sende Payload:", payload);
+
       const res = await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          question,
-          company,
-          balance,
-          history: chatHistory
-        })
+        body: JSON.stringify(payload)
       });
 
+      console.log("📥 Response Status:", res.status);
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("❌ API Fehler:", errorText);
+        throw new Error(`API returned ${res.status}: ${errorText}`);
+      }
+
       const data = await res.json();
+      console.log("✅ API Antwort:", data);
+
       loading.remove();
 
-      addMessage(data.answer || "Keine Antwort erhalten.", "ki");
-
-      chatHistory.push({ role: "user", content: question });
-      chatHistory.push({ role: "assistant", content: data.answer });
+      if (data.answer) {
+        addMessage(data.answer, "ki");
+        chatHistory.push({ role: "user", content: question });
+        chatHistory.push({ role: "assistant", content: data.answer });
+      } else {
+        addMessage("⚠️ Keine Antwort von der KI erhalten.", "ki");
+      }
 
     } catch (err) {
       loading.remove();
-      addMessage("Fehler bei Verbindung.", "ki");
-      console.error(err);
+      console.error("🔴 Fehler:", err);
+      addMessage(`❌ Fehler: ${err.message}\n\nBitte überprüfe die Browser-Konsole (F12) für Details.`, "ki");
     }
   };
 
