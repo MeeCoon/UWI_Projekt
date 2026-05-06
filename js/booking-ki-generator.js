@@ -52,8 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return new Date().getFullYear().toString();
   }
 
-  function storageKey(year) {
-    return "uwi-ki-tasks-" + year;
+  function storageKey(cid, year) {
+    return `uwi_ki_tasks_${cid}_${year}`;
   }
 
   /* =========================
@@ -246,7 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ========================= */
   window.initKICasesForYear = function () {
     const year = getSelectedYear();
-    const tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
+    const tasks = JSON.parse(localStorage.getItem(storageKey(company.id, year)) || "[]");
     renderTable(tasks);
   };
 
@@ -258,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
   generateBtn.addEventListener("click", () => {
     const year = getSelectedYear();
 
-    let tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
+    let tasks = JSON.parse(localStorage.getItem(storageKey(company.id, year)) || "[]");
 
     // alte generierte entfernen
     tasks = tasks.filter(t => !t.generated);
@@ -267,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     tasks.push(...newTasks);
 
-    localStorage.setItem(storageKey(year), JSON.stringify(tasks));
+    localStorage.setItem(storageKey(company.id, year), JSON.stringify(tasks));
     renderTable(tasks);
   });
 
@@ -283,7 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const tasks = JSON.parse(localStorage.getItem(storageKey(year)) || "[]");
+    const tasks = JSON.parse(localStorage.getItem(storageKey(company.id, year)) || "[]");
 
     const task = tasks.find(t => t.id === id);
 
