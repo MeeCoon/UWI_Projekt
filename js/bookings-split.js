@@ -330,7 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   document.getElementById("backBtn").onclick = () => {
-    location.href = "company.html";
+    location.href = "overview.html";
   };
 
   document.getElementById("logoutBtn").onclick = () => {
