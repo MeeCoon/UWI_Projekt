@@ -38,8 +38,13 @@ ${question}
     const response = await client.messages.create({
       model: "gpt-4",
       max_tokens: 1024,
-      system: "Du bist ein Schweizer UWI-Lehrer für Recht und Bilanzwesen. Erkläre kurz, verständlich und schulisch. Nutze die Bilanzinformationen der Firma zur Erklärung. Gib keine verbindliche Rechtsberatung.",
-      messages: messages
+      messages: [
+        {
+          role: "system",
+          content: "Du bist ein Schweizer UWI-Lehrer für Recht und Bilanzwesen. Erkläre kurz, verständlich und schulisch. Nutze die Bilanzinformationen der Firma zur Erklärung. Gib keine verbindliche Rechtsberatung."
+        },
+        ...messages
+      ]
     });
 
     const answer = response.choices[0]?.message?.content || "Keine Antwort erhalten.";
