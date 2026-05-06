@@ -529,7 +529,7 @@ function renderBalance(companyId, year) {
 
   const totalAssets = assetGroups.flatMap(g => g.accounts).reduce((sum, [no]) => {
     const raw = Number(saldo[no] || 0);
-    return sum + Math.max(raw, 0);
+    return sum + raw;
   }, 0);
 
    const totalLiabilities = liabilityGroups
