@@ -103,10 +103,10 @@ function getLiabilityGroups(legal) {
     title: "Kurzfristiges Fremdkapital",
     accounts: [
       ["2000", "Verbindlichkeiten aus Lieferungen und Leistungen"],
-      ["2270", "Verbindlichkeiten Sozialversicherungen"],
       ["2100", "Bankverbindlichkeiten"],
       ["2200", "Geschuldete MWST"],
       ["2206", "Geschuldete Verrechnungssteuer"],
+      ["2270", "Verbindlichkeiten Sozialversicherungen"],
       ["2300", "Passive Rechnungsabgrenzungen"]
     ]
   };
@@ -141,12 +141,12 @@ function getLiabilityGroups(legal) {
         title: "Kurzfristiges Fremdkapital",
         accounts: [
           ["2000", "Verbindlichkeiten aus Lieferungen und Leistungen"],
-          ["2270", "Verbindlichkeiten Sozialversicherungen"],
           ["2100", "Bankverbindlichkeiten"],
           ["2200", "Geschuldete MWST"],
           ["2206", "Geschuldete Verrechnungssteuer"],
-          ["2300", "Passive Rechnungsabgrenzungen"],
-          ["2261", "Beschlossene Ausschüttungen"]
+          ["2261", "Beschlossene Ausschüttungen"],
+          ["2270", "Verbindlichkeiten Sozialversicherungen"],
+          ["2300", "Passive Rechnungsabgrenzungen"]
         ]
       },
       baseLong,
@@ -169,12 +169,12 @@ function getLiabilityGroups(legal) {
         title: "Kurzfristiges Fremdkapital",
         accounts: [
           ["2000", "Verbindlichkeiten aus Lieferungen und Leistungen"],
-          ["2270", "Verbindlichkeiten Sozialversicherungen"],
           ["2100", "Bankverbindlichkeiten"],
           ["2200", "Geschuldete MWST"],
           ["2206", "Geschuldete Verrechnungssteuer"],
-          ["2300", "Passive Rechnungsabgrenzungen"],
-          ["2261", "Beschlossene Ausschüttungen"]
+          ["2261", "Beschlossene Ausschüttungen"],
+          ["2270", "Verbindlichkeiten Sozialversicherungen"],
+          ["2300", "Passive Rechnungsabgrenzungen"]
         ]
       },
       baseLong,
