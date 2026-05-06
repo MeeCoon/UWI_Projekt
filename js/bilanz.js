@@ -297,6 +297,7 @@ function computeBalancesFromJournal(rows) {
         if (!acc || !(amt > 0)) continue;
         applyBooking(bal, acc, amt, false);
       }
+
       continue;
     }
 
@@ -309,6 +310,198 @@ function computeBalancesFromJournal(rows) {
   }
 
   return bal;
+}
+
+/* =========================
+   JAHRESABSCHLUSS
+========================= */
+function closeYear(companyId, year) {
+  const currentRows = loadJournal(companyId, year);
+  const saldo = computeBalancesFromJournal(currentRows);
+  const nextYear = String(Number(year) + 1);
+
+  const years = getYears(companyId);
+  if (!years.includes(nextYear)) {
+    years.push(nextYear);
+    years.sort();
+    saveYears(companyId, years);
+  }
+
+  const nextRows = loadJournal(companyId, nextYear);
+  const alreadyClosed = nextRows.some(r => r && r.system === `abschluss_${year}`);
+
+  if (alreadyClosed) {
+    alert(`Jahresabschluss für ${year} wurde schon gemacht.`);
+    return;
+  }
+
+  const carryRows = [];
+
+  Object.keys(saldo).forEach((acc) => {
+    const type = ACCOUNT_TYPES[acc];
+    const amount = Number(saldo[acc] || 0);
+
+    if (!amount) return;
+    if (!(type === "asset" || type === "liability" || type === "equity")) return;
+
+    if (type === "asset") {
+      if (amount > 0) {
+        carryRows.push({
+          debit: acc,
+          credit: "2800",
+          amount: Math.abs(amount),
+          fact: `Vortrag ${year} → ${nextYear}`,
+          year: nextYear,
+          date: new Date().toISOString(),
+          system: `abschluss_${year}`
+        });
+      }
+    } else {
+      carryRows.push({
+        debit: "1020",
+        credit: acc,
+        amount: Math.abs(amount),
+        fact: `Vortrag ${year} → ${nextYear}`,
+        year: nextYear,
+        date: new Date().toISOString(),
+        system: `abschluss_${year}`
+      });
+    }
+  });
+
+  const cleanedNextRows = nextRows.filter(r => r.system !== `abschluss_${year}`);
+  saveJournal(companyId, nextYear, [...cleanedNextRows, ...carryRows]);
+
+  currentYear = nextYear;
+  renderYearTabs(companyId);
+  renderBalance(companyId, currentYear);
+
+  alert(`Jahresabschluss von ${year} nach ${nextYear} erstellt.`);
+}
+
+/* =========================
+   JAHR TABS
+========================= */
+function renderYearTabs(companyId) {
+  const el = document.getElementById("yearTabs");
+  if (!el) return;
+
+  const years = getYears(companyId);
+  if (!years.includes(currentYear)) {
+    currentYear = years[0];
+  }
+
+  el.innerHTML =
+    years.map(y => `
+      <button class="yearBtn ${y === currentYear ? "active" : ""}" data-year="${y}" type="button">
+        ${y}
+      </button>
+    `).join("") +
+    `
+      <button class="addYearBtn" id="addYearBtn" type="button">+ Jahr hinzufügen</button>
+      <button class="addYearBtn" id="closeYearBtn" type="button">Jahresabschluss</button>
+      <button class="addYearBtn" id="deleteYearBtn" type="button">🗑 Jahr löschen</button>
+    `;
+
+  el.onclick = (e) => {
+    const yearBtn = e.target.closest(".yearBtn");
+    if (yearBtn) {
+      currentYear = yearBtn.dataset.year;
+      renderYearTabs(companyId);
+      renderBalance(companyId, currentYear);
+      return;
+    }
+
+    const addBtn = e.target.closest("#addYearBtn");
+    if (addBtn) {
+      const y = prompt("Jahr eingeben (z.B. 2027)");
+      if (!y) return;
+
+      const year = y.trim();
+      if (!/^\d{4}$/.test(year)) {
+        alert("Ungültiges Jahr");
+        return;
+      }
+
+      const list = getYears(companyId);
+      if (list.includes(year)) {
+        alert("Jahr existiert bereits");
+        return;
+      }
+
+      list.push(year);
+      list.sort();
+      saveYears(companyId, list);
+
+      currentYear = year;
+      renderYearTabs(companyId);
+      renderBalance(companyId, currentYear);
+      return;
+    }
+
+    const closeBtn = e.target.closest("#closeYearBtn");
+    if (closeBtn) {
+      if (!confirm(`Jahr ${currentYear} abschliessen und Bilanzwerte ins nächste Jahr übernehmen?`)) {
+        return;
+      }
+      closeYear(companyId, currentYear);
+      return;
+    }
+
+    const deleteBtn = e.target.closest("#deleteYearBtn");
+    if (deleteBtn) {
+      const list = getYears(companyId);
+      if (list.length <= 1) {
+        alert("Mindestens ein Jahr muss bleiben.");
+        return;
+      }
+
+      if (!confirm(`Jahr ${currentYear} wirklich löschen?`)) {
+        return;
+      }
+
+      const next = list.filter(y => y !== currentYear);
+      saveYears(companyId, next);
+      localStorage.removeItem(journalKey(companyId, currentYear));
+
+      currentYear = next[0];
+      renderYearTabs(companyId);
+      renderBalance(companyId, currentYear);
+    }
+  };
+}
+
+/* =========================
+   HTML HILFSFUNKTIONEN
+========================= */
+function renderAccountRow(no, name, value) {
+  return `
+    <div class="balanceRow">
+      <span>${no} ${name}</span>
+      <input
+        class="balanceInput input-readonly"
+        type="number"
+        value="${value}"
+        readonly
+      >
+    </div>
+  `;
+}
+
+function renderGroup(group, saldo) {
+  const rowsHtml = group.accounts.map(([no, name]) => {
+    const type = ACCOUNT_TYPES[no] || "asset";
+    const raw = Number(saldo[no] || 0);
+
+    let value = raw;
+
+    return renderAccountRow(no, name, value);
+  }).join("");
+
+  return `
+    <div class="balanceBlockTitle">${group.title}</div>
+    ${rowsHtml}
+  `;
 }
 
 /* =========================
@@ -336,10 +529,12 @@ function renderBalance(companyId, year) {
     return sum + raw;
   }, 0);
 
-  const totalLiabilities = liabilityGroups.flatMap(g => g.accounts).reduce((sum, [no]) => {
-    const raw = Number(saldo[no] || 0);
-    return sum + raw;
-  }, 0);
+   const totalLiabilities = liabilityGroups
+     .flatMap(g => g.accounts)
+     .reduce((sum, [no]) => {
+       const raw = Number(saldo[no] || 0);
+       return sum + raw;
+     }, 0);
 
   root.innerHTML = `
     <div class="balanceHeaderBlue">
@@ -377,6 +572,27 @@ function renderBalance(companyId, year) {
 document.addEventListener("DOMContentLoaded", () => {
   const user = getUserOrRedirect();
   if (!user) return;
+
+  const userDisplay = document.getElementById("userDisplay");
+  if (userDisplay) {
+    userDisplay.textContent = `Angemeldet: ${user}`;
+  }
+
+  const backBtn = document.getElementById("backBtn");
+  if (backBtn) {
+    backBtn.onclick = () => {
+      window.location.href = "overview.html";
+    };
+  }
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.onclick = () => {
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(currentCompanyKey(user));
+      window.location.href = "index.html";
+    };
+  }
 
   const company = getSelectedCompany(user);
   if (!company) {
