@@ -55,19 +55,47 @@ function addMessage(text, type) {
 function fakeKI(question, company, balance) {
   const f = question.toLowerCase();
 
+  // Smalltalk
   if (f.includes("hallo") || f.includes("hi")) {
-    return "Hallo 😊 Ich bin deine Recht- und Finanz-KI. Frag mich zu Bilanz, GmbH, AG, Haftung oder Verbesserungen.";
+    return "Hallo 😊 Ich bin deine Recht- und Finanz-KI. Frag mich alles zu Unternehmen!";
   }
 
   if (f.includes("wie geht")) {
-    return "Mir geht’s gut 😄 Ich bin bereit, dein Unternehmen zu analysieren.";
+    return "Mir geht’s gut 😄 Bereit dir zu helfen!";
   }
 
   if (f.includes("danke")) {
     return "Gerne 😊";
   }
 
-  if (f.includes("bilanz") || f.includes("finanz") || f.includes("analyse")) {
+  // Schulden & Verbesserung
+  if (f.includes("schulden") || f.includes("reduzier") || f.includes("kosten")) {
+    return `💡 Schulden reduzieren:
+
+1. Kosten senken → unnötige Ausgaben streichen  
+2. Einnahmen erhöhen → mehr Kunden gewinnen  
+3. Schulden planen → Schritt für Schritt zurückzahlen  
+4. Eigenkapital erhöhen → mehr eigenes Geld  
+5. Budget kontrollieren  
+
+👉 Weniger Schulden = weniger Risiko`;
+  }
+
+  if (f.includes("besser") || f.includes("verbesser") || f.includes("unternehmen")) {
+    return `🚀 Unternehmen verbessern:
+
+- Kosten kontrollieren  
+- Umsatz steigern  
+- Werbung verbessern  
+- Kunden gewinnen  
+- Schulden reduzieren  
+- Eigenkapital erhöhen  
+
+👉 Ziel: stabil + erfolgreich`;
+  }
+
+  // Bilanz Analyse
+  if (f.includes("bilanz") || f.includes("analyse") || f.includes("finanz")) {
     const aktiven = balance.assets || balance.aktiven || {};
     const passiven = balance.liabilities || balance.passiven || {};
 
@@ -75,57 +103,62 @@ function fakeKI(question, company, balance) {
     const p = sum(passiven);
 
     if (a === 0 && p === 0) {
-      return "⚠️ Ich finde noch keine Bilanzdaten. Bitte zuerst in der Bilanz Werte eingeben und speichern.";
+      return "⚠️ Keine Bilanzdaten gefunden. Bitte zuerst Bilanz eingeben.";
     }
 
-    return `📊 Finanzanalyse
+    return `📊 Finanzanalyse:
 
-Aktiven total: ${a} CHF
-Passiven total: ${p} CHF
+Aktiven: ${a} CHF  
+Passiven: ${p} CHF  
 
-${a === p ? "✅ Die Bilanz ist ausgeglichen." : `⚠️ Die Bilanz ist nicht ausgeglichen. Differenz: ${a - p} CHF.`}
+${a === p ? "✅ Bilanz korrekt" : "⚠️ Bilanz nicht ausgeglichen"}
 
-💡 Empfehlungen:
-- Schulden reduzieren
-- Eigenkapital erhöhen
-- Kosten kontrollieren
-- Einnahmen steigern
-- Liquidität sichern`;
+💡 Tipp:
+- Schulden senken  
+- Eigenkapital erhöhen  
+- Kosten kontrollieren`;
   }
 
+  // Rechtsformen
   if (f.includes("gmbh")) {
-    return "Eine GmbH ist eine Gesellschaft mit beschränkter Haftung. Vorteil: weniger private Haftung. Nachteil: mehr Regeln und Kapital nötig.";
+    return "GmbH = weniger Risiko, da keine private Haftung.";
   }
 
   if (f.includes("ag")) {
-    return "Eine AG ist eine Aktiengesellschaft. Sie passt eher für grössere Unternehmen und kann Kapital durch Aktien sammeln.";
+    return "AG = grosse Firma, Kapital durch Aktien.";
   }
 
   if (f.includes("einzel")) {
-    return "Ein Einzelunternehmen ist einfach und günstig, aber riskanter, weil man privat haftet.";
+    return "Einzelunternehmen = einfach, aber riskant wegen privater Haftung.";
   }
 
   if (f.includes("rechtsform")) {
-    return "Vergleich: Einzelunternehmen = einfach, aber riskant. GmbH = sicherer und beliebt. AG = eher für grosse Firmen. Empfehlung: Für euer Projekt ist GmbH oft die beste Wahl.";
+    return "Vergleich: Einzelunternehmen (einfach), GmbH (sicher), AG (gross).";
   }
 
+  // Begriffe
   if (f.includes("haftung")) {
-    return "Haftung bedeutet, wer für Schulden bezahlen muss. Bei Einzelunternehmen privat, bei GmbH/AG meistens nur die Firma.";
+    return "Haftung bedeutet, wer für Schulden bezahlen muss.";
   }
 
-  if (f.includes("verbesser") || f.includes("besser") || f.includes("empfehlung")) {
-    return `💡 Unternehmens-Tipps
-
-1. Kosten senken
-2. Umsatz erhöhen
-3. Schulden reduzieren
-4. Eigenkapital stärken
-5. Werbung verbessern
-6. Kundenservice verbessern
-7. passende Rechtsform wählen`;
+  if (f.includes("eigenkapital")) {
+    return "Eigenkapital = eigenes Geld → macht Unternehmen stabil.";
   }
 
-  return "Gute Frage! Wichtig sind Rechtsform, Haftung, Kapital, Schulden und Bilanz.";
+  if (f.includes("risiko")) {
+    return "Risiko = Möglichkeit, Geld zu verlieren.";
+  }
+
+  // Fallback
+  return `Gute Frage 👍
+
+Wichtige Themen:
+- Rechtsform  
+- Schulden  
+- Kapital  
+- Bilanz  
+
+Frag z.B.: "Wie kann man Schulden reduzieren?"`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -133,7 +166,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!user) return;
 
   const company = getCompany(user);
-  const balance = getBalance(user);
 
   document.getElementById("userDisplay").textContent = `Angemeldet: ${user}`;
 
@@ -152,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
   box.style.display = "flex";
   box.style.flexDirection = "column";
 
-  addMessage("Hallo! Ich kann deine Bilanz berücksichtigen und Fragen zu Rechtsformen beantworten.", "ki");
+  addMessage("Hallo! Ich kann deine Bilanz analysieren und Fragen beantworten 🤖", "ki");
 
   document.getElementById("askBtn").onclick = () => {
     const input = document.getElementById("rechtQuestion");
@@ -164,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const loading = document.createElement("div");
     loading.innerText = "KI denkt...";
-    loading.style.padding = "12px";
+    loading.style.padding = "10px";
     box.appendChild(loading);
 
     setTimeout(() => {
