@@ -6,7 +6,7 @@ const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
 const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
-const yearsKey = (companyId) => `uwi_years_${companyID}`; // ✅ FIX
+const yearsKey = (companyId) => `uwi_years_${companyId}`; // ✅ FIX
 
 const DEFAULT_YEARS = ["2024", "2025", "2026"];
 let currentYear = "2024";
@@ -320,21 +320,6 @@ function renderBalance(companyId, year) {
 
   const rows = loadJournal(companyId, year);
   const saldo = computeBalancesFromJournal(rows);
-
-  // ✅ JAHRESERGEBNIS EINBAUEN
-  let totalExpense = 0;
-  let totalRevenue = 0;
-
-  Object.keys(saldo).forEach(acc => {
-    const type = ACCOUNT_TYPES[acc];
-    const value = Number(saldo[acc] || 0);
-
-    if (type === "expense") totalExpense += value;
-    if (type === "revenue") totalRevenue += value;
-  });
-
-  const profit = totalRevenue - totalExpense;
-  saldo["2979"] = profit;
 
   const user = localStorage.getItem(USER_KEY);
   const company = getSelectedCompany(user);
