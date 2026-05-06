@@ -282,6 +282,25 @@ function applyBooking(balance, account, amount, isDebit) {
 function computeBalancesFromJournal(rows) {
   const bal = {};
 
+// =========================
+// JAHRESERGEBNIS BERECHNEN
+// =========================
+let totalExpense = 0;
+let totalRevenue = 0;
+
+Object.keys(saldo).forEach(acc => {
+  const type = ACCOUNT_TYPES[acc];
+  const value = Number(saldo[acc] || 0);
+
+  if (type === "expense") totalExpense += value;
+  if (type === "revenue") totalRevenue += value;
+});
+
+const profit = totalRevenue - totalExpense;
+
+// 👉 In Jahresgewinn-Konto schreiben
+saldo["2979"] = profit;
+
   for (const r of rows) {
     if (r.type === "split") {
       for (const d of r.debits || []) {
