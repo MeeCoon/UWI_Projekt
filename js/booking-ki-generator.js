@@ -289,7 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (task) {
       task.status = "done";
-      localStorage.setItem(storageKey(year), JSON.stringify(tasks));
+      localStorage.setItem(storageKey(company.id, year), JSON.stringify(tasks));
       renderTable(tasks);
     }
   });
