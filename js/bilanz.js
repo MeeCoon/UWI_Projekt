@@ -337,37 +337,29 @@ function closeYear(companyId, year) {
 
   const carryRows = [];
 
-  Object.keys(saldo).forEach((acc) => {
-    const type = ACCOUNT_TYPES[acc];
-    const amount = Number(saldo[acc] || 0);
+const carryRows = [];
 
-    if (!amount) return;
-    if (!(type === "asset" || type === "liability" || type === "equity")) return;
+Object.keys(saldo).forEach((acc) => {
+  const type = ACCOUNT_TYPES[acc];
+  const amount = Number(saldo[acc] || 0);
 
-    if (type === "asset") {
-      if (amount > 0) {
-        carryRows.push({
-          debit: acc,
-          credit: "2800",
-          amount: Math.abs(amount),
-          fact: `Vortrag ${year} → ${nextYear}`,
-          year: nextYear,
-          date: new Date().toISOString(),
-          system: `abschluss_${year}`
-        });
-      }
-    } else {
-      carryRows.push({
-        debit: "1020",
-        credit: acc,
-        amount: Math.abs(amount),
-        fact: `Vortrag ${year} → ${nextYear}`,
-        year: nextYear,
-        date: new Date().toISOString(),
-        system: `abschluss_${year}`
-      });
-    }
-  });
+  if (!amount) return;
+
+  // Nur Bilanzkonten übernehmen (keine Erfolgsrechnung!)
+  if (type !== "asset" && type !== "liability" && type !== "equity") return;
+
+  if (amount > 0) {
+    carryRows.push({
+      debit: type === "asset" ? acc : "1020",
+      credit: type === "asset" ? "1020" : acc,
+      amount: Math.abs(amount),
+      fact: `Vortrag ${year} → ${nextYear}`,
+      year: nextYear,
+      date: new Date().toISOString(),
+      system: `abschluss_${year}`
+    });
+  }
+});
 
   const cleanedNextRows = nextRows.filter(r => r.system !== `abschluss_${year}`);
   saveJournal(companyId, nextYear, [...cleanedNextRows, ...carryRows]);
