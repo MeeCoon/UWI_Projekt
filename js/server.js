@@ -13,38 +13,46 @@ app.post("/api/recht-ki", async (req, res) => {
   try {
     const { question, company, balance, history = [] } = req.body;
 
-    const response = await client.responses.create({
-      model: "gpt-5.5",
-      input: [
-        {
-          role: "system",
-          content:
-            "Du bist ein einfacher Schweizer UWI-Lehrer. Erkläre Recht und Bilanz kurz, verständlich und schulisch. Keine verbindliche Rechtsberatung."
-        },
-        ...history,
-        {
-          role: "user",
-          content: `
-Firma:
-${JSON.stringify(company)}
+    // Konvertiere history zu OpenAI-Format
+    const messages = history.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
 
-Bilanz:
-${JSON.stringify(balance)}
+    // Füge aktuelle Frage hinzu
+    messages.push({
+      role: "user",
+      content: `
+Firma: ${company?.name || "Unbekannt"}
+Rechtsform: ${company?.legal || "Unbekannt"}
+Branche: ${company?.industry || "Unbekannt"}
+
+Aktuelle Bilanz:
+${JSON.stringify(balance, null, 2)}
 
 Frage:
 ${question}
-          `
-        }
-      ]
+      `
     });
 
-    res.json({ answer: response.output_text });
+    const response = await client.messages.create({
+      model: "gpt-4",
+      max_tokens: 1024,
+      system: "Du bist ein Schweizer UWI-Lehrer für Recht und Bilanzwesen. Erkläre kurz, verständlich und schulisch. Nutze die Bilanzinformationen der Firma zur Erklärung. Gib keine verbindliche Rechtsberatung.",
+      messages: messages
+    });
+
+    const answer = response.choices[0]?.message?.content || "Keine Antwort erhalten.";
+
+    res.json({ answer });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ answer: "Fehler bei der KI-Verbindung." });
+    console.error("❌ KI-Fehler:", err.message);
+    res.status(500).json({ 
+      answer: `Fehler bei der KI-Verbindung: ${err.message}` 
+    });
   }
 });
 
 app.listen(3000, () => {
-  console.log("Server läuft auf http://localhost:3000");
+  console.log("✅ Server läuft auf http://localhost:3000");
 });
