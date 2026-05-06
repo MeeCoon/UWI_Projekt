@@ -322,6 +322,32 @@ function computeBalancesFromJournal(rows) {
 function closeYear(companyId, year) {
   const currentRows = loadJournal(companyId, year);
   const saldo = computeBalancesFromJournal(currentRows);
+  let totalExpense = 0;
+  let totalRevenue = 0;
+
+  Object.keys(saldo).forEach((acc) => {
+    if (acc === "2979" || acc === "2891") {
+    if (amount !== 0) {
+      carryRows.push({
+        debit: amount > 0 ? "2970" : "1020",
+        credit: amount > 0 ? "2979" : "2979",
+        amount: Math.abs(amount),
+        fact: `Jahresgewinn ${year} → ${nextYear}`,
+        year: nextYear,
+        date: new Date().toISOString(),
+        system: `abschluss_${year}`
+      });
+    }
+    return;
+  }
+    const type = ACCOUNT_TYPES[acc];
+    const value = Number(saldo[acc] || 0);
+
+    if (type === "expense") totalExpense += value;
+    if (type === "revenue") totalRevenue += value;
+  });
+
+  const profit = totalRevenue - totalExpense;
   const nextYear = String(Number(year) + 1);
 
   const years = getYears(companyId);
@@ -524,9 +550,7 @@ Object.keys(saldo).forEach(acc => {
 
 const profit = totalRevenue - totalExpense;
 
-// In Jahresgewinn-Konto schreiben
-saldo["2979"] = profit;
-saldo["2891"] = profit;
+
 
   const user = localStorage.getItem(USER_KEY);
   const company = getSelectedCompany(user);
