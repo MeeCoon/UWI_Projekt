@@ -6,7 +6,7 @@ const CURRENT_COMPANY_PREFIX = "uwi_currentCompany_";
 const companiesKey = (u) => `${COMPANIES_PREFIX}${u}`;
 const currentCompanyKey = (u) => `${CURRENT_COMPANY_PREFIX}${u}`;
 const journalKey = (companyId, year) => `uwi_journal_${companyId}_${year}`;
-const yearsKey = (companyId) => `uwi_years_${companyId}`; //
+const yearsKey = (companyId) => `uwi_years_${companyId}`;
 
 const DEFAULT_YEARS = ["2024", "2025", "2026"];
 let currentYear = "2024";
@@ -38,10 +38,7 @@ function getAssetGroups(industry) {
     return [
       {
         title: "Umlaufvermögen",
-        accounts: [
-          ...commonCurrentAssets,
-          ["1200", "Handelswaren"]
-        ]
+        accounts: [...commonCurrentAssets, ["1200", "Handelswaren"]]
       },
       {
         title: "Anlagevermögen",
@@ -54,10 +51,7 @@ function getAssetGroups(industry) {
     return [
       {
         title: "Umlaufvermögen",
-        accounts: [
-          ...commonCurrentAssets,
-          ["1210", "Rohstoffe"]
-        ]
+        accounts: [...commonCurrentAssets, ["1210", "Rohstoffe"]]
       },
       {
         title: "Anlagevermögen",
@@ -224,9 +218,7 @@ function getYears(companyId) {
   try {
     const raw = localStorage.getItem(yearsKey(companyId));
     const arr = raw ? JSON.parse(raw) : null;
-    if (Array.isArray(arr) && arr.length) {
-      return arr.map(String);
-    }
+    if (Array.isArray(arr) && arr.length) return arr.map(String);
   } catch {}
   return [...DEFAULT_YEARS];
 }
@@ -281,7 +273,7 @@ function applyBooking(balance, account, amount, isDebit) {
 }
 
 /* =========================
-   SALDO BERECHNEN
+   SALDO
 ========================= */
 function computeBalancesFromJournal(rows) {
   const bal = {};
@@ -301,7 +293,6 @@ function computeBalancesFromJournal(rows) {
         if (!acc || !(amt > 0)) continue;
         applyBooking(bal, acc, amt, false);
       }
-
       continue;
     }
 
@@ -329,12 +320,10 @@ function closeYear(companyId, year) {
   Object.keys(saldo).forEach(acc => {
     const type = ACCOUNT_TYPES[acc];
     const value = Number(saldo[acc] || 0);
-
     if (type === "expense") totalExpense += value;
     if (type === "revenue") totalRevenue += value;
   });
 
-  
   const nextYear = String(Number(year) + 1);
   const profit = totalRevenue - totalExpense;
 
@@ -345,57 +334,55 @@ function closeYear(companyId, year) {
     saveYears(companyId, years);
   }
 
+  const nextRows = loadJournal(companyId, nextYear);
   const alreadyClosed = nextRows.some(r => r.system === `abschluss_${year}`);
 
   if (alreadyClosed) {
     alert(`Jahresabschluss für ${year} wurde schon gemacht.`);
     return;
   }
-   
-const carryRows = [];
 
-// Jahresgewinn / -verlust ins nächste Jahr übertragen
-if (profit !== 0) {
-  carryRows.push({
-    debit: profit > 0 ? "2979" : "1020",
-    credit: profit > 0 ? "2970" : "2979",
-    amount: Math.abs(profit),
-    fact: `Jahresgewinn ${year} → ${nextYear}`,
-    year: nextYear,
-    date: new Date().toISOString(),
-    system: `abschluss_${year}`
+  const carryRows = [];
+
+  if (profit !== 0) {
+    carryRows.push({
+      debit: profit > 0 ? "2979" : "1020",
+      credit: profit > 0 ? "2970" : "2979",
+      amount: Math.abs(profit),
+      fact: `Jahresgewinn ${year} → ${nextYear}`,
+      year: nextYear,
+      date: new Date().toISOString(),
+      system: `abschluss_${year}`
+    });
+  }
+
+  Object.keys(saldo).forEach(acc => {
+    const type = ACCOUNT_TYPES[acc];
+    const amount = Number(saldo[acc] || 0);
+
+    if (!amount) return;
+    if (type !== "asset" && type !== "liability" && type !== "equity") return;
+
+    if (amount !== 0) {
+      const isAsset = type === "asset";
+
+      carryRows.push({
+        debit: amount > 0
+          ? (isAsset ? acc : "1020")
+          : (isAsset ? "1020" : acc),
+
+        credit: amount > 0
+          ? (isAsset ? "1020" : acc)
+          : (isAsset ? acc : "1020"),
+
+        amount: Math.abs(amount),
+        fact: `Vortrag ${year} → ${nextYear}`,
+        year: nextYear,
+        date: new Date().toISOString(),
+        system: `abschluss_${year}`
+      });
+    }
   });
-}
-
-Object.keys(saldo).forEach((acc) => {
-  const type = ACCOUNT_TYPES[acc];
-  const amount = Number(saldo[acc] || 0);
-
-  if (!amount) return;
-
-  // Nur Bilanzkonten übernehmen (keine Erfolgsrechnung!)
-  if (type !== "asset" && type !== "liability" && type !== "equity") return;
-
-   if (amount !== 0) {
-  const isAsset = type === "asset";
-
-  carryRows.push({
-    debit: amount > 0
-      ? (isAsset ? acc : "1020")
-      : (isAsset ? "1020" : acc),
-
-    credit: amount > 0
-      ? (isAsset ? "1020" : acc)
-      : (isAsset ? acc : "1020"),
-
-    amount: Math.abs(amount),
-    fact: `Vortrag ${year} → ${nextYear}`,
-    year: nextYear,
-    date: new Date().toISOString(),
-    system: `abschluss_${year}`
-  });
-}
-});
 
   const cleanedNextRows = nextRows.filter(r => r.system !== `abschluss_${year}`);
   saveJournal(companyId, nextYear, [...cleanedNextRows, ...carryRows]);
@@ -415,9 +402,7 @@ function renderYearTabs(companyId) {
   if (!el) return;
 
   const years = getYears(companyId);
-  if (!years.includes(currentYear)) {
-    currentYear = years[0];
-  }
+  if (!years.includes(currentYear)) currentYear = years[0];
 
   el.innerHTML =
     years.map(y => `
@@ -446,16 +431,10 @@ function renderYearTabs(companyId) {
       if (!y) return;
 
       const year = y.trim();
-      if (!/^\d{4}$/.test(year)) {
-        alert("Ungültiges Jahr");
-        return;
-      }
+      if (!/^\d{4}$/.test(year)) return alert("Ungültiges Jahr");
 
       const list = getYears(companyId);
-      if (list.includes(year)) {
-        alert("Jahr existiert bereits");
-        return;
-      }
+      if (list.includes(year)) return alert("Jahr existiert bereits");
 
       list.push(year);
       list.sort();
@@ -469,9 +448,7 @@ function renderYearTabs(companyId) {
 
     const closeBtn = e.target.closest("#closeYearBtn");
     if (closeBtn) {
-      if (!confirm(`Jahr ${currentYear} abschliessen und Bilanzwerte ins nächste Jahr übernehmen?`)) {
-        return;
-      }
+      if (!confirm(`Jahr ${currentYear} abschliessen?`)) return;
       closeYear(companyId, currentYear);
       return;
     }
@@ -479,14 +456,9 @@ function renderYearTabs(companyId) {
     const deleteBtn = e.target.closest("#deleteYearBtn");
     if (deleteBtn) {
       const list = getYears(companyId);
-      if (list.length <= 1) {
-        alert("Mindestens ein Jahr muss bleiben.");
-        return;
-      }
+      if (list.length <= 1) return alert("Mindestens ein Jahr muss bleiben.");
 
-      if (!confirm(`Jahr ${currentYear} wirklich löschen?`)) {
-        return;
-      }
+      if (!confirm(`Jahr ${currentYear} löschen?`)) return;
 
       const next = list.filter(y => y !== currentYear);
       saveYears(companyId, next);
@@ -500,30 +472,21 @@ function renderYearTabs(companyId) {
 }
 
 /* =========================
-   HTML HILFSFUNKTIONEN
+   RENDER HELPERS
 ========================= */
 function renderAccountRow(no, name, value) {
   return `
     <div class="balanceRow">
       <span>${no} ${name}</span>
-      <input
-        class="balanceInput input-readonly"
-        type="number"
-        value="${value}"
-        readonly
-      >
+      <input class="balanceInput input-readonly" type="number" value="${value}" readonly>
     </div>
   `;
 }
 
 function renderGroup(group, saldo) {
   const rowsHtml = group.accounts.map(([no, name]) => {
-    const type = ACCOUNT_TYPES[no] || "asset";
     const raw = Number(saldo[no] || 0);
-
-    let value = raw;
-
-    return renderAccountRow(no, name, value);
+    return renderAccountRow(no, name, raw);
   }).join("");
 
   return `
@@ -533,7 +496,7 @@ function renderGroup(group, saldo) {
 }
 
 /* =========================
-   BILANZ RENDER
+   BILANZ
 ========================= */
 function renderBalance(companyId, year) {
   const root = document.getElementById("balanceRoot");
@@ -542,23 +505,17 @@ function renderBalance(companyId, year) {
   const rows = loadJournal(companyId, year);
   const saldo = computeBalancesFromJournal(rows);
 
-  // =========================
-// JAHRESERGEBNIS BERECHNEN
-// =========================
-let totalExpense = 0;
-let totalRevenue = 0;
+  let totalExpense = 0;
+  let totalRevenue = 0;
 
-Object.keys(saldo).forEach(acc => {
-  const type = ACCOUNT_TYPES[acc];
-  const value = Number(saldo[acc] || 0);
+  Object.keys(saldo).forEach(acc => {
+    const type = ACCOUNT_TYPES[acc];
+    const value = Number(saldo[acc] || 0);
+    if (type === "expense") totalExpense += value;
+    if (type === "revenue") totalRevenue += value;
+  });
 
-  if (type === "expense") totalExpense += value;
-  if (type === "revenue") totalRevenue += value;
-});
-
-const profit = totalRevenue - totalExpense;
-
-
+  const profit = totalRevenue - totalExpense;
 
   const user = localStorage.getItem(USER_KEY);
   const company = getSelectedCompany(user);
@@ -567,20 +524,11 @@ const profit = totalRevenue - totalExpense;
   const assetGroups = getAssetGroups(company.industry);
   const liabilityGroups = getLiabilityGroups(company.legal);
 
-  const assetHtml = assetGroups.map(group => renderGroup(group, saldo)).join("");
-  const liabilityHtml = liabilityGroups.map(group => renderGroup(group, saldo)).join("");
+  const assetHtml = assetGroups.map(g => renderGroup(g, saldo)).join("");
+  const liabilityHtml = liabilityGroups.map(g => renderGroup(g, saldo)).join("");
 
-  const totalAssets = assetGroups.flatMap(g => g.accounts).reduce((sum, [no]) => {
-    const raw = Number(saldo[no] || 0);
-    return sum + raw;
-  }, 0);
-
-   const totalLiabilities = liabilityGroups
-     .flatMap(g => g.accounts)
-     .reduce((sum, [no]) => {
-       const raw = Number(saldo[no] || 0);
-       return sum + raw;
-     }, 0);
+  const totalAssets = assetGroups.flatMap(g => g.accounts).reduce((s, [no]) => s + Number(saldo[no] || 0), 0);
+  const totalLiabilities = liabilityGroups.flatMap(g => g.accounts).reduce((s, [no]) => s + Number(saldo[no] || 0), 0);
 
   root.innerHTML = `
     <div class="balanceHeaderBlue">
@@ -620,16 +568,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!user) return;
 
   const userDisplay = document.getElementById("userDisplay");
-  if (userDisplay) {
-    userDisplay.textContent = `Angemeldet: ${user}`;
-  }
+  if (userDisplay) userDisplay.textContent = `Angemeldet: ${user}`;
 
   const backBtn = document.getElementById("backBtn");
-  if (backBtn) {
-    backBtn.onclick = () => {
-      window.location.href = "overview.html";
-    };
-  }
+  if (backBtn) backBtn.onclick = () => window.location.href = "overview.html";
 
   const logoutBtn = document.getElementById("logoutBtn");
   if (logoutBtn) {
@@ -641,10 +583,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const company = getSelectedCompany(user);
-  if (!company) {
-    window.location.href = "overview.html";
-    return;
-  }
+  if (!company) return window.location.href = "overview.html";
 
   const years = getYears(company.id);
   currentYear = years[0];
