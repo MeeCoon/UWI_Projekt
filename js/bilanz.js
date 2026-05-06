@@ -322,9 +322,11 @@ function computeBalancesFromJournal(rows) {
 function closeYear(companyId, year) {
   const currentRows = loadJournal(companyId, year);
   const saldo = computeBalancesFromJournal(currentRows);
+
   let totalExpense = 0;
   let totalRevenue = 0;
 
+  Object.keys(saldo).forEach(acc => {
     const type = ACCOUNT_TYPES[acc];
     const value = Number(saldo[acc] || 0);
 
@@ -332,8 +334,9 @@ function closeYear(companyId, year) {
     if (type === "revenue") totalRevenue += value;
   });
 
-  const profit = totalRevenue - totalExpense;
+  
   const nextYear = String(Number(year) + 1);
+  const profit = totalRevenue - totalExpense;
 
   const years = getYears(companyId);
   if (!years.includes(nextYear)) {
@@ -343,7 +346,7 @@ function closeYear(companyId, year) {
   }
 
   const nextRows = loadJournal(companyId, nextYear);
-  const alreadyClosed = nextRows.some(r => r && r.system === `abschluss_${year}`);
+  const alreadyClosed = currentRows.some(r => r.system === `abschluss_${year}`);
 
   if (alreadyClosed) {
     alert(`Jahresabschluss für ${year} wurde schon gemacht.`);
